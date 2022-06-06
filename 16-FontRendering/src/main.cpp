@@ -82,7 +82,8 @@ Shader shaderDepth;
 
 std::shared_ptr<FirstPersonCamera> cameraFP(new FirstPersonCamera());
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
-float distanceFromTarget = 7.0;
+float distanceFromTarget = 2.0;
+float lastDistanceFromTarget = 0.0;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
@@ -179,6 +180,10 @@ glm::mat4 modelMatrixPivoteCam = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
 glm::mat4 modelMatrixAstroProta = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
 
 int animationIndex = 1;
 //float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0,
@@ -644,9 +649,19 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
 	//astroProta
-	astroProta.loadModel("../models/astroProta/astro.fbx");
+	astroProta.loadModel("../models/astroProta/astroAnim.fbx");
 	astroProta.setShader(&shaderMulLighting);
-	
+
+	//Muros
+	muroFondo.init();
+	muroFondo.setShader(&shaderMulLighting);
+	muroFrontal.init();
+	muroFrontal.setShader(&shaderMulLighting);
+	muroDerecho.init();
+	muroDerecho.setShader(&shaderMulLighting);
+	muroIzquierdo.init();
+	muroIzquierdo.setShader(&shaderMulLighting);
+
 	cameraFP->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	//camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
@@ -1226,6 +1241,10 @@ void destroy() {
 	modelFountain.destroy();
 	pivoteCam.destroy();
 	astroProta.destroy();
+	muroDerecho.destroy();
+	muroFondo.destroy();
+	muroFrontal.destroy();
+	muroIzquierdo.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1294,6 +1313,7 @@ void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
 void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
 	distanceFromTarget -= yoffset;
 	camera->setDistanceFromTarget(distanceFromTarget);
+	lastDistanceFromTarget = distanceFromTarget;
 }
 
 void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
@@ -1364,13 +1384,13 @@ bool processInput(bool continueApplication) {
 
 	if (cameraSelected == 1) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			cameraFP->moveFrontCamera(true, deltaTime);
+			cameraFP->moveFrontCamera(true, deltaTime + 0.5);
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			cameraFP->moveFrontCamera(false, deltaTime);
+			cameraFP->moveFrontCamera(false, deltaTime + 0.5);
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			cameraFP->moveRightCamera(false, deltaTime);
+			cameraFP->moveRightCamera(false, deltaTime + 0.5);
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			cameraFP->moveRightCamera(true, deltaTime);
+			cameraFP->moveRightCamera(true, deltaTime + 0.5);
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 			cameraFP->mouseMoveCamera(offsetX, offsetY, deltaTime);
 	}
@@ -1504,19 +1524,19 @@ bool processInput(bool continueApplication) {
 	//			glm::vec3(0.02, 0.0, 0.0));
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f),
+		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(1.0f),
 				glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	} else if (modelSelected
 			== 2&& glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f),
+		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-1.0f),
 				glm::vec3(0, 1, 0));
 		animationIndex = 0;
 	}
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		pasado = terrain.getXCoordTerrain(modelMatrixMayow[3][0]);
-		modelMatrixMayow = glm::translate(modelMatrixMayow,
-				glm::vec3(0, 0, 0.1));
+		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+				glm::vec3(-1.0, 0.0, 0));
 		animationIndex = 0;
 		cameraMove();
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
@@ -1526,9 +1546,9 @@ bool processInput(bool continueApplication) {
 		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	} else if (modelSelected
 			== 2&& glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		pasado = terrain.getXCoordTerrain(modelMatrixMayow[3][0]);
-		modelMatrixMayow = glm::translate(modelMatrixMayow,
-				glm::vec3(0, 0, -0.1));
+		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+				glm::vec3(1.0, 0.0, 0.0));
 		animationIndex = 0;
 		cameraMove();
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
@@ -1580,8 +1600,10 @@ void applicationLoop() {
 
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
-	modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
-		glm::vec3(1, 0, 0));
+	modelMatrixAstroProta = glm::scale(modelMatrixAstroProta,
+		glm::vec3(0.021, 0.021, 0.021));
+	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
+		glm::vec3(1, 0, 0));*/
 
 	modelMatrixFountain = glm::translate(modelMatrixFountain,
 			glm::vec3(5.0, 0.0, -40.0));
@@ -1589,6 +1611,27 @@ void applicationLoop() {
 			modelMatrixFountain[3][0], modelMatrixFountain[3][2]) + 0.2;
 	modelMatrixFountain = glm::scale(modelMatrixFountain,
 			glm::vec3(10.0f, 10.0f, 10.0f));
+
+	//Posicion de los muros
+	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo, 
+		glm::vec3(0.0f, 0.0f, 50.0f));
+	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
+		glm::vec3(75.0f, 20.0f, 0.0f));
+
+	modelMatrixMuroFrontal = glm::translate(modelMatrixMuroFrontal,
+		glm::vec3(0.0f, 0.0f, -20.0f));
+	modelMatrixMuroFrontal = glm::scale(modelMatrixMuroFrontal,
+		glm::vec3(75.0f, 20.0f, 0.0f));
+
+	modelMatrixMuroDerecho = glm::translate(modelMatrixMuroDerecho,
+		glm::vec3(35.0f, 0.0f, 15.0f));
+	modelMatrixMuroDerecho = glm::scale(modelMatrixMuroDerecho,
+		glm::vec3(0.0f, 20.0f, 70.0f));
+
+	modelMatrixMuroIzquierdo = glm::translate(modelMatrixMuroIzquierdo,
+		glm::vec3(-35.0f, 0.0f, 15.0f));
+	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
+		glm::vec3(0.0f, 20.0f, 70.0f));
 
 	//// Variables to interpolation key frames
 	//fileName = "../animaciones/animation_dart_joints.txt";
@@ -1651,8 +1694,10 @@ void applicationLoop() {
 				angleTarget = -angleTarget;
 			camera->setCameraTarget(target);
 			camera->setAngleTarget(angleTarget);
+			
 			camera->updateCamera();
 			view = camera->getViewMatrix();
+
 		}
 		else {
 			view = cameraFP->getViewMatrix();
@@ -2110,12 +2155,8 @@ void applicationLoop() {
 		//Collider de astroProta
 		AbstractModel::OBB astroProtaCollider;
 		glm::mat4 modelmatrixColliderAstroProta = glm::mat4(modelMatrixAstroProta);
-		/*modelmatrixColliderAstroProta = glm::rotate(modelmatrixColliderAstroProta,
-			glm::radians(-90.0f), glm::vec3(1, 0, 0));*/
 		// Set the orientation of collider before doing the scale
 		astroProtaCollider.u = glm::quat_cast(modelmatrixColliderAstroProta);
-		/*modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
-			glm::vec3(0.021, 0.021, 0.021));*/
 		modelmatrixColliderAstroProta = glm::translate(modelmatrixColliderAstroProta,
 			glm::vec3(astroProta.getObb().c.x,
 				astroProta.getObb().c.y,
@@ -2124,6 +2165,62 @@ void applicationLoop() {
 		astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
 		addOrUpdateColliders(collidersOBB, "astroProta", astroProtaCollider,
 			modelMatrixAstroProta);
+
+		//Collider muro fondo
+		AbstractModel::OBB muroFondoCollider;
+		glm::mat4 modelmatrixColliderMuroFondo = glm::mat4(modelMatrixMuroFondo);
+		// Set the orientation of collider before doing the scale
+		muroFondoCollider.u = glm::quat_cast(modelmatrixColliderMuroFondo);
+		modelmatrixColliderMuroFondo = glm::translate(modelmatrixColliderMuroFondo,
+			glm::vec3(muroFondo.getObb().c.x,
+				muroFondo.getObb().c.y,
+				muroFondo.getObb().c.z));
+		muroFondoCollider.e = glm::vec3(37.50f, 10.0f, 0.0f);
+		muroFondoCollider.c = glm::vec3(modelmatrixColliderMuroFondo[3]);
+		addOrUpdateColliders(collidersOBB, "muroFondo", muroFondoCollider,
+			modelMatrixMuroFondo);
+
+		//Collider muro frontal
+		AbstractModel::OBB muroFrontalCollider;
+		glm::mat4 modelmatrixColliderMuroFrontal = glm::mat4(modelMatrixMuroFrontal);
+		// Set the orientation of collider before doing the scale
+		muroFrontalCollider.u = glm::quat_cast(modelmatrixColliderMuroFrontal);
+		modelmatrixColliderMuroFrontal = glm::translate(modelmatrixColliderMuroFrontal,
+			glm::vec3(muroFrontal.getObb().c.x,
+				muroFrontal.getObb().c.y,
+				muroFrontal.getObb().c.z));
+		muroFrontalCollider.e = glm::vec3(37.50f, 10.0f, 0.0f);
+		muroFrontalCollider.c = glm::vec3(modelmatrixColliderMuroFrontal[3]);
+		addOrUpdateColliders(collidersOBB, "muroFrontal", muroFrontalCollider,
+			modelMatrixMuroFrontal);
+
+		//Collider muro derecho
+		AbstractModel::OBB muroDerechoCollider;
+		glm::mat4 modelmatrixColliderMuroDerecho = glm::mat4(modelMatrixMuroDerecho);
+		// Set the orientation of collider before doing the scale
+		muroDerechoCollider.u = glm::quat_cast(modelmatrixColliderMuroDerecho);
+		modelmatrixColliderMuroDerecho = glm::translate(modelmatrixColliderMuroDerecho,
+			glm::vec3(muroDerecho.getObb().c.x,
+				muroDerecho.getObb().c.y,
+				muroDerecho.getObb().c.z));
+		muroDerechoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
+		muroDerechoCollider.c = glm::vec3(modelmatrixColliderMuroDerecho[3]);
+		addOrUpdateColliders(collidersOBB, "muroDerecho", muroDerechoCollider,
+			modelMatrixMuroDerecho);
+
+		//Collider muro izquierdo
+		AbstractModel::OBB muroIzquierdoCollider;
+		glm::mat4 modelmatrixColliderMuroIzquierdo = glm::mat4(modelMatrixMuroIzquierdo);
+		// Set the orientation of collider before doing the scale
+		muroIzquierdoCollider.u = glm::quat_cast(modelmatrixColliderMuroIzquierdo);
+		modelmatrixColliderMuroIzquierdo = glm::translate(modelmatrixColliderMuroIzquierdo,
+			glm::vec3(muroIzquierdo.getObb().c.x,
+				muroIzquierdo.getObb().c.y,
+				muroIzquierdo.getObb().c.z));
+		muroIzquierdoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
+		muroIzquierdoCollider.c = glm::vec3(modelmatrixColliderMuroIzquierdo[3]);
+		addOrUpdateColliders(collidersOBB, "muroIzquierdo", muroIzquierdoCollider,
+			modelMatrixMuroIzquierdo);
 
 		/*******************************************
 		 * Render de colliders
@@ -2156,26 +2253,6 @@ void applicationLoop() {
 			sphereCollider.render(matrixCollider);
 		}
 
-		// Esto es para ilustrar la transformacion inversa de los coliders
-		/*glm::vec3 cinv = glm::inverse(mayowCollider.u) * glm::vec4(rockCollider.c, 1.0);
-		 glm::mat4 invColliderS = glm::mat4(1.0);
-		 invColliderS = glm::translate(invColliderS, cinv);
-		 invColliderS =  invColliderS * glm::mat4(mayowCollider.u);
-		 invColliderS = glm::scale(invColliderS, glm::vec3(rockCollider.ratio * 2.0, rockCollider.ratio * 2.0, rockCollider.ratio * 2.0));
-		 sphereCollider.setColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
-		 sphereCollider.enableWireMode();
-		 sphereCollider.render(invColliderS);
-		 glm::vec3 cinv2 = glm::inverse(mayowCollider.u) * glm::vec4(mayowCollider.c, 1.0);
-		 glm::mat4 invColliderB = glm::mat4(1.0);
-		 invColliderB = glm::translate(invColliderB, cinv2);
-		 invColliderB = glm::scale(invColliderB, mayowCollider.e * 2.0f);
-		 boxCollider.setColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
-		 boxCollider.enableWireMode();
-		 boxCollider.render(invColliderB);
-		 // Se regresa el color blanco
-		 sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-		 boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));*/
-
 		/*******************************************
 		 * Test Colisions
 		 *******************************************/
@@ -2189,9 +2266,15 @@ void applicationLoop() {
 				if (it != jt
 						&& testOBBOBB(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
+					if (!((it->first.compare("muroFondo") == 0 || it->first.compare("muroFrontal") == 0 ||
+						it->first.compare("muroDerecho") == 0 || it->first.compare("muroIzquierdo") == 0) &&
+						(jt->first.compare("muroFondo") == 0 || jt->first.compare("muroFrontal") == 0 ||
+							jt->first.compare("muroDerecho") == 0 || jt->first.compare("muroIzquierdo") == 0)))
+					{
+						std::cout << "Colision " << it->first << " with "
 							<< jt->first << std::endl;
-					isCollision = true;
+						isCollision = true;
+					}
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first,
@@ -2257,6 +2340,8 @@ void applicationLoop() {
 				else {
 					if (jt->first.compare("mayow") == 0)
 						modelMatrixMayow = std::get<1>(jt->second);
+					if (jt->first.compare("astroProta") == 0)
+						modelMatrixAstroProta = std::get<1>(jt->second);
 					/*if (jt->first.compare("dart") == 0)
 						modelMatrixDart = std::get<1>(jt->second);*/
 				}
@@ -2461,6 +2546,14 @@ void prepareScene() {
 
 	astroProta.setShader(&shaderMulLighting);
 
+	muroFondo.setShader(&shaderMulLighting);
+
+	muroFrontal.setShader(&shaderMulLighting);
+
+	muroDerecho.setShader(&shaderMulLighting);
+
+	muroIzquierdo.setShader(&shaderMulLighting);
+
 }
 
 void prepareDepthScene() {
@@ -2509,6 +2602,13 @@ void prepareDepthScene() {
 	pivoteCam.setShader(&shaderDepth);
 	astroProta.setShader(&shaderDepth);
 
+	muroFondo.setShader(&shaderDepth);
+
+	muroFrontal.setShader(&shaderDepth);
+
+	muroDerecho.setShader(&shaderDepth);
+
+	muroIzquierdo.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2541,6 +2641,18 @@ void renderScene(bool renderParticles) {
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(40, 40)));
 	terrain.render();
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//Muros
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureWallID);
+	//muroFondo.render(modelMatrixMuroFondo);
+
+	//muroFrontal.render(modelMatrixMuroFrontal);
+
+	//muroDerecho.render(modelMatrixMuroDerecho);
+
+	//muroIzquierdo.render(modelMatrixMuroIzquierdo);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	/*******************************************
@@ -2592,15 +2704,23 @@ void renderScene(bool renderParticles) {
 
 	// Pivote cam
 	glDisable(GL_CULL_FACE);
-	pivoteCam.render(modelMatrixPivoteCam);
+	//pivoteCam.render(modelMatrixPivoteCam);
+	//muroFondo.render(modelMatrixMuroFondo);
 	glEnable(GL_CULL_FACE);
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
 	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
 		modelMatrixAstroProta[3][2]) + 0.75f;
+	/*glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
+	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
+		glm::vec3(0.021, 0.021, 0.021));*/
+	astroProta.setAnimationIndex(animationIndex);
 	astroProta.render(modelMatrixAstroProta);
 	glEnable(GL_CULL_FACE);
+
+	
+
 
 	/*******************************************
 	 * Custom Anim objects obj
@@ -2808,14 +2928,14 @@ void renderScene(bool renderParticles) {
 }
 
 void cameraMove() {
-	posterior = terrain.getXCoordTerrain(modelMatrixMayow[3][0]);
+	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 	if (pasado < posterior) {
-		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixMayow[3][0]) > limiteIzquierdo)
+		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 				glm::vec3(0.6, 0, 0.0));
 	}
 	if (pasado > posterior) {
-		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixMayow[3][0]) < limiteDerecho)
+		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 				glm::vec3(-0.6, 0, 0.0));
 	}
