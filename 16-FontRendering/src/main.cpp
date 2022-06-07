@@ -175,6 +175,7 @@ int posterior = 0;
 int cameraSelected = 0;
 bool enableCameraSelected = true;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
+float anguloEntreDosVectores;
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -216,6 +217,7 @@ GLuint feedback[2];
 GLuint drawBuf = 1;
 float particleSize = 0.5, particleLifetime = 3.0;
 double currTimeParticlesAnimationFire, lastTimeParticlesAnimationFire;
+bool cambiaVelocidadEnemigo;
 
 // Colliders
 std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
@@ -1175,7 +1177,8 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0, 1, 0));
 		animationIndex = 0;
 		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.distanceToPersonaje = enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]);
+		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 	} else if (modelSelected
 			== 2&& glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -1183,7 +1186,8 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0, 1, 0));
 		animationIndex = 0;
 		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.distanceToPersonaje = enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]);
+		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+		anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 	}
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
@@ -1197,6 +1201,10 @@ bool processInput(bool continueApplication) {
 
 		cameraMove();
 		astroPosition = modelMatrixAstroProta[3];
+		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+		/*anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);*/
+
+
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
 		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
 		//float posMayow = mayowModelAnimate.getPosition()[3]
@@ -1214,7 +1222,8 @@ bool processInput(bool continueApplication) {
 		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 		cameraMove();
 		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.distanceToPersonaje = enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]);
+		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
@@ -1222,30 +1231,20 @@ bool processInput(bool continueApplication) {
 		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
 	}
 
-	//bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-	//if(!isJump && keySpaceStatus){
-	//	isJump = true;
-	//	startTimeJump = currTime;
-	//	tmv = 0;
-	//}
-
-
-
+	//printf("angulo entre vectores es: %.2f", anguloEntreDosVectores);
 	//************************IA PARA SEGUIR AL PROTA******************************/
 
 	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixMayow[3]);
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
 
-	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians((float)acos(enemigo1.productoPunto(astroProta.getPosition(), enemigo1.direccion))), glm::vec3(0, 1, 0));
+	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(anguloEntreDosVectores), glm::vec3(0, 1, 0));
 
-	if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje)) {
-		enemigo1.velocidad = 0.05 * 1.0f;
-
-	}
-	else {
+	if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje) == true)
 		enemigo1.velocidad = 0.05 * 1.2f;
-	}
+	else if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje) == false)
+		enemigo1.velocidad = 0.05 * 1.5f;
+
 
 
 
@@ -1963,7 +1962,7 @@ void applicationLoop() {
 					addOrUpdateColliders(collidersOBB, jt->first);
 				else {
 					if (jt->first.compare("mayow") == 0)
-						modelMatrixMayow = std::get<1>(jt->second);
+						//modelMatrixMayow = std::get<1>(jt->second);
 					if (jt->first.compare("astroProta") == 0)
 						modelMatrixAstroProta = std::get<1>(jt->second);
 					/*if (jt->first.compare("dart") == 0)
