@@ -22,6 +22,7 @@
     <ClCompile Include="src\Bones.cpp" />
     <ClCompile Include="src\Box.cpp" />
     <ClCompile Include="src\Cylinder.cpp" />
+    <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\FirstPersonCamera.cpp" />
     <ClCompile Include="src\FontTypeRendering.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="include\Headers\Camera.h" />
     <ClInclude Include="include\Headers\Colisiones.h" />
     <ClInclude Include="include\Headers\Cylinder.h" />
+    <ClInclude Include="include\Headers\Enemy.h" />
     <ClInclude Include="include\Headers\FirstPersonCamera.h" />
     <ClInclude Include="include\Headers\FontTypeRendering.h" />
     <ClInclude Include="include\Headers\mathUtil.h" />
@@ -91,7 +93,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{172f046a-36b0-41d6-a3d8-5a9e12f214e6}</ProjectGuid>
     <RootNamespace>CGALib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -175,6 +177,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BUILDING_DLL</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\CGALib\src;D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\CGALib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -1,11 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGALib", "CGALib\CGALib.vcxproj", "{172F046A-36B0-41D6-A3D8-5A9E12F214E6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "16-FontRendering", "16-FontRendering\16-FontRendering.vcxproj", "{89A2D172-FBBB-4032-973E-C6C4D418EF79}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProyectoFinal", "16-FontRendering\16-FontRendering.vcxproj", "{89A2D172-FBBB-4032-973E-C6C4D418EF79}"
+	ProjectSection(ProjectDependencies) = postProject
+		{172F046A-36B0-41D6-A3D8-5A9E12F214E6} = {172F046A-36B0-41D6-A3D8-5A9E12F214E6}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
