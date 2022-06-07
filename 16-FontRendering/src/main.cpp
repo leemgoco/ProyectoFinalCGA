@@ -2,7 +2,6 @@
 #include <cmath>
 //glew include
 #include <GL/glew.h>
-
 //std includes
 #include <string>
 #include <iostream>
@@ -16,6 +15,9 @@
 
 // program include
 #include "Headers/TimeManager.h"
+
+//Enemy Include
+#include "Headers/Enemy.h"
 
 // Shader include
 #include "Headers/Shader.h"
@@ -117,6 +119,7 @@ Model modelFountain;
 Model mayowModelAnimate;
 Model astroProta;
 
+Enemy enemigo1;
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
@@ -158,8 +161,10 @@ glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
+glm::vec3 astroPosition;
 
 int animationIndex = 1;
+int animationIndexMayow = 0;
 int modelSelected = 2;
 bool enableCountSelected = true;
 int limiteIzquierdo = 132 - 20;
@@ -168,6 +173,7 @@ int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
 bool enableCameraSelected = true;
+glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -1056,6 +1062,9 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 
+	enemigo1.setMatrixEnemigo(modelMatrixMayow);
+
+
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
 		std::cout << "Esta presente el joystick" << std::endl;
 		int axesCount, buttonCount;
@@ -1149,11 +1158,16 @@ bool processInput(bool continueApplication) {
 		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
 				glm::vec3(0, 1, 0));
 		animationIndex = 0;
+		astroPosition = modelMatrixAstroProta[3];
+		enemigo1.distanceToPersonaje = enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]);
+
 	} else if (modelSelected
 			== 2&& glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
 				glm::vec3(0, 1, 0));
 		animationIndex = 0;
+		astroPosition = modelMatrixAstroProta[3];
+		enemigo1.distanceToPersonaje = enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]);
 	}
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
@@ -1161,6 +1175,7 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0.0, 0.0, 0.1));
 		animationIndex = 0;
 		cameraMove();
+		astroPosition = modelMatrixAstroProta[3];
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
 		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
 		//float posMayow = mayowModelAnimate.getPosition()[3]
@@ -1173,17 +1188,45 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0.0, 0.0, -0.1));
 		animationIndex = 0;
 		cameraMove();
+		astroPosition = modelMatrixAstroProta[3];
+		enemigo1.distanceToPersonaje = enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]);
+
+
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
 		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
 		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
 	}
 
-	bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-	if(!isJump && keySpaceStatus){
-		isJump = true;
-		startTimeJump = currTime;
-		tmv = 0;
+	//bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+	//if(!isJump && keySpaceStatus){
+	//	isJump = true;
+	//	startTimeJump = currTime;
+	//	tmv = 0;
+	//}
+
+
+
+	//************************IA PARA SEGUIR AL PROTA******************************/
+
+	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixMayow[3]);
+
+	modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
+
+	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians((float)acos(enemigo1.productoPunto(astroProta.getPosition(), enemigo1.direccion))), glm::vec3(0, 1, 0));
+
+	if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje)) {
+		enemigo1.velocidad = 0.05 * 1.0f;
+
 	}
+	else {
+		enemigo1.velocidad = 0.05 * 1.2f;
+	}
+
+
+
+	/******************************************************************************/
+
+
 
 	glfwPollEvents();
 	return continueApplication;
@@ -1202,8 +1245,10 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow,
 			glm::vec3(13.0f, 0.05f, -5.0f));
-	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
-			glm::vec3(0, 1, 0));
+
+	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
+	//		glm::vec3(0, 1, 0));
+
 
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1973,6 +2018,7 @@ void applicationLoop() {
 
 void prepareScene() {
 
+
 	skyboxSphere.setShader(&shaderSkybox);
 
 	terrain.setShader(&shaderTerrain);
@@ -2080,37 +2126,7 @@ void renderScene(bool renderParticles) {
 	// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
 	glActiveTexture(GL_TEXTURE0);
 
-	//// Render the lamps
-	//for (int i = 0; i < lamp1Position.size(); i++) {
-	//	lamp1Position[i].y = terrain.getHeightTerrain(lamp1Position[i].x,
-	//			lamp1Position[i].z);
-	//	modelLamp1.setPosition(lamp1Position[i]);
-	//	modelLamp1.setScale(glm::vec3(0.5, 0.5, 0.5));
-	//	modelLamp1.setOrientation(glm::vec3(0, lamp1Orientation[i], 0));
-	//	modelLamp1.render();
-	//}
 
-	/*for (int i = 0; i < lamp2Position.size(); i++) {
-		lamp2Position[i].y = terrain.getHeightTerrain(lamp2Position[i].x,
-				lamp2Position[i].z);
-		modelLamp2.setPosition(lamp2Position[i]);
-		modelLamp2.setScale(glm::vec3(1.0, 1.0, 1.0));
-		modelLamp2.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
-		modelLamp2.render();
-		modelLampPost2.setPosition(lamp2Position[i]);
-		modelLampPost2.setScale(glm::vec3(1.0, 1.0, 1.0));
-		modelLampPost2.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
-		modelLampPost2.render();
-	}*/
-
-	//// Grass
-	//glDisable(GL_CULL_FACE);
-	//glm::vec3 grassPosition = glm::vec3(0.0, 0.0, 0.0);
-	//grassPosition.y = terrain.getHeightTerrain(grassPosition.x,
-	//		grassPosition.z);
-	//modelGrass.setPosition(grassPosition);
-	//modelGrass.render();
-	//glEnable(GL_CULL_FACE);
 
 	// Fountain
 	glDisable(GL_CULL_FACE);
@@ -2141,7 +2157,7 @@ void renderScene(bool renderParticles) {
 	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody,
 			glm::vec3(0.021, 0.021, 0.021));
-	mayowModelAnimate.setAnimationIndex(animationIndex);
+	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
 	mayowModelAnimate.render(modelMatrixMayowBody);
 
 	//astroProta

@@ -109,6 +109,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\CGALib\src;D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\CGALib\include;D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\16-FontRendering\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="src\Bones.cpp" />
     <ClCompile Include="src\Box.cpp" />
     <ClCompile Include="src\Cylinder.cpp" />
+    <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\FirstPersonCamera.cpp" />
     <ClCompile Include="src\FontTypeRendering.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
@@ -36,7 +36,6 @@
     <ClCompile Include="src\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Enemy.h" />
     <ClInclude Include="include\Headers\AbstractModel.h" />
     <ClInclude Include="include\Headers\AnimationUtils.h" />
     <ClInclude Include="include\Headers\Bones.h" />
@@ -44,6 +43,7 @@
     <ClInclude Include="include\Headers\Camera.h" />
     <ClInclude Include="include\Headers\Colisiones.h" />
     <ClInclude Include="include\Headers\Cylinder.h" />
+    <ClInclude Include="include\Headers\Enemy.h" />
     <ClInclude Include="include\Headers\FirstPersonCamera.h" />
     <ClInclude Include="include\Headers\FontTypeRendering.h" />
     <ClInclude Include="include\Headers\mathUtil.h" />
@@ -177,6 +177,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BUILDING_DLL</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\CGALib\src;D:\Semestre 10\CGA\Proyectos\ProyectoFinalCGA\CGALib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
