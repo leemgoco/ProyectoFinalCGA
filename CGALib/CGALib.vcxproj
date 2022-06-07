@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="src\Bones.cpp" />
     <ClCompile Include="src\Box.cpp" />
     <ClCompile Include="src\Cylinder.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="src\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="include\Headers\AbstractModel.h" />
     <ClInclude Include="include\Headers\AnimationUtils.h" />
     <ClInclude Include="include\Headers\Bones.h" />
