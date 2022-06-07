@@ -117,6 +117,11 @@ Model modelFountain;
 // Mayow
 Model mayowModelAnimate;
 Model astroProta;
+Model modelBotones;
+Model modelGenerador;
+Model modelCompuerta;
+Model modelEdCompuerta;
+Model modelPlataforma;
 
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
@@ -159,6 +164,9 @@ glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
+glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
 
 int animationIndex = 1;
 int modelSelected = 2;
@@ -177,6 +185,13 @@ std::vector<float> lamp1Orientation = { -17.0, -82.67, 23.70 };
 std::vector<glm::vec3> lamp2Position = { glm::vec3(-36.52, 0, -23.24),
 		glm::vec3(-52.73, 0, -3.90) };
 std::vector<float> lamp2Orientation = { 21.37 + 90, -65.0 + 90 };
+
+//Posición botones y plataformas
+std::vector<glm::vec3> botonesPos = { glm::vec3(10, 0, 10), glm::vec3(
+		20, 0, 10), glm::vec3(30, 0, 10), glm::vec3(40, 0, 10)};
+
+std::vector<glm::vec3> generadorPos = { glm::vec3(10, 0, 10), glm::vec3(
+		20, 0, 10), glm::vec3(30, 0, 10), glm::vec3(40, 0, 10) };
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = { { "aircraft", glm::vec3(
@@ -511,12 +526,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxLightViewBox.init();
 	boxLightViewBox.setShader(&shaderViewDepth);
 
-	/*modelRock.loadModel("../models/rock/rock.obj");
-	modelRock.setShader(&shaderMulLighting);*/
-
-	/*modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
-	modelAircraft.setShader(&shaderMulLighting);*/
-
 	terrain.init();
 	terrain.setShader(&shaderTerrain);
 	terrain.setPosition(glm::vec3(100, 0, 100));
@@ -535,6 +544,22 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	////Grass
 	//modelGrass.loadModel("../models/grass/grassModel.obj");
 	//modelGrass.setShader(&shaderMulLighting);
+
+	//Botones
+	modelBotones.loadModel("../models/botones/Botones.fbx");
+	modelBotones.setShader(&shaderMulLighting);
+
+	//Compuerta
+	modelCompuerta.loadModel("../models/compuerta/Compuerta.fbx");
+	modelCompuerta.setShader(&shaderMulLighting);
+
+	//Edificio compuerta
+	modelEdCompuerta.loadModel("../models/edCompuerta/EdificioCompuerta.fbx");
+	modelEdCompuerta.setShader(&shaderMulLighting);
+
+	//Plataforma
+	modelPlataforma.loadModel("../models/plataforma/Plataforma.fbx");
+	modelPlataforma.setShader(&shaderMulLighting);
 
 	//Fountain
 	modelFountain.loadModel("../models/fountain/fountain.obj");
@@ -559,7 +584,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	muroIzquierdo.setShader(&shaderMulLighting);
 
 	cameraFP->setPosition(glm::vec3(0.0, 3.0, 4.0));
-	//camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
 	camera->setSensitivity(1.0);
 
@@ -964,6 +988,11 @@ void destroy() {
 	muroFondo.destroy();
 	muroFrontal.destroy();
 	muroIzquierdo.destroy();
+	modelBotones.destroy();
+	modelCompuerta.destroy();
+	modelEdCompuerta.destroy();
+	modelGenerador.destroy();
+	modelPlataforma.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1159,6 +1188,10 @@ bool processInput(bool continueApplication) {
 		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-1.0f),
 			glm::vec3(0, 0, 1));
 		yaw -= 1;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		animationIndex = 2;
 	}
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -1692,6 +1725,90 @@ void applicationLoop() {
 		//			lampCollider;
 		//}
 
+		//Botones colliders
+		for (int i = 0; i < botonesPos.size(); i++) {
+			AbstractModel::OBB botonCollider;
+			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
+			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+				botonesPos[i]);
+			//modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+			//		glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
+				botonCollider, modelMatrixColliderBoton);
+			// Set the orientation of collider before doing the scale
+			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
+			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
+					glm::vec3(1.0, 1.0, 1.0));
+			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+					modelBotones.getObb().c);
+			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
+			botonCollider.e = modelBotones.getObb().e
+					* glm::vec3(1.0, 1.0, 1.0);
+			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
+				botonCollider;
+		}
+
+		//Botones generadores
+		for (int i = 0; i < generadorPos.size(); i++) {
+			AbstractModel::OBB generadorCollider;
+			glm::mat4 modelMatrixColliderGenerador = glm::mat4(1.0);
+			modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
+				generadorPos[i]);
+			//modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+			//		glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "gene-" + std::to_string(i),
+				generadorCollider, modelMatrixColliderGenerador);
+			// Set the orientation of collider before doing the scale
+			generadorCollider.u = glm::quat_cast(modelMatrixColliderGenerador);
+			modelMatrixColliderGenerador = glm::scale(modelMatrixColliderGenerador,
+				glm::vec3(1.0, 1.0, 1.0));
+			modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
+				modelGenerador.getObb().c);
+			generadorCollider.c = glm::vec3(modelMatrixColliderGenerador[3]);
+			generadorCollider.e = modelGenerador.getObb().e
+				* glm::vec3(1.0, 1.0, 1.0);
+			std::get<0>(collidersOBB.find("gene-" + std::to_string(i))->second) =
+				generadorCollider;
+		}
+
+		// Collider de compuerta
+		AbstractModel::OBB compuertaCollider;
+		glm::mat4 modelmatrixColliderCompuerta = glm::mat4(modelMatrixCompuerta);
+		modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
+			glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		// Set the orientation of collider before doing the scale
+		compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
+		modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
+			glm::vec3(0.021, 0.021, 0.021));
+		modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,
+			glm::vec3(modelCompuerta.getObb().c.x,
+				modelCompuerta.getObb().c.y,
+				modelCompuerta.getObb().c.z));
+		compuertaCollider.e = modelCompuerta.getObb().e
+			* glm::vec3(0.021, 0.021, 0.021);
+		compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
+		addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
+			modelMatrixCompuerta);
+
+		// Collider de edificio compuerta
+		AbstractModel::OBB edCompuertaCollider;
+		glm::mat4 modelmatrixColliderEdCompuerta = glm::mat4(modelMatrixEdCompuerta);
+		modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
+			glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		// Set the orientation of collider before doing the scale
+		edCompuertaCollider.u = glm::quat_cast(modelmatrixColliderEdCompuerta);
+		modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
+			glm::vec3(0.021, 0.021, 0.021));
+		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
+			glm::vec3(modelEdCompuerta.getObb().c.x,
+				modelEdCompuerta.getObb().c.y,
+				modelEdCompuerta.getObb().c.z));
+		edCompuertaCollider.e = modelEdCompuerta.getObb().e
+			* glm::vec3(0.021, 0.021, 0.021);
+		edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
+		addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider,
+			modelMatrixEdCompuerta);
+
 		// Collider de mayow
 		AbstractModel::OBB mayowCollider;
 		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
@@ -2018,6 +2135,16 @@ void prepareScene() {
 
 	muroIzquierdo.setShader(&shaderMulLighting);
 
+	modelBotones.setShader(&shaderMulLighting);
+
+	modelCompuerta.setShader(&shaderMulLighting);
+
+	modelEdCompuerta.setShader(&shaderMulLighting);
+
+	modelGenerador.setShader(&shaderMulLighting);
+
+	modelPlataforma.setShader(&shaderMulLighting);
+
 }
 
 void prepareDepthScene() {
@@ -2046,6 +2173,18 @@ void prepareDepthScene() {
 	muroDerecho.setShader(&shaderDepth);
 
 	muroIzquierdo.setShader(&shaderDepth);
+
+	modelBotones.setShader(&shaderDepth);
+
+	modelCompuerta.setShader(&shaderDepth);
+
+	modelEdCompuerta.setShader(&shaderDepth);
+
+	modelGenerador.setShader(&shaderDepth);
+
+	modelPlataforma.setShader(&shaderDepth);
+
+
 }
 
 void renderScene(bool renderParticles) {
@@ -2161,6 +2300,32 @@ void renderScene(bool renderParticles) {
 			glm::vec3(0.021, 0.021, 0.021));
 	mayowModelAnimate.setAnimationIndex(animationIndex);
 	mayowModelAnimate.render(modelMatrixMayowBody);
+
+	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
+		modelMatrixCompuerta[3][2]);
+	glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
+	modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
+		glm::vec3(0.021, 0.021, 0.021));
+	modelCompuerta.setAnimationIndex(animationIndex);
+	modelCompuerta.render(modelMatrixCompuertaBody);
+
+	for (int i = 0; i < botonesPos.size(); i++) {
+		botonesPos[i].y = terrain.getHeightTerrain(botonesPos[i].x,
+			botonesPos[i].z);
+		modelBotones.setPosition(botonesPos[i]);
+		modelBotones.setScale(glm::vec3(1.0, 1.0, 1.0));
+		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
+		//modelBotones.render();
+	}
+
+	for (int i = 0; i < generadorPos.size(); i++) {
+		generadorPos[i].y = terrain.getHeightTerrain(generadorPos[i].x,
+			generadorPos[i].z);
+		modelGenerador.setPosition(generadorPos[i]);
+		modelGenerador.setScale(glm::vec3(1.0, 1.0, 1.0));
+		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
+		modelGenerador.render();
+	}
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
