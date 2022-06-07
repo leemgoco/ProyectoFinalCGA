@@ -82,8 +82,9 @@ Shader shaderDepth;
 
 std::shared_ptr<FirstPersonCamera> cameraFP(new FirstPersonCamera());
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
-float distanceFromTarget = 2.0;
+float distanceFromTarget = 14.0;
 float lastDistanceFromTarget = 0.0;
+float yaw = 0.0;
 
 Sphere skyboxSphere(20, 20);
 Box boxCollider;
@@ -1047,6 +1048,8 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 			std::cout << "lastMousePos.x:" << lastMousePosX << std::endl;
 			std::cout << "lastMousePos.y:" << lastMousePosY << std::endl;
 			std::cout << "distanceFromTarget:" << lastDistanceFromTarget << std::endl;
+			std::cout << "angulo rotacion yaw:" << yaw << std::endl;
+			std::cout << "pitch:" << camera->getPitch() << std::endl;
 			break;
 		}
 	}
@@ -1146,6 +1149,18 @@ bool processInput(bool continueApplication) {
 			&& glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_RELEASE))
 		enableCameraSelected = true;
 
+	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(1.0f),
+			glm::vec3(0, 0, 1));
+		yaw += 1;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-1.0f),
+			glm::vec3(0, 0, 1));
+		yaw -= 1;
+	}
+
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
 				glm::vec3(0, 1, 0));
@@ -1164,12 +1179,9 @@ bool processInput(bool continueApplication) {
 		
 		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
 		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+		
 
 		cameraMove();
-		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-		//float posMayow = mayowModelAnimate.getPosition()[3]
-		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
-		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	} else if (modelSelected
 			== 2&& glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
@@ -1179,12 +1191,10 @@ bool processInput(bool continueApplication) {
 
 		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
 		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-
 		cameraMove();
-		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
 	}
+
+
 
 	bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
 	if(!isJump && keySpaceStatus){
@@ -2127,7 +2137,7 @@ void renderScene(bool renderParticles) {
 
 	// Pivote cam
 	glDisable(GL_CULL_FACE);
-	pivoteCam.render(modelMatrixPivoteCam);
+	//pivoteCam.render(modelMatrixPivoteCam);
 	//muroFondo.render(modelMatrixMuroFondo);
 	glEnable(GL_CULL_FACE);
 

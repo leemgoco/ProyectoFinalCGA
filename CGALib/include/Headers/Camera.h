@@ -107,6 +107,10 @@ public:
 		this->distanceFromTarget = distanceFromTarget;
 	}
 
+	float getPitch() {
+		return this->pitch;
+	}
+
 protected:
 	glm::vec3 position;
 	glm::vec3 front;
