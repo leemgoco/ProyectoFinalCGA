@@ -1046,6 +1046,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			std::cout << "lastMousePos.x:" << lastMousePosX << std::endl;
 			std::cout << "lastMousePos.y:" << lastMousePosY << std::endl;
+			std::cout << "distanceFromTarget:" << lastDistanceFromTarget << std::endl;
 			break;
 		}
 	}
@@ -1160,8 +1161,11 @@ bool processInput(bool continueApplication) {
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
 		animationIndex = 0;
+		
+		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+
 		cameraMove();
-		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
 		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
 		//float posMayow = mayowModelAnimate.getPosition()[3]
 		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
@@ -1172,6 +1176,10 @@ bool processInput(bool continueApplication) {
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
 		animationIndex = 0;
+
+		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
+		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+
 		cameraMove();
 		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
 		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
@@ -2119,7 +2127,7 @@ void renderScene(bool renderParticles) {
 
 	// Pivote cam
 	glDisable(GL_CULL_FACE);
-	//pivoteCam.render(modelMatrixPivoteCam);
+	pivoteCam.render(modelMatrixPivoteCam);
 	//muroFondo.render(modelMatrixMuroFondo);
 	glEnable(GL_CULL_FACE);
 
@@ -2341,15 +2349,16 @@ void renderScene(bool renderParticles) {
 
 void cameraMove() {
 	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-	if (pasado < posterior) {
+	int camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
+	if (camaraXcoord < posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(0.6, 0, 0.0));
+				glm::vec3(0.1, 0, 0.0));
 	}
-	if (pasado > posterior) {
+	if (camaraXcoord > posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(-0.6, 0, 0.0));
+				glm::vec3(-0.1, 0, 0.0));
 	}
 }
 
