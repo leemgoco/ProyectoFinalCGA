@@ -1244,8 +1244,8 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0.0, 0.0, 0.1));
 		animationIndex = 0;
 		
-		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+		//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+		//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 		
 
 		cameraMove();
@@ -1295,17 +1295,12 @@ bool processInput(bool continueApplication) {
 		enemigo1.velocidad = 0.05 * 1.5f;
 
 
-
-
 	bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
 	if(!isJump && keySpaceStatus){
 		isJump = true;
 		startTimeJump = currTime;
 		tmv = 0;
 	}
-
-
-
 	/******************************************************************************/
 
 
@@ -1814,10 +1809,12 @@ void applicationLoop() {
 			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 				botonesPos[i]);
+			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(0, 0, -0.2));
 			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
 					glm::radians(-90.0f), glm::vec3(1, 0, 0));
 			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-				glm::radians(-150.0f), glm::vec3(0, 0, 1));
+				glm::radians(-180.0f), glm::vec3(0, 0, 1));
 			/*modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
 				glm::radians(-150.0f), glm::vec3(0, 1, 0));*/
 			addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
@@ -1825,12 +1822,12 @@ void applicationLoop() {
 			// Set the orientation of collider before doing the scale
 			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
 			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
-					glm::vec3(1.5, 1.0, 1.0));
+					glm::vec3(1.5, 0.9, 1.0));
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 					modelBotones.getObb().c);
 			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
 			botonCollider.e = modelBotones.getObb().e
-					* glm::vec3(1.5, 1.0, 1.0);
+					* glm::vec3(1.5, 0.9, 1.0);
 			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
 				botonCollider;
 		}
@@ -2105,7 +2102,7 @@ void applicationLoop() {
 				if (!colIt->second)
 					addOrUpdateColliders(collidersOBB, jt->first);
 				else {
-					if (jt->first.compare("mayow") == 0)
+					//if (jt->first.compare("mayow") == 0)
 						//modelMatrixMayow = std::get<1>(jt->second);
 					if (jt->first.compare("astroProta") == 0)
 						modelMatrixAstroProta = std::get<1>(jt->second);
@@ -2392,7 +2389,7 @@ void renderScene(bool renderParticles) {
 			botonesPos[i].z ) + 1.25f;
 		modelBotones.setPosition(botonesPos[i]);
 		modelBotones.setScale(glm::vec3(1.5, 1.0, 1.0));
-		modelBotones.setOrientation(glm::vec3(-90.0, -150.0, 0));
+		modelBotones.setOrientation(glm::vec3(-90.0, -180.0, 0));
 		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
 		modelBotones.render();
 	}
@@ -2411,9 +2408,9 @@ void renderScene(bool renderParticles) {
 			rokasPos[i].z) + 1.25f;
 		modelRokas.setPosition(rokasPos[i]);
 		modelRokas.setScale(glm::vec3(1.5, 1.0, 1.0));
-		modelRokas.setOrientation(glm::vec3(-90.0, -150.0, 0));
+		modelRokas.setOrientation(glm::vec3(-90.0, -180.0, 0));
 		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
-		modelRokas.render();
+		//modelRokas.render();
 	}
 
 	modelPlataforma.render(modelMatrixPlataforma);
