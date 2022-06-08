@@ -124,6 +124,8 @@ Model modelGenerador;
 Model modelCompuerta;
 Model modelEdCompuerta;
 Model modelPlataforma;
+Model modelPlaCompuerta;
+Model modelRokas;
 
 Enemy enemigo1;
 // Terrain model instance
@@ -171,13 +173,14 @@ glm::vec3 astroPosition;
 glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
+glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
 
 int animationIndex = 1;
 int animationIndexMayow = 0;
 int modelSelected = 2;
 bool enableCountSelected = true;
-int limiteIzquierdo = 132 - 20;
-int limiteDerecho = 132 + 20;
+int limiteIzquierdo = 132 - 80;
+int limiteDerecho = 132 + 85;
 int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
@@ -193,11 +196,14 @@ std::vector<glm::vec3> lamp2Position = { glm::vec3(-36.52, 0, -23.24),
 std::vector<float> lamp2Orientation = { 21.37 + 90, -65.0 + 90 };
 
 //Posición botones y plataformas
-std::vector<glm::vec3> botonesPos = { glm::vec3(10, 0, 10), glm::vec3(
-		20, 0, 10), glm::vec3(30, 0, 10), glm::vec3(40, 0, 10)};
+std::vector<glm::vec3> botonesPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
+		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12)};
 
 std::vector<glm::vec3> generadorPos = { glm::vec3(10, 0, 10), glm::vec3(
 		20, 0, 10), glm::vec3(30, 0, 10), glm::vec3(40, 0, 10) };
+
+std::vector<glm::vec3> rokasPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
+		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12) };
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = { { "aircraft", glm::vec3(
@@ -551,6 +557,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelGrass.loadModel("../models/grass/grassModel.obj");
 	//modelGrass.setShader(&shaderMulLighting);
 
+	//Rokas
+	modelRokas.loadModel("../models/rokas/Piedras2.obj");
+	modelRokas.setShader(&shaderMulLighting);
+
 	//Botones
 	modelBotones.loadModel("../models/botones/Botones.fbx");
 	modelBotones.setShader(&shaderMulLighting);
@@ -562,6 +572,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Edificio compuerta
 	modelEdCompuerta.loadModel("../models/edCompuerta/EdificioCompuerta.fbx");
 	modelEdCompuerta.setShader(&shaderMulLighting);
+
+	//PlatCompuerta
+	modelPlaCompuerta.loadModel("../models/compuerta/CompuertaBase.fbx");
+	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	//Plataforma
 	modelPlataforma.loadModel("../models/plataforma/Plataforma.fbx");
@@ -999,6 +1013,8 @@ void destroy() {
 	modelEdCompuerta.destroy();
 	modelGenerador.destroy();
 	modelPlataforma.destroy();
+	modelPlaCompuerta.destroy();
+	modelRokas.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1268,7 +1284,7 @@ bool processInput(bool continueApplication) {
 
 	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixMayow[3]);
 
-	modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
+	//modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
 
 	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians((float)acos(enemigo1.productoPunto(astroProta.getPosition(), enemigo1.direccion))), glm::vec3(0, 1, 0));
 
@@ -1307,8 +1323,11 @@ void applicationLoop() {
 	glm::vec3 target;
 	float angleTarget;
 
+	
 	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-		glm::vec3(0.0f, 5.0f, 0.0f));
+		glm::vec3(0.0f, 5.0f, 23.0f));
+	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+		glm::vec3(0, 0, 1));
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow,
 			glm::vec3(13.0f, 0.05f, -5.0f));
@@ -1331,24 +1350,28 @@ void applicationLoop() {
 
 	//Posicion de los muros
 	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo, 
-		glm::vec3(0.0f, 0.0f, 50.0f));
+		glm::vec3(0.0f, 0.0f, -10.0f));
 	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 
 	modelMatrixMuroFrontal = glm::translate(modelMatrixMuroFrontal,
-		glm::vec3(0.0f, 0.0f, -20.0f));
+		glm::vec3(0.0f, 0.0f, 28.0f));
 	modelMatrixMuroFrontal = glm::scale(modelMatrixMuroFrontal,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 
 	modelMatrixMuroDerecho = glm::translate(modelMatrixMuroDerecho,
-		glm::vec3(35.0f, 0.0f, 15.0f));
+		glm::vec3(85.0f, 0.0f, 15.0f));
 	modelMatrixMuroDerecho = glm::scale(modelMatrixMuroDerecho,
 		glm::vec3(0.0f, 20.0f, 70.0f));
 
 	modelMatrixMuroIzquierdo = glm::translate(modelMatrixMuroIzquierdo,
-		glm::vec3(-35.0f, 0.0f, 15.0f));
+		glm::vec3(-73.0f, 0.0f, 15.0f));
 	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
 		glm::vec3(0.0f, 20.0f, 70.0f));
+
+	modelMatrixCompuerta = glm::translate(modelMatrixCompuerta,
+		glm::vec3(5.9f, 0.0f, 8.8f));
+
 
 	lastTime = TimeManager::Instance().GetTime();
 
@@ -1792,19 +1815,23 @@ void applicationLoop() {
 			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 				botonesPos[i]);
-			//modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-			//		glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+					glm::radians(-90.0f), glm::vec3(1, 0, 0));
+			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+				glm::radians(-150.0f), glm::vec3(0, 0, 1));
+			/*modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+				glm::radians(-150.0f), glm::vec3(0, 1, 0));*/
 			addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
 				botonCollider, modelMatrixColliderBoton);
 			// Set the orientation of collider before doing the scale
 			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
 			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
-					glm::vec3(1.0, 1.0, 1.0));
+					glm::vec3(1.5, 1.0, 1.0));
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 					modelBotones.getObb().c);
 			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
 			botonCollider.e = modelBotones.getObb().e
-					* glm::vec3(1.0, 1.0, 1.0);
+					* glm::vec3(1.5, 1.0, 1.0);
 			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
 				botonCollider;
 		}
@@ -1916,7 +1943,7 @@ void applicationLoop() {
 			glm::vec3(muroFondo.getObb().c.x,
 				muroFondo.getObb().c.y,
 				muroFondo.getObb().c.z));
-		muroFondoCollider.e = glm::vec3(37.50f, 10.0f, 0.0f);
+		muroFondoCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
 		muroFondoCollider.c = glm::vec3(modelmatrixColliderMuroFondo[3]);
 		addOrUpdateColliders(collidersOBB, "muroFondo", muroFondoCollider,
 			modelMatrixMuroFondo);
@@ -1930,7 +1957,7 @@ void applicationLoop() {
 			glm::vec3(muroFrontal.getObb().c.x,
 				muroFrontal.getObb().c.y,
 				muroFrontal.getObb().c.z));
-		muroFrontalCollider.e = glm::vec3(37.50f, 10.0f, 0.0f);
+		muroFrontalCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
 		muroFrontalCollider.c = glm::vec3(modelmatrixColliderMuroFrontal[3]);
 		addOrUpdateColliders(collidersOBB, "muroFrontal", muroFrontalCollider,
 			modelMatrixMuroFrontal);
@@ -2207,6 +2234,9 @@ void prepareScene() {
 
 	modelPlataforma.setShader(&shaderMulLighting);
 
+	modelPlaCompuerta.setShader(&shaderMulLighting);
+
+	modelRokas.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene() {
@@ -2246,7 +2276,9 @@ void prepareDepthScene() {
 
 	modelPlataforma.setShader(&shaderDepth);
 
+	modelPlaCompuerta.setShader(&shaderDepth);
 
+	modelRokas.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2333,21 +2365,37 @@ void renderScene(bool renderParticles) {
 	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
 	mayowModelAnimate.render(modelMatrixMayowBody);
 
+	/*
+	glm::vec3 ejey = glm::normalize(terrain.getNormalTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]));
+	glm::vec3 ejex = glm::normalize(modelMatrixCompuerta[0]);
+	glm::vec3 ejez = glm::normalize(glm::cross(ejex, ejey));
+	ejex = glm::normalize(glm::cross(ejey, ejez));
+	modelMatrixCompuerta[0] = glm::vec4(ejex, 0.0);
+	modelMatrixCompuerta[1] = glm::vec4(ejey, 0.0);
+	modelMatrixCompuerta[2] = glm::vec4(ejez, 0.0);
+	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]);*/
+
+	//glDisable(GL_BLEND);
 	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-		modelMatrixCompuerta[3][2]);
+		modelMatrixCompuerta[3][2]) + 2.0f;
 	glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
 	modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-		glm::vec3(0.021, 0.021, 0.021));
-	modelCompuerta.setAnimationIndex(animationIndex);
+		glm::vec3(0.0021, 0.0021, 0.0021));
+	modelCompuerta.setAnimationIndex(1);
 	modelCompuerta.render(modelMatrixCompuertaBody);
+
+
+	//modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+	//	glm::vec3(0, 0, 1));
 
 	for (int i = 0; i < botonesPos.size(); i++) {
 		botonesPos[i].y = terrain.getHeightTerrain(botonesPos[i].x,
-			botonesPos[i].z);
+			botonesPos[i].z ) + 1.25f;
 		modelBotones.setPosition(botonesPos[i]);
-		modelBotones.setScale(glm::vec3(1.0, 1.0, 1.0));
+		modelBotones.setScale(glm::vec3(1.5, 1.0, 1.0));
+		modelBotones.setOrientation(glm::vec3(-90.0, -150.0, 0));
 		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
-		//modelBotones.render();
+		modelBotones.render();
 	}
 
 	for (int i = 0; i < generadorPos.size(); i++) {
@@ -2358,6 +2406,22 @@ void renderScene(bool renderParticles) {
 		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
 		modelGenerador.render();
 	}
+
+	for (int i = 0; i < rokasPos.size(); i++) {
+		rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
+			rokasPos[i].z) + 1.25f;
+		modelRokas.setPosition(rokasPos[i]);
+		modelRokas.setScale(glm::vec3(1.5, 1.0, 1.0));
+		modelRokas.setOrientation(glm::vec3(-90.0, -150.0, 0));
+		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
+		modelRokas.render();
+	}
+
+	modelPlataforma.render(modelMatrixPlataforma);
+
+	modelEdCompuerta.render(modelMatrixEdCompuerta);
+
+	modelPlaCompuerta.render(modelMatrixPlaCompuerta);
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
@@ -2560,12 +2624,12 @@ void cameraMove() {
 	if (camaraXcoord < posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(0.1, 0, 0.0));
+				glm::vec3(-0.1, 0, 0.0));
 	}
 	if (camaraXcoord > posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(-0.1, 0, 0.0));
+				glm::vec3(0.1, 0, 0.0));
 	}
 }
 
