@@ -100,6 +100,7 @@ Box muroFondo;
 Box muroFrontal;
 Box muroIzquierdo;
 Box muroDerecho;
+Box boxReferencia;
 
 ShadowBox *shadowBox;
 
@@ -185,6 +186,8 @@ int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
 bool enableCameraSelected = true;
+bool enableAction = true;
+bool actionE = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
 
@@ -244,6 +247,8 @@ bool cambiaVelocidadEnemigo;
 std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
 std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
 
+//std::map<std::string, bool> collisionDetection;
+
 // Framesbuffers
 GLuint depthMap, depthMapFBO;
 
@@ -295,6 +300,8 @@ void prepareScene();
 void prepareDepthScene();
 void renderScene(bool renderParticles = true);
 void cameraMove();
+bool excepCollider(std::string string1, std::string string2);
+void updateBotonCollider(std::map<std::string, bool> collisionDetection);
 
 void initParticleBuffers() {
 	// Generate the buffers
@@ -547,17 +554,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	pivoteCam.init();
 	pivoteCam.setShader(&shaderMulLighting);
 
-	////Lamp models
-	//modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
-	//modelLamp1.setShader(&shaderMulLighting);
-	//modelLamp2.loadModel("../models/Street_Light/Lamp.obj");
-	//modelLamp2.setShader(&shaderMulLighting);
-	//modelLampPost2.loadModel("../models/Street_Light/LampPost.obj");
-	//modelLampPost2.setShader(&shaderMulLighting);
-
-	////Grass
-	//modelGrass.loadModel("../models/grass/grassModel.obj");
-	//modelGrass.setShader(&shaderMulLighting);
+	boxReferencia.init();
+	boxReferencia.setShader(&shaderMulLighting);
 
 	//Rokas
 	modelRokas.loadModel("../models/rokas/Piedras2.obj");
@@ -999,10 +997,6 @@ void destroy() {
 	terrain.destroy();
 
 	// Custom objects Delete
-	/*modelLamp1.destroy();
-	modelLamp2.destroy();
-	modelLampPost2.destroy();
-	modelGrass.destroy();*/
 	modelFountain.destroy();
 	pivoteCam.destroy();
 	astroProta.destroy();
@@ -1017,6 +1011,7 @@ void destroy() {
 	modelPlataforma.destroy();
 	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
+	boxReferencia.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1217,9 +1212,20 @@ bool processInput(bool continueApplication) {
 		yaw -= 1;
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+	if (enableAction && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		enableAction = false;
+		actionE = true;
 		animationIndex = 2;
+		std::cout << "actionE:" << actionE << std::endl;
 	}
+	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+		enableAction = true;
+		actionE = false;
+	}
+
+	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+	//	animationIndex = 2;
+	//}
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
@@ -1267,8 +1273,8 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0.0, 0.0, -0.1));
 		animationIndex = 0;
 
-		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
-		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+		/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
+		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
 		cameraMove();
 		astroPosition = modelMatrixAstroProta[3];
 		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
@@ -1395,16 +1401,6 @@ void applicationLoop() {
 
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 				(float) screenWidth / (float) screenHeight, 0.1f, 100.0f);
-
-		/*if (modelSelected == 1) {
-			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
-			target = modelMatrixPivoteCam[3];
-		} else {
-			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
-			target = modelMatrixMayow[3];
-		}*/
 
 		if (cameraSelected == 0) {
 			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
@@ -1806,19 +1802,38 @@ void applicationLoop() {
 		//Botones colliders
 		for (int i = 0; i < botonesPos.size(); i++) {
 			AbstractModel::OBB botonCollider;
+			AbstractModel::OBB botonColliderY;
+			AbstractModel::OBB botonColliderB;
+			AbstractModel::OBB botonColliderR;
 			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
+			glm::mat4 modelMatrixColliderBotonY = glm::mat4(1.0);
+			glm::mat4 modelMatrixColliderBotonB = glm::mat4(1.0);
+			glm::mat4 modelMatrixColliderBotonR = glm::mat4(1.0);
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 				botonesPos[i]);
+			//Botones colores
+			modelMatrixColliderBotonY = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(-1.0, -0.4, 1.2));
+			modelMatrixColliderBotonB = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(0.0, -0.4, 1.2));
+			modelMatrixColliderBotonR = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(1.0, -0.4, 1.2));
+			//Retomar caja general
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 				glm::vec3(0, 0, -0.2));
 			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
 					glm::radians(-90.0f), glm::vec3(1, 0, 0));
 			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
 				glm::radians(-180.0f), glm::vec3(0, 0, 1));
-			/*modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-				glm::radians(-150.0f), glm::vec3(0, 1, 0));*/
+			//adds
 			addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
 				botonCollider, modelMatrixColliderBoton);
+			addOrUpdateColliders(collidersOBB, "botonBox-Y" + std::to_string(i),
+				botonColliderY, modelMatrixColliderBotonY);
+			addOrUpdateColliders(collidersOBB, "botonBox-B" + std::to_string(i),
+				botonColliderB, modelMatrixColliderBotonB);
+			addOrUpdateColliders(collidersOBB, "botonBox-R" + std::to_string(i),
+				botonColliderR, modelMatrixColliderBotonR);
 			// Set the orientation of collider before doing the scale
 			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
 			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
@@ -1828,8 +1843,32 @@ void applicationLoop() {
 			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
 			botonCollider.e = modelBotones.getObb().e
 					* glm::vec3(1.5, 0.9, 1.0);
+			//Y boton
+			botonColliderY.u = glm::quat_cast(modelMatrixColliderBotonY);
+			modelMatrixColliderBotonY = glm::scale(modelMatrixColliderBotonY,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderY.c = glm::vec3(modelMatrixColliderBotonY[3]);
+			botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			//B boton
+			botonColliderB.u = glm::quat_cast(modelMatrixColliderBotonB);
+			modelMatrixColliderBotonB = glm::scale(modelMatrixColliderBotonB,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderB.c = glm::vec3(modelMatrixColliderBotonB[3]);
+			botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			//R boton
+			botonColliderR.u = glm::quat_cast(modelMatrixColliderBotonR);
+			modelMatrixColliderBotonR = glm::scale(modelMatrixColliderBotonR,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderR.c = glm::vec3(modelMatrixColliderBotonR[3]);
+			botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
 			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
 				botonCollider;
+			std::get<0>(collidersOBB.find("botonBox-Y" + std::to_string(i))->second) =
+				botonColliderY;
+			std::get<0>(collidersOBB.find("botonBox-B" + std::to_string(i))->second) =
+				botonColliderB;
+			std::get<0>(collidersOBB.find("botonBox-R" + std::to_string(i))->second) =
+				botonColliderR;
 		}
 
 		//Botones generadores
@@ -2020,6 +2059,7 @@ void applicationLoop() {
 		/*******************************************
 		 * Test Colisions
 		 *******************************************/
+		bool isCollisionG = false;
 		for (std::map<std::string,
 				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
@@ -2030,19 +2070,23 @@ void applicationLoop() {
 				if (it != jt
 						&& testOBBOBB(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					if (!((it->first.compare("muroFondo") == 0 || it->first.compare("muroFrontal") == 0 ||
-						it->first.compare("muroDerecho") == 0 || it->first.compare("muroIzquierdo") == 0) &&
-						(jt->first.compare("muroFondo") == 0 || jt->first.compare("muroFrontal") == 0 ||
-							jt->first.compare("muroDerecho") == 0 || jt->first.compare("muroIzquierdo") == 0)))
+					if (!(excepCollider(it->first, jt->first)))
 					{
-						std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+						/*std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;*/
 						isCollision = true;
+						isCollisionG = true;
 					}
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first,
 					isCollision);
+		}
+
+		if (isCollisionG && actionE) {
+			std::cout << "EntraISC " << std::endl;
+			updateBotonCollider(collisionDetection);
+			actionE = false;
 		}
 
 		for (std::map<std::string,
@@ -2197,14 +2241,6 @@ void prepareScene() {
 
 	terrain.setShader(&shaderTerrain);
 
-	////Lamp models
-	//modelLamp1.setShader(&shaderMulLighting);
-	//modelLamp2.setShader(&shaderMulLighting);
-	//modelLampPost2.setShader(&shaderMulLighting);
-
-	////Grass
-	//modelGrass.setShader(&shaderMulLighting);
-
 	//Mayow
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
@@ -2233,6 +2269,8 @@ void prepareScene() {
 	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	modelRokas.setShader(&shaderMulLighting);
+
+	boxReferencia.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene() {
@@ -2241,17 +2279,11 @@ void prepareDepthScene() {
 
 	terrain.setShader(&shaderDepth);
 
-	////Lamp models
-	//modelLamp1.setShader(&shaderDepth);
-	//modelLamp2.setShader(&shaderDepth);
-	//modelLampPost2.setShader(&shaderDepth);
-
-	////Grass
-	//modelGrass.setShader(&shaderDepth);
-
 	//Mayow
 	mayowModelAnimate.setShader(&shaderDepth);
+
 	pivoteCam.setShader(&shaderDepth);
+
 	astroProta.setShader(&shaderDepth);
 
 	muroFondo.setShader(&shaderDepth);
@@ -2275,6 +2307,8 @@ void prepareDepthScene() {
 	modelPlaCompuerta.setShader(&shaderDepth);
 
 	modelRokas.setShader(&shaderDepth);
+
+	boxReferencia.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2626,6 +2660,52 @@ void cameraMove() {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 				glm::vec3(0.1, 0, 0.0));
+	}
+}
+
+bool excepCollider(std::string string1, std::string string2) {
+	if ((string1.compare("muroFondo") == 0 || string1.compare("muroFrontal") == 0 ||
+		string1.compare("muroDerecho") == 0 || string1.compare("muroIzquierdo") == 0) &&
+		(string2.compare("muroFondo") == 0 || string2.compare("muroFrontal") == 0 ||
+			string2.compare("muroDerecho") == 0 || string2.compare("muroIzquierdo") == 0)) {
+		return true;
+	}
+	for (int i = 0; i < botonesPos.size(); i++) {
+		if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
+			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+//if (isCollision) {
+//	std::cout << "collisionDetection " << collisionDetection.find(it->first)->second << " de "
+//		<< it->first << std::endl;
+//}
+
+void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
+	for (int i = 0; i < botonesPos.size(); i++) {
+		/*if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
+			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
+			
+		}*/
+		if (collisionDetection.find("botonBox-Y" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-Y" + std::to_string(i))->second << " de "
+				<< "botonBox-Y" + std::to_string(i) << std::endl;
+		}
+		if (collisionDetection.find("botonBox-B" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-B" + std::to_string(i))->second << " de "
+				<< "botonBox-B" + std::to_string(i) << std::endl;
+		}
+		if (collisionDetection.find("botonBox-R" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
+				<< "botonBox-R" + std::to_string(i) << std::endl;
+		}
 	}
 }
 
