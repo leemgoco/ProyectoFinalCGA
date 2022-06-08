@@ -92,10 +92,13 @@ class Enemy
 			direccion = matrixEnemigo[3];
 		}
 
-		float faceDirection(glm::vec3 a) {
+		float faceDirection(glm::vec3 a, glm::vec3 b) {
 			float res;
+			if (a.x == 0.0f && a.z == 0.0f) {
+				a.z = 1.0f;
+			}
 
-			res = (float)atan2(-a.y, a.x);
+			res = (float)acos((a.x * b.x + a.z * b.z) / ((sqrt(pow(a.x,2) + pow(a.z, 2))) * (sqrt(pow(b.x, 2) + pow(b.z, 2)))));
 			res = res * (180.0 / 3.141592653589793238463);
 			return res;
 		}

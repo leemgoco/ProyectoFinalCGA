@@ -175,7 +175,7 @@ glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
 //vectors
 glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f,0.0f,0.0f);
-glm::vec3 astroInitialOrientation;
+glm::vec3 astroInitialOrientation = glm::vec3(0.0f, 0.0f, 1.0f);
 
 int animationIndex = 1;
 int animationIndexMayow = 0;
@@ -1310,7 +1310,6 @@ void applicationLoop() {
 
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
-	astroInitialOrientation = modelMatrixAstroProta[3];
 	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
 		glm::vec3(1, 0, 0));*/
 
@@ -1996,8 +1995,8 @@ void applicationLoop() {
 						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
 
 						if (colIt->first.compare("mayow") == 0) {
-							std::cout << "angulo es: %.2f " << enemigo1.faceDirection(enemigo1.calculaReaparicion(modelMatrixAstroProta[3], astroInitialOrientation)) << std::endl;
-							modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, enemigo1.faceDirection(enemigo1.calculaReaparicion(modelMatrixAstroProta[3], astroInitialOrientation)), glm::vec3(0, 1, 0));
+							std::cout << "angulo es: %.2f " << enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation) << std::endl;
+							modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation), glm::vec3(0, 1, 0));
 							modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, -astroPosition);
 							playerRespawn = true;
 						}
