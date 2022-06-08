@@ -14,3 +14,4 @@ Release/*.pbd
 CGALib/ide/CGALib/Debug/*
 RemoteSystemsTempFiles/
 .metadata/
+/16-FontRendering/src/main - copia.cpp
