@@ -127,13 +127,15 @@ Model modelEdCompuerta;
 Model modelPlataforma;
 Model modelPlaCompuerta;
 Model modelRokas;
+Model modelLuzGenerador;
+Model modelLuzBotones;
 
 Enemy enemigo1;
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
-GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID,
-		textureLandingPadID;
+GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
+		textureGreenID, texturePurpleID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
 		textureTerrainBID, textureTerrainBlendMapID;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
@@ -188,8 +190,16 @@ int cameraSelected = 0;
 bool enableCameraSelected = true;
 bool enableAction = true;
 bool actionE = false;
+bool enableEscotilla1 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
+std::vector<std::vector<bool>> combBotones = { 
+	{false, false, false}, 
+	{false, false, false},
+	{false, false, false},
+	{false, false, false}};
+
+std::vector<bool> lucesBotones = { false, false, false, false };
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -302,6 +312,7 @@ void renderScene(bool renderParticles = true);
 void cameraMove();
 bool excepCollider(std::string string1, std::string string2);
 void updateBotonCollider(std::map<std::string, bool> collisionDetection);
+void updateEscenario1();
 
 void initParticleBuffers() {
 	// Generate the buffers
@@ -561,9 +572,21 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelRokas.loadModel("../models/rokas/Piedras2.obj");
 	modelRokas.setShader(&shaderMulLighting);
 
+	//Generador
+	modelGenerador.loadModel("../models/generadorG/Generador.obj");
+	modelGenerador.setShader(&shaderMulLighting);
+
 	//Botones
 	modelBotones.loadModel("../models/botones/Botones.fbx");
 	modelBotones.setShader(&shaderMulLighting);
+
+	//LucesBotones
+	modelLuzBotones.loadModel("../models/Luces/Luz/LucesGenerador.obj");
+	modelLuzBotones.setShader(&shaderMulLighting);
+
+	//LucesGeneradores
+	modelLuzGenerador.loadModel("../models/Luces/LuzEspacio/LuzEspacio.obj");
+	modelLuzGenerador.setShader(&shaderMulLighting);
 
 	//Compuerta
 	modelCompuerta.loadModel("../models/compuerta/Compuerta.fbx");
@@ -793,6 +816,138 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
 
+	// Definiendo la textura a utilizar
+	Texture textureYellow("../Textures/Texturas/Amarillo.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureYellow.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureYellow.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureYellowID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureYellowID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureYellow.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureBlue("../Textures/Texturas/Azul.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureBlue.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureBlue.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureBlueID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureBlueID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureBlue.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureOrange("../Textures/Texturas/Naranja.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureOrange.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureOrange.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureOrangeID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureOrangeID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureOrange.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureGreen("../Textures/Texturas/Verde.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureGreen.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureGreen.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureGreenID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureGreenID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureGreen.freeImage(bitmap);
+
 	Texture textureParticlesFountain("../Textures/bluewater.png");
 	bitmap = textureParticlesFountain.loadImage();
 	data = textureParticlesFountain.convertToData(bitmap, imageWidth,
@@ -1011,6 +1166,8 @@ void destroy() {
 	modelPlataforma.destroy();
 	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
+	modelLuzBotones.destroy();
+	modelLuzGenerador.destroy();
 	boxReferencia.destroy();
 
 	// Custom objects animate
@@ -1018,11 +1175,12 @@ void destroy() {
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteTextures(1, &textureCespedID);
-	glDeleteTextures(1, &textureWallID);
-	glDeleteTextures(1, &textureWindowID);
-	glDeleteTextures(1, &textureHighwayID);
-	glDeleteTextures(1, &textureLandingPadID);
+	glDeleteTextures(1, &textureBlueID);
+	glDeleteTextures(1, &textureGreenID);
+	glDeleteTextures(1, &textureOrangeID);
+	glDeleteTextures(1, &texturePurpleID);
+	glDeleteTextures(1, &textureRedID);
+	glDeleteTextures(1, &textureYellowID);
 	glDeleteTextures(1, &textureTerrainBackgroundID);
 	glDeleteTextures(1, &textureTerrainRID);
 	glDeleteTextures(1, &textureTerrainGID);
@@ -1423,6 +1581,8 @@ void applicationLoop() {
 		else {
 			view = cameraFP->getViewMatrix();
 		}
+
+		updateEscenario1();
 
 		shadowBox->update(screenWidth, screenHeight);
 		glm::vec3 centerBox = shadowBox->getCenter();
@@ -2083,7 +2243,7 @@ void applicationLoop() {
 					isCollision);
 		}
 
-		if (isCollisionG && actionE) {
+		if (isCollisionG && actionE && !enableEscotilla1) {
 			std::cout << "EntraISC " << std::endl;
 			updateBotonCollider(collisionDetection);
 			actionE = false;
@@ -2271,6 +2431,10 @@ void prepareScene() {
 	modelRokas.setShader(&shaderMulLighting);
 
 	boxReferencia.setShader(&shaderMulLighting);
+
+	modelLuzBotones.setShader(&shaderMulLighting);
+
+	modelLuzGenerador.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene() {
@@ -2309,6 +2473,10 @@ void prepareDepthScene() {
 	modelRokas.setShader(&shaderDepth);
 
 	boxReferencia.setShader(&shaderDepth);
+
+	modelLuzBotones.setShader(&shaderDepth);
+
+	modelLuzGenerador.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2345,7 +2513,7 @@ void renderScene(bool renderParticles) {
 
 	//Muros
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureWallID);
+	//glBindTexture(GL_TEXTURE_2D, textureWallID);
 	//muroFondo.render(modelMatrixMuroFondo);
 
 	//muroFrontal.render(modelMatrixMuroFrontal);
@@ -2360,13 +2528,6 @@ void renderScene(bool renderParticles) {
 	 *******************************************/
 	// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
 	glActiveTexture(GL_TEXTURE0);
-
-
-
-	// Fountain
-	glDisable(GL_CULL_FACE);
-	modelFountain.render(modelMatrixFountain);
-	glEnable(GL_CULL_FACE);
 
 	// Pivote cam
 	glDisable(GL_CULL_FACE);
@@ -2424,9 +2585,32 @@ void renderScene(bool renderParticles) {
 		modelBotones.setPosition(botonesPos[i]);
 		modelBotones.setScale(glm::vec3(1.5, 1.0, 1.0));
 		modelBotones.setOrientation(glm::vec3(-90.0, -180.0, 0));
-		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
+		boxReferencia.setPosition(glm::vec3(botonesPos[i].x,
+			botonesPos[i].y + 1.5, botonesPos[i].z));
+		modelLuzBotones.setPosition(glm::vec3(botonesPos[i].x,
+			botonesPos[i].y + 0.6, botonesPos[i].z + 1.1));
+		modelLuzBotones.setScale(glm::vec3(1.5, 2.0, 1.0));
+		if (i == 0) {
+			glBindTexture(GL_TEXTURE_2D, textureYellowID);
+			boxReferencia.render();
+		}
+		if (i == 1) {
+			glBindTexture(GL_TEXTURE_2D, textureBlueID);
+			boxReferencia.render();
+		}
+		if (i == 2) {
+			glBindTexture(GL_TEXTURE_2D, textureOrangeID);
+			boxReferencia.render();
+		}
+		if (i == 3) {
+			glBindTexture(GL_TEXTURE_2D, textureGreenID);
+			boxReferencia.render();
+		}
+		modelLuzBotones.render();
 		modelBotones.render();
 	}
+
+	glActiveTexture(GL_TEXTURE0);
 
 	for (int i = 0; i < generadorPos.size(); i++) {
 		generadorPos[i].y = terrain.getHeightTerrain(generadorPos[i].x,
@@ -2688,23 +2872,52 @@ bool excepCollider(std::string string1, std::string string2) {
 
 void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
 	for (int i = 0; i < botonesPos.size(); i++) {
-		/*if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
-			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
-			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
-				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
-			
-		}*/
 		if (collisionDetection.find("botonBox-Y" + std::to_string(i))->second) {
 			std::cout << "collisionDetection " << collisionDetection.find("botonBox-Y" + std::to_string(i))->second << " de "
 				<< "botonBox-Y" + std::to_string(i) << std::endl;
+			//std::cout << "previo a update " << combBotones[i][0] << std::endl;
+			combBotones[i][0] = !combBotones[i][0];
+			//std::cout << "despues de update " << combBotones[i][0] << std::endl;
 		}
 		if (collisionDetection.find("botonBox-B" + std::to_string(i))->second) {
 			std::cout << "collisionDetection " << collisionDetection.find("botonBox-B" + std::to_string(i))->second << " de "
 				<< "botonBox-B" + std::to_string(i) << std::endl;
+			combBotones[i][1] = !combBotones[i][1];
 		}
 		if (collisionDetection.find("botonBox-R" + std::to_string(i))->second) {
 			std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
 				<< "botonBox-R" + std::to_string(i) << std::endl;
+			combBotones[i][2] = !combBotones[i][2];
+		}
+	}
+}
+
+void updateEscenario1() {
+	if (!enableEscotilla1) {
+		if (combBotones[0][0] && !combBotones[0][1] && !combBotones[0][2]) {
+			lucesBotones[0] = true;
+			std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
+		}
+		else {
+			lucesBotones[0] = false;
+		}
+		if (combBotones[2][0] && !combBotones[2][1] && combBotones[2][2]) {
+			lucesBotones[2] = true;
+			std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
+		}
+		else {
+			lucesBotones[2] = false;
+		}
+		if (combBotones[3][0] && combBotones[3][1] && !combBotones[3][2]) {
+			lucesBotones[3] = true;
+			std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
+		}
+		else {
+			lucesBotones[3] = false;
+		}
+		if (lucesBotones[0] && lucesBotones[2] && lucesBotones[3]) {
+			enableEscotilla1 = true;
+			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
 		}
 	}
 }
