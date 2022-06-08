@@ -21,15 +21,21 @@ class Enemy
 		float distanceToPersonaje = 100.0f;
 		float velocidad = 0.06f;
 		glm::vec3 direccion = glm::vec3(0.0f);
-		bool cambiaVelocidad = false;
+		glm::vec3 origen = glm::vec3(0.0f);
+		std::string name = "";
+		bool respawn = false;
 		glm::mat4 matrixEnemigo = glm::mat4(1.0f);
+		
 
 		/*
 			DESDE CERCA VA MÁS RÁPIDO Y CUANDO ESTÁ A 
 			CIERTA DISTANCIA DE LEJOS, VA UN POCO MÁS LENTO
 		*/
 
-		Enemy() {
+		Enemy(glm::vec3 o, std::string n) {
+
+			name = n;
+			origen = o;
 
 		}
 
@@ -72,16 +78,25 @@ class Enemy
 			return direccion;
 		}
 
+		glm::vec3 calculaReaparicion(glm::vec3 coordsSpawnPoint, glm::vec3 coordsEnemigo) {
+
+			glm::vec3 direccion = glm::vec3(1.0f);
+			direccion.y = coordsSpawnPoint.y - coordsEnemigo.y;
+			direccion.x = coordsSpawnPoint.x - coordsEnemigo.x;
+			direccion.z = coordsSpawnPoint.z - coordsEnemigo.z;
+			return direccion;
+		}
+
 		void setMatrixEnemigo(glm::mat4 x) {
 			matrixEnemigo = x;
 			direccion = matrixEnemigo[3];
 		}
 
-		float anguloEntreVectores(glm::vec3 a, glm::vec3 b) {
+		float faceDirection(glm::vec3 a) {
 			float res;
 
-			res = (float)acos((a.x * b.x + a.z * b.z)/ (sqrt(a.x*a.x + a.z*a.z) * sqrt(b.x*b.x + b.z*b.z)));
-
+			res = (float)atan2(-a.y, a.x);
+			res = res * (180.0 / 3.141592653589793238463);
 			return res;
 		}
 

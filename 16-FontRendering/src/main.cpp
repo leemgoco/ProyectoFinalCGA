@@ -5,6 +5,8 @@
 //std includes
 #include <string>
 #include <iostream>
+#include <time.h>
+#include <chrono>
 
 // contains new std::shuffle definition
 #include <algorithm>
@@ -120,7 +122,11 @@ Model modelFountain;
 Model mayowModelAnimate;
 Model astroProta;
 
-Enemy enemigo1;
+//Enemigos
+Enemy enemigo1(glm::vec3(13.0f, 0.05f, -5.0f), "enemy1");
+Enemy enemigo2(glm::vec3(13.0f, 0.05f, -5.0f), "enemy2");
+Enemy enemigo3(glm::vec3(13.0f, 0.05f, -5.0f), "enemy3");
+
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
@@ -133,6 +139,9 @@ GLuint skyboxTextureID;
 
 // Modelo para el redener de texto
 FontTypeRendering::FontTypeRendering *modelText;
+
+//vairables para medir tiempo
+int tiempo = 0;
 
 GLenum types[6] = {
 GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -162,7 +171,11 @@ glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
+
+//vectors
 glm::vec3 astroPosition;
+glm::vec3 astroOrigin = glm::vec3(0.0f,0.0f,0.0f);
+glm::vec3 astroInitialOrientation;
 
 int animationIndex = 1;
 int animationIndexMayow = 0;
@@ -173,7 +186,9 @@ int limiteDerecho = 132 + 20;
 int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
+int tiempoRespawnProta = 0;
 bool enableCameraSelected = true;
+bool playerRespawn = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
 
@@ -1135,16 +1150,7 @@ bool processInput(bool continueApplication) {
 	}
 	offsetX = 0;
 	offsetY = 0;
-
-	// Seleccionar modelo
-	/*if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
-		enableCountSelected = false;
-		modelSelected++;
-		if (modelSelected > 2)
-			modelSelected = 0;
-		std::cout << "modelSelected:" << modelSelected << std::endl;
-	} else if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE)
-		enableCountSelected = true;*/
+	
 
 	if (enableCameraSelected && glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS
 		&& (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS
@@ -1172,81 +1178,104 @@ bool processInput(bool continueApplication) {
 		yaw -= 1;
 	}
 
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
-				glm::vec3(0, 1, 0));
-		animationIndex = 0;
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+	if (playerRespawn == false) {
 
-	} else if (modelSelected
-			== 2&& glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
+		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
 				glm::vec3(0, 1, 0));
-		animationIndex = 0;
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
-	}
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+			animationIndex = 0;
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+
+		}
+		else if (modelSelected
+			== 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
+				glm::vec3(0, 1, 0));
+			animationIndex = 0;
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+		}
+		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
-		animationIndex = 0;
-		
-		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-		
+			animationIndex = 0;
 
-		cameraMove();
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		/*anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);*/
+			std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 
 
-		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-		//float posMayow = mayowModelAnimate.getPosition()[3]
-		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
-		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-    
-	} else if (modelSelected
-			== 2&& glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+			cameraMove();
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+
+
+		}
+		else if (modelSelected
+			== 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
-		animationIndex = 0;
+			animationIndex = 0;
+			std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+			cameraMove();
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
-		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
-		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-		cameraMove();
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
+			//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
+			//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
+			//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
+		}
 
-		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
 	}
+		
 
-	//printf("angulo entre vectores es: %.2f", anguloEntreDosVectores);
-	//************************IA PARA SEGUIR AL PROTA******************************/
+
+
+	//************************INTERACCIONES DE COLLIDERS ENEMIGO JUGADOR ******************************/
 
 	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixMayow[3]);
 
-	modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
 
-	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(anguloEntreDosVectores), glm::vec3(0, 1, 0));
+
+	if (playerRespawn == true) {
+		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, glm::vec3(0.0f, 0.0f, 0.0f));
+		tiempoRespawnProta++;
+		if (tiempoRespawnProta > 50) {
+			playerRespawn = false;
+			tiempoRespawnProta = 0;
+		}
+		
+	}
 
 	if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje) == true)
 		enemigo1.velocidad = 0.05 * 1.2f;
 	else if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje) == false)
 		enemigo1.velocidad = 0.05 * 1.5f;
 
+	if (enemigo1.respawn == true) {
+		modelMatrixMayow = glm::translate(modelMatrixMayow,
+			glm::vec3(0.0f, 0.0f, 0.0f));
+		tiempo += 1;
 
+		if (tiempo > 150) {
+			enemigo1.respawn = false;
+			tiempo = 0.0f;
+		}
+			
+	}
+	else if (enemigo1.respawn == false) {
+		modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
+		//modelMatrixMayow = glm::rotate(modelMatrixMayow, enemigo1.faceDirection(vectorDireccionEnemigo), glm::vec3(0,1,0));
+	}
 
+	/******************************************************************************/
 
 	bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
 	if(!isJump && keySpaceStatus){
@@ -1254,11 +1283,6 @@ bool processInput(bool continueApplication) {
 		startTimeJump = currTime;
 		tmv = 0;
 	}
-
-
-
-	/******************************************************************************/
-
 
 
 	glfwPollEvents();
@@ -1279,12 +1303,14 @@ void applicationLoop() {
 	modelMatrixMayow = glm::translate(modelMatrixMayow,
 			glm::vec3(13.0f, 0.05f, -5.0f));
 
+
 	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
 	//		glm::vec3(0, 1, 0));
 
 
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
+	astroInitialOrientation = modelMatrixAstroProta[3];
 	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
 		glm::vec3(1, 0, 0));*/
 
@@ -1914,8 +1940,8 @@ void applicationLoop() {
 				if (it != jt
 						&& testSphereSphereIntersection(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					//std::cout << "Colision " << it->first << " with "
+					//		<< jt->first << std::endl;
 					isCollision = true;
 				}
 			}
@@ -1933,8 +1959,8 @@ void applicationLoop() {
 			for (; jt != collidersOBB.end(); jt++) {
 				if (testSphereOBox(std::get<0>(it->second),
 						std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					//std::cout << "Colision " << it->first << " with "
+					//		<< jt->first << std::endl;
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first,
 							isCollision);
@@ -1961,10 +1987,31 @@ void applicationLoop() {
 				if (!colIt->second)
 					addOrUpdateColliders(collidersOBB, jt->first);
 				else {
-					if (jt->first.compare("mayow") == 0)
+					if (jt->first.compare("mayow") == 0) {
 						//modelMatrixMayow = std::get<1>(jt->second);
-					if (jt->first.compare("astroProta") == 0)
+						/*std::cout << "Colisionó de " << colIt->first << " with "
+							<< jt->first << std::endl;*/
+
+						enemigo1.respawn = true;
+						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+
+						if (colIt->first.compare("mayow") == 0) {
+							std::cout << "angulo es: %.2f " << enemigo1.faceDirection(enemigo1.calculaReaparicion(modelMatrixAstroProta[3], astroInitialOrientation)) << std::endl;
+							modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, enemigo1.faceDirection(enemigo1.calculaReaparicion(modelMatrixAstroProta[3], astroInitialOrientation)), glm::vec3(0, 1, 0));
+							modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, -astroPosition);
+							playerRespawn = true;
+						}
+
+						
+					}
+					if (jt->first.compare("astroProta") == 0) {
+
 						modelMatrixAstroProta = std::get<1>(jt->second);
+						
+							
+
+					}
+						
 					/*if (jt->first.compare("dart") == 0)
 						modelMatrixDart = std::get<1>(jt->second);*/
 				}
@@ -2203,17 +2250,6 @@ void renderScene(bool renderParticles) {
 	astroProta.setAnimationIndex(animationIndex);
 	astroProta.render(modelMatrixAstroBody);
 	glEnable(GL_CULL_FACE);
-
-	///**********
-	// * Update the position with alpha objects
-	// */
-	//// Update the aircraft
-	//blendingUnsorted.find("aircraft")->second = glm::vec3(
-	//		modelMatrixAircraft[3]);
-	//// Update the lambo
-	//blendingUnsorted.find("lambo")->second = glm::vec3(modelMatrixLambo[3]);
-	//// Update the helicopter
-	//blendingUnsorted.find("heli")->second = glm::vec3(modelMatrixHeli[3]);
 
 	///**********
 	// * Sorter with alpha objects
