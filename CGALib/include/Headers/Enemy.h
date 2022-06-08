@@ -18,7 +18,7 @@
 class Enemy
 {
 	public:
-		float distanceToPersonaje = 1000.0f;
+		float distanceToPersonaje = 100.0f;
 		float velocidad = 0.06f;
 		glm::vec3 direccion = glm::vec3(0.0f);
 		bool cambiaVelocidad = false;
@@ -77,13 +77,16 @@ class Enemy
 			direccion = matrixEnemigo[3];
 		}
 
-		float productoPunto(glm::vec3 a, glm::vec3 b) {
+		float anguloEntreVectores(glm::vec3 a, glm::vec3 b) {
 			float res;
 
-			res = a.x * b.x + a.z * b.z;
+			res = (float)acos((a.x * b.x + a.z * b.z)/ (sqrt(a.x*a.x + a.z*a.z) * sqrt(b.x*b.x + b.z*b.z)));
 
 			return res;
 		}
 
+		void setDistance(float x) {
+			distanceToPersonaje = x;
+		}
 
 };
