@@ -175,7 +175,7 @@ glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
 //vectors
 glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f,0.0f,0.0f);
-glm::vec3 astroInitialOrientation = glm::vec3(0.0f, 0.0f, 1.0f);
+glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
 
 int animationIndex = 1;
 int animationIndexMayow = 0;
