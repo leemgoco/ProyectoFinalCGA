@@ -181,6 +181,7 @@ glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
+glm::mat4 defaultMatrix = glm::mat4(1.0f);
 
 //vectors
 glm::vec3 astroPosition;
@@ -206,6 +207,9 @@ bool playerRespawn = false;
 bool enableAction = true;
 bool actionE = false;
 bool enableEscotilla1 = false;
+bool cambianivel2 = false;
+bool cambianivel3 = false;
+bool empiezaJuego = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
 
@@ -325,10 +329,13 @@ bool processInput(bool continueApplication = true);
 void prepareScene();
 void prepareDepthScene();
 void renderScene(bool renderParticles = true);
+void renderScene2(bool renderParticles = true);
+void renderScene3(bool renderParticles = true);
 void cameraMove();
 bool excepCollider(std::string string1, std::string string2);
 void updateBotonCollider(std::map<std::string, bool> collisionDetection);
 void updateEscenario1();
+
 
 void initParticleBuffers() {
 	// Generate the buffers
@@ -1377,7 +1384,7 @@ bool processInput(bool continueApplication) {
 		yaw -= 1;
 	}
 
-	if (playerRespawn == false) {
+	if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
 
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
@@ -1406,8 +1413,7 @@ bool processInput(bool continueApplication) {
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 		}
-		else if (modelSelected
-			== 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		else if (modelSelected== 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
 				glm::vec3(0, 1, 0));
 			animationIndex = 0;
@@ -1464,9 +1470,6 @@ bool processInput(bool continueApplication) {
 		}
 
 	}
-		
-
-
 
 	//************************INTERACCIONES DE COLLIDERS ENEMIGO JUGADOR ******************************/
 
@@ -1475,7 +1478,8 @@ bool processInput(bool continueApplication) {
 
 
 	if (playerRespawn == true) {
-		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, glm::vec3(0.0f, 0.0f, 0.0f));
+		modelMatrixAstroProta = defaultMatrix;
+		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
 		tiempoRespawnProta++;
 		if (tiempoRespawnProta > 50) {
 			playerRespawn = false;
@@ -1939,7 +1943,9 @@ void applicationLoop(){
 		skyboxSphere.render();
 		glCullFace(oldCullFaceMode);
 		glDepthFunc(oldDepthFuncMode);
+
 		renderScene();
+
 		/*******************************************
 		 * Debug to box light box
 		 *******************************************/
@@ -2374,10 +2380,6 @@ void applicationLoop(){
 						if (isCollisionEnemy == true) {
 							enemigo1.respawn = true;
 							modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
-
-							//std::cout << "angulo es: %.2f " << enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation) << std::endl;
-							modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation), glm::vec3(0, 1, 0));
-							modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, -astroPosition);
 							playerRespawn = true;
 							isCollisionEnemy = false;
 						}
