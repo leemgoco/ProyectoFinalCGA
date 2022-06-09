@@ -1421,8 +1421,8 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0.0, 0.0, 0.1));
 			animationIndex = 0;
 
-			std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-			std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 
 
 			cameraMove();
@@ -1443,8 +1443,8 @@ bool processInput(bool continueApplication) {
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
 			animationIndex = 0;
-			std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-			std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 			cameraMove();
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
