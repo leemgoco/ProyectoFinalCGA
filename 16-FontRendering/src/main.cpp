@@ -191,6 +191,9 @@ bool enableCameraSelected = true;
 bool enableAction = true;
 bool actionE = false;
 bool enableEscotilla1 = false;
+bool escenario1 = true;
+bool escenario2 = false;
+//bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
 std::vector<std::vector<bool>> combBotones = { 
