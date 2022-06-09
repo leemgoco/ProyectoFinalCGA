@@ -13,5 +13,19 @@ Debug/*.pdb
 Release/*.pbd
 CGALib/ide/CGALib/Debug/*
 RemoteSystemsTempFiles/
+<<<<<<< HEAD
 .metadata/
 /16-FontRendering/src/main - copia.cpp
+=======
+.metadata/
+.editorconfig
+16-FontRendering/16-FontRendering.vcxproj
+16-FontRendering/16-FontRendering.vcxproj.filters
+16-FontRendering/16-FontRendering.vcxproj.user
+16-FontRendering/ProyectoFinal.aps
+16-FontRendering/resource.h
+CGALib/CGALib.vcxproj
+CGALib/CGALib.vcxproj.filters
+CGALib/CGALib.vcxproj.user
+ComputacionGraficaAvanzada.sln
+>>>>>>> origin/master

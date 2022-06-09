@@ -102,6 +102,7 @@ Box muroFondo;
 Box muroFrontal;
 Box muroIzquierdo;
 Box muroDerecho;
+Box boxReferencia;
 
 ShadowBox *shadowBox;
 
@@ -121,6 +122,15 @@ Model modelFountain;
 // Mayow
 Model mayowModelAnimate;
 Model astroProta;
+Model modelBotones;
+Model modelGenerador;
+Model modelCompuerta;
+Model modelEdCompuerta;
+Model modelPlataforma;
+Model modelPlaCompuerta;
+Model modelRokas;
+Model modelLuzGenerador;
+Model modelLuzBotones;
 
 //Enemigos
 Enemy enemigo1(glm::vec3(13.0f, 0.05f, -5.0f), "enemy1");
@@ -130,8 +140,8 @@ Enemy enemigo3(glm::vec3(13.0f, 0.05f, -5.0f), "enemy3");
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
-GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID,
-		textureLandingPadID;
+GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
+		textureGreenID, texturePurpleID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
 		textureTerrainBID, textureTerrainBlendMapID;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
@@ -176,21 +186,36 @@ glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
 glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f,0.0f,0.0f);
 glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
+glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
+glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
 
 int animationIndex = 1;
 int animationIndexMayow = 0;
 int modelSelected = 2;
 bool enableCountSelected = true;
-int limiteIzquierdo = 132 - 20;
-int limiteDerecho = 132 + 20;
+int limiteIzquierdo = 132 - 80;
+int limiteDerecho = 132 + 85;
 int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
 int tiempoRespawnProta = 0;
 bool enableCameraSelected = true;
 bool playerRespawn = false;
+bool enableAction = true;
+bool actionE = false;
+bool enableEscotilla1 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
+
+std::vector<std::vector<bool>> combBotones = { 
+	{false, false, false}, 
+	{false, false, false},
+	{false, false, false},
+	{false, false, false}};
+
+std::vector<bool> lucesBotones = { false, false, false, false };
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -199,6 +224,16 @@ std::vector<float> lamp1Orientation = { -17.0, -82.67, 23.70 };
 std::vector<glm::vec3> lamp2Position = { glm::vec3(-36.52, 0, -23.24),
 		glm::vec3(-52.73, 0, -3.90) };
 std::vector<float> lamp2Orientation = { 21.37 + 90, -65.0 + 90 };
+
+//Posición botones y plataformas
+std::vector<glm::vec3> botonesPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
+		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12)};
+
+std::vector<glm::vec3> generadorPos = { glm::vec3(10, 0, 10), glm::vec3(
+		20, 0, 10), glm::vec3(30, 0, 10), glm::vec3(40, 0, 10) };
+
+std::vector<glm::vec3> rokasPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
+		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12) };
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = { { "aircraft", glm::vec3(
@@ -237,6 +272,8 @@ bool cambiaVelocidadEnemigo;
 // Colliders
 std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
 std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
+
+//std::map<std::string, bool> collisionDetection;
 
 // Framesbuffers
 GLuint depthMap, depthMapFBO;
@@ -289,6 +326,9 @@ void prepareScene();
 void prepareDepthScene();
 void renderScene(bool renderParticles = true);
 void cameraMove();
+bool excepCollider(std::string string1, std::string string2);
+void updateBotonCollider(std::map<std::string, bool> collisionDetection);
+void updateEscenario1();
 
 void initParticleBuffers() {
 	// Generate the buffers
@@ -534,12 +574,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxLightViewBox.init();
 	boxLightViewBox.setShader(&shaderViewDepth);
 
-	/*modelRock.loadModel("../models/rock/rock.obj");
-	modelRock.setShader(&shaderMulLighting);*/
-
-	/*modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
-	modelAircraft.setShader(&shaderMulLighting);*/
-
 	terrain.init();
 	terrain.setShader(&shaderTerrain);
 	terrain.setPosition(glm::vec3(100, 0, 100));
@@ -547,17 +581,44 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	pivoteCam.init();
 	pivoteCam.setShader(&shaderMulLighting);
 
-	////Lamp models
-	//modelLamp1.loadModel("../models/Street-Lamp-Black/objLamp.obj");
-	//modelLamp1.setShader(&shaderMulLighting);
-	//modelLamp2.loadModel("../models/Street_Light/Lamp.obj");
-	//modelLamp2.setShader(&shaderMulLighting);
-	//modelLampPost2.loadModel("../models/Street_Light/LampPost.obj");
-	//modelLampPost2.setShader(&shaderMulLighting);
+	boxReferencia.init();
+	boxReferencia.setShader(&shaderMulLighting);
 
-	////Grass
-	//modelGrass.loadModel("../models/grass/grassModel.obj");
-	//modelGrass.setShader(&shaderMulLighting);
+	//Rokas
+	modelRokas.loadModel("../models/rokas/Piedras2.obj");
+	modelRokas.setShader(&shaderMulLighting);
+
+	//Generador
+	modelGenerador.loadModel("../models/generadorG/Generador.obj");
+	modelGenerador.setShader(&shaderMulLighting);
+
+	//Botones
+	modelBotones.loadModel("../models/botones/Botones.fbx");
+	modelBotones.setShader(&shaderMulLighting);
+
+	//LucesBotones
+	modelLuzBotones.loadModel("../models/Luces/Luz/LucesGenerador.obj");
+	modelLuzBotones.setShader(&shaderMulLighting);
+
+	//LucesGeneradores
+	modelLuzGenerador.loadModel("../models/Luces/LuzEspacio/LuzEspacio.obj");
+	modelLuzGenerador.setShader(&shaderMulLighting);
+
+	//Compuerta
+	modelCompuerta.loadModel("../models/compuerta/Compuerta.fbx");
+	modelCompuerta.setShader(&shaderMulLighting);
+
+	//Edificio compuerta
+	modelEdCompuerta.loadModel("../models/edCompuerta/EdificioCompuerta.fbx");
+	modelEdCompuerta.setShader(&shaderMulLighting);
+
+	//PlatCompuerta
+	modelPlaCompuerta.loadModel("../models/compuerta/CompuertaBase.fbx");
+	modelPlaCompuerta.setShader(&shaderMulLighting);
+
+	//Plataforma
+	modelPlataforma.loadModel("../models/plataforma/Plataforma.fbx");
+	modelPlataforma.setShader(&shaderMulLighting);
 
 	//Fountain
 	modelFountain.loadModel("../models/fountain/fountain.obj");
@@ -582,7 +643,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	muroIzquierdo.setShader(&shaderMulLighting);
 
 	cameraFP->setPosition(glm::vec3(0.0, 3.0, 4.0));
-	//camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
 	camera->setSensitivity(1.0);
 
@@ -771,6 +831,138 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureYellow("../Textures/Texturas/Amarillo.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureYellow.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureYellow.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureYellowID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureYellowID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureYellow.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureBlue("../Textures/Texturas/Azul.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureBlue.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureBlue.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureBlueID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureBlueID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureBlue.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureOrange("../Textures/Texturas/Naranja.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureOrange.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureOrange.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureOrangeID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureOrangeID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureOrange.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureGreen("../Textures/Texturas/Verde.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureGreen.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureGreen.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureGreenID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureGreenID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureGreen.freeImage(bitmap);
 
 	Texture textureParticlesFountain("../Textures/bluewater.png");
 	bitmap = textureParticlesFountain.loadImage();
@@ -976,10 +1168,6 @@ void destroy() {
 	terrain.destroy();
 
 	// Custom objects Delete
-	/*modelLamp1.destroy();
-	modelLamp2.destroy();
-	modelLampPost2.destroy();
-	modelGrass.destroy();*/
 	modelFountain.destroy();
 	pivoteCam.destroy();
 	astroProta.destroy();
@@ -987,17 +1175,28 @@ void destroy() {
 	muroFondo.destroy();
 	muroFrontal.destroy();
 	muroIzquierdo.destroy();
+	modelBotones.destroy();
+	modelCompuerta.destroy();
+	modelEdCompuerta.destroy();
+	modelGenerador.destroy();
+	modelPlataforma.destroy();
+	modelPlaCompuerta.destroy();
+	modelRokas.destroy();
+	modelLuzBotones.destroy();
+	modelLuzGenerador.destroy();
+	boxReferencia.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteTextures(1, &textureCespedID);
-	glDeleteTextures(1, &textureWallID);
-	glDeleteTextures(1, &textureWindowID);
-	glDeleteTextures(1, &textureHighwayID);
-	glDeleteTextures(1, &textureLandingPadID);
+	glDeleteTextures(1, &textureBlueID);
+	glDeleteTextures(1, &textureGreenID);
+	glDeleteTextures(1, &textureOrangeID);
+	glDeleteTextures(1, &texturePurpleID);
+	glDeleteTextures(1, &textureRedID);
+	glDeleteTextures(1, &textureYellowID);
 	glDeleteTextures(1, &textureTerrainBackgroundID);
 	glDeleteTextures(1, &textureTerrainRID);
 	glDeleteTextures(1, &textureTerrainGID);
@@ -1180,8 +1379,26 @@ bool processInput(bool continueApplication) {
 
 	if (playerRespawn == false) {
 
-		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
+		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
+
+	if (enableAction && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		enableAction = false;
+		actionE = true;
+		animationIndex = 2;
+		std::cout << "actionE:" << actionE << std::endl;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+		enableAction = true;
+		actionE = false;
+	}
+
+	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+	//	animationIndex = 2;
+	//}
+
+	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
 				glm::vec3(0, 1, 0));
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
@@ -1212,6 +1429,12 @@ bool processInput(bool continueApplication) {
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
 
+		animationIndex = 0;
+		
+		//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+		//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+		
+
 
 		}
 		else if (modelSelected
@@ -1227,6 +1450,13 @@ bool processInput(bool continueApplication) {
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
+
+		/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
+		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
+		cameraMove();
+		astroPosition = modelMatrixAstroProta[3];
+		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 			//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
 			//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
@@ -1264,6 +1494,7 @@ bool processInput(bool continueApplication) {
 			glm::vec3(0.0f, 0.0f, 0.0f));
 		tiempo += 1;
 
+
 		if (tiempo > 150) {
 			enemigo1.respawn = false;
 			tiempo = 0.0f;
@@ -1289,16 +1520,19 @@ bool processInput(bool continueApplication) {
 	return continueApplication;
 }
 
-void applicationLoop() {
-	bool psi = true;
+void applicationLoop(){
 
+	bool psi = true;
 	glm::mat4 view;
 	glm::vec3 axis;
 	glm::vec3 target;
 	float angleTarget;
 
+	
 	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-		glm::vec3(0.0f, 5.0f, 0.0f));
+		glm::vec3(0.0f, 5.0f, 23.0f));
+	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+		glm::vec3(0, 0, 1));
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow,
 			glm::vec3(13.0f, 0.05f, -5.0f));
@@ -1322,24 +1556,28 @@ void applicationLoop() {
 
 	//Posicion de los muros
 	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo, 
-		glm::vec3(0.0f, 0.0f, 50.0f));
+		glm::vec3(0.0f, 0.0f, -10.0f));
 	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 
 	modelMatrixMuroFrontal = glm::translate(modelMatrixMuroFrontal,
-		glm::vec3(0.0f, 0.0f, -20.0f));
+		glm::vec3(0.0f, 0.0f, 28.0f));
 	modelMatrixMuroFrontal = glm::scale(modelMatrixMuroFrontal,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 
 	modelMatrixMuroDerecho = glm::translate(modelMatrixMuroDerecho,
-		glm::vec3(35.0f, 0.0f, 15.0f));
+		glm::vec3(85.0f, 0.0f, 15.0f));
 	modelMatrixMuroDerecho = glm::scale(modelMatrixMuroDerecho,
 		glm::vec3(0.0f, 20.0f, 70.0f));
 
 	modelMatrixMuroIzquierdo = glm::translate(modelMatrixMuroIzquierdo,
-		glm::vec3(-35.0f, 0.0f, 15.0f));
+		glm::vec3(-73.0f, 0.0f, 15.0f));
 	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
 		glm::vec3(0.0f, 20.0f, 70.0f));
+
+	modelMatrixCompuerta = glm::translate(modelMatrixCompuerta,
+		glm::vec3(5.9f, 0.0f, 8.8f));
+
 
 	lastTime = TimeManager::Instance().GetTime();
 
@@ -1370,16 +1608,6 @@ void applicationLoop() {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 				(float) screenWidth / (float) screenHeight, 0.1f, 100.0f);
 
-		/*if (modelSelected == 1) {
-			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
-			target = modelMatrixPivoteCam[3];
-		} else {
-			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
-			target = modelMatrixMayow[3];
-		}*/
-
 		if (cameraSelected == 0) {
 			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
@@ -1401,6 +1629,8 @@ void applicationLoop() {
 		else {
 			view = cameraFP->getViewMatrix();
 		}
+
+		updateEscenario1();
 
 		shadowBox->update(screenWidth, screenHeight);
 		glm::vec3 centerBox = shadowBox->getCenter();
@@ -1777,6 +2007,139 @@ void applicationLoop() {
 		//			lampCollider;
 		//}
 
+		//Botones colliders
+		for (int i = 0; i < botonesPos.size(); i++) {
+			AbstractModel::OBB botonCollider;
+			AbstractModel::OBB botonColliderY;
+			AbstractModel::OBB botonColliderB;
+			AbstractModel::OBB botonColliderR;
+			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
+			glm::mat4 modelMatrixColliderBotonY = glm::mat4(1.0);
+			glm::mat4 modelMatrixColliderBotonB = glm::mat4(1.0);
+			glm::mat4 modelMatrixColliderBotonR = glm::mat4(1.0);
+			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+				botonesPos[i]);
+			//Botones colores
+			modelMatrixColliderBotonY = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(-1.0, -0.4, 1.2));
+			modelMatrixColliderBotonB = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(0.0, -0.4, 1.2));
+			modelMatrixColliderBotonR = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(1.0, -0.4, 1.2));
+			//Retomar caja general
+			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+				glm::vec3(0, 0, -0.2));
+			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+					glm::radians(-90.0f), glm::vec3(1, 0, 0));
+			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+				glm::radians(-180.0f), glm::vec3(0, 0, 1));
+			//adds
+			addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
+				botonCollider, modelMatrixColliderBoton);
+			addOrUpdateColliders(collidersOBB, "botonBox-Y" + std::to_string(i),
+				botonColliderY, modelMatrixColliderBotonY);
+			addOrUpdateColliders(collidersOBB, "botonBox-B" + std::to_string(i),
+				botonColliderB, modelMatrixColliderBotonB);
+			addOrUpdateColliders(collidersOBB, "botonBox-R" + std::to_string(i),
+				botonColliderR, modelMatrixColliderBotonR);
+			// Set the orientation of collider before doing the scale
+			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
+			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
+					glm::vec3(1.5, 0.9, 1.0));
+			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+					modelBotones.getObb().c);
+			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
+			botonCollider.e = modelBotones.getObb().e
+					* glm::vec3(1.5, 0.9, 1.0);
+			//Y boton
+			botonColliderY.u = glm::quat_cast(modelMatrixColliderBotonY);
+			modelMatrixColliderBotonY = glm::scale(modelMatrixColliderBotonY,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderY.c = glm::vec3(modelMatrixColliderBotonY[3]);
+			botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			//B boton
+			botonColliderB.u = glm::quat_cast(modelMatrixColliderBotonB);
+			modelMatrixColliderBotonB = glm::scale(modelMatrixColliderBotonB,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderB.c = glm::vec3(modelMatrixColliderBotonB[3]);
+			botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			//R boton
+			botonColliderR.u = glm::quat_cast(modelMatrixColliderBotonR);
+			modelMatrixColliderBotonR = glm::scale(modelMatrixColliderBotonR,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderR.c = glm::vec3(modelMatrixColliderBotonR[3]);
+			botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
+				botonCollider;
+			std::get<0>(collidersOBB.find("botonBox-Y" + std::to_string(i))->second) =
+				botonColliderY;
+			std::get<0>(collidersOBB.find("botonBox-B" + std::to_string(i))->second) =
+				botonColliderB;
+			std::get<0>(collidersOBB.find("botonBox-R" + std::to_string(i))->second) =
+				botonColliderR;
+		}
+
+		//Botones generadores
+		for (int i = 0; i < generadorPos.size(); i++) {
+			AbstractModel::OBB generadorCollider;
+			glm::mat4 modelMatrixColliderGenerador = glm::mat4(1.0);
+			modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
+				generadorPos[i]);
+			//modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+			//		glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "gene-" + std::to_string(i),
+				generadorCollider, modelMatrixColliderGenerador);
+			// Set the orientation of collider before doing the scale
+			generadorCollider.u = glm::quat_cast(modelMatrixColliderGenerador);
+			modelMatrixColliderGenerador = glm::scale(modelMatrixColliderGenerador,
+				glm::vec3(1.0, 1.0, 1.0));
+			modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
+				modelGenerador.getObb().c);
+			generadorCollider.c = glm::vec3(modelMatrixColliderGenerador[3]);
+			generadorCollider.e = modelGenerador.getObb().e
+				* glm::vec3(1.0, 1.0, 1.0);
+			std::get<0>(collidersOBB.find("gene-" + std::to_string(i))->second) =
+				generadorCollider;
+		}
+
+		// Collider de compuerta
+		AbstractModel::OBB compuertaCollider;
+		glm::mat4 modelmatrixColliderCompuerta = glm::mat4(modelMatrixCompuerta);
+		modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
+			glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		// Set the orientation of collider before doing the scale
+		compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
+		modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
+			glm::vec3(0.021, 0.021, 0.021));
+		modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,
+			glm::vec3(modelCompuerta.getObb().c.x,
+				modelCompuerta.getObb().c.y,
+				modelCompuerta.getObb().c.z));
+		compuertaCollider.e = modelCompuerta.getObb().e
+			* glm::vec3(0.021, 0.021, 0.021);
+		compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
+		addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
+			modelMatrixCompuerta);
+
+		// Collider de edificio compuerta
+		AbstractModel::OBB edCompuertaCollider;
+		glm::mat4 modelmatrixColliderEdCompuerta = glm::mat4(modelMatrixEdCompuerta);
+		modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
+			glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		// Set the orientation of collider before doing the scale
+		edCompuertaCollider.u = glm::quat_cast(modelmatrixColliderEdCompuerta);
+		modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
+			glm::vec3(0.021, 0.021, 0.021));
+		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
+			glm::vec3(modelEdCompuerta.getObb().c.x,
+				modelEdCompuerta.getObb().c.y,
+				modelEdCompuerta.getObb().c.z));
+		edCompuertaCollider.e = modelEdCompuerta.getObb().e
+			* glm::vec3(0.021, 0.021, 0.021);
+		edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
+		addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider,
+			modelMatrixEdCompuerta);
+
 		// Collider de mayow
 		AbstractModel::OBB mayowCollider;
 		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
@@ -1823,7 +2186,7 @@ void applicationLoop() {
 			glm::vec3(muroFondo.getObb().c.x,
 				muroFondo.getObb().c.y,
 				muroFondo.getObb().c.z));
-		muroFondoCollider.e = glm::vec3(37.50f, 10.0f, 0.0f);
+		muroFondoCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
 		muroFondoCollider.c = glm::vec3(modelmatrixColliderMuroFondo[3]);
 		addOrUpdateColliders(collidersOBB, "muroFondo", muroFondoCollider,
 			modelMatrixMuroFondo);
@@ -1837,7 +2200,7 @@ void applicationLoop() {
 			glm::vec3(muroFrontal.getObb().c.x,
 				muroFrontal.getObb().c.y,
 				muroFrontal.getObb().c.z));
-		muroFrontalCollider.e = glm::vec3(37.50f, 10.0f, 0.0f);
+		muroFrontalCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
 		muroFrontalCollider.c = glm::vec3(modelmatrixColliderMuroFrontal[3]);
 		addOrUpdateColliders(collidersOBB, "muroFrontal", muroFrontalCollider,
 			modelMatrixMuroFrontal);
@@ -1904,6 +2267,9 @@ void applicationLoop() {
 		/*******************************************
 		 * Test Colisions
 		 *******************************************/
+		bool isCollisionG = false;
+		bool isCollisionEnemy = false;
+
 		for (std::map<std::string,
 				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
 				collidersOBB.begin(); it != collidersOBB.end(); it++) {
@@ -1914,19 +2280,29 @@ void applicationLoop() {
 				if (it != jt
 						&& testOBBOBB(std::get<0>(it->second),
 								std::get<0>(jt->second))) {
-					if (!((it->first.compare("muroFondo") == 0 || it->first.compare("muroFrontal") == 0 ||
-						it->first.compare("muroDerecho") == 0 || it->first.compare("muroIzquierdo") == 0) &&
-						(jt->first.compare("muroFondo") == 0 || jt->first.compare("muroFrontal") == 0 ||
-							jt->first.compare("muroDerecho") == 0 || jt->first.compare("muroIzquierdo") == 0)))
+					if (!(excepCollider(it->first, jt->first)))
 					{
 						std::cout << "Colision " << it->first << " with "
 							<< jt->first << std::endl;
+
+						if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
+							&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
+							isCollisionEnemy = true;
+
+
 						isCollision = true;
+						isCollisionG = true;
 					}
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first,
 					isCollision);
+		}
+
+		if (isCollisionG && actionE && !enableEscotilla1) {
+			std::cout << "EntraISC " << std::endl;
+			updateBotonCollider(collisionDetection);
+			actionE = false;
 		}
 
 		for (std::map<std::string,
@@ -1956,10 +2332,10 @@ void applicationLoop() {
 					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
 					collidersOBB.begin();
 			for (; jt != collidersOBB.end(); jt++) {
-				if (testSphereOBox(std::get<0>(it->second),
-						std::get<0>(jt->second))) {
-					//std::cout << "Colision " << it->first << " with "
-					//		<< jt->first << std::endl;
+				if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
+					std::cout << "Colision " << it->first << " with "
+							<< jt->first << std::endl;
+
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first,
 							isCollision);
@@ -1983,23 +2359,30 @@ void applicationLoop() {
 					addOrUpdateColliders(collidersSBB, it->first);
 			}
 			if (jt != collidersOBB.end()) {
-				if (!colIt->second)
+				if (!colIt->second) {
 					addOrUpdateColliders(collidersOBB, jt->first);
+				}
 				else {
+
+					
 					if (jt->first.compare("mayow") == 0) {
+
 						//modelMatrixMayow = std::get<1>(jt->second);
 						/*std::cout << "Colisionó de " << colIt->first << " with "
 							<< jt->first << std::endl;*/
 
-						enemigo1.respawn = true;
-						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+						if (isCollisionEnemy == true) {
+							enemigo1.respawn = true;
+							modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
 
-						if (colIt->first.compare("mayow") == 0) {
-							std::cout << "angulo es: %.2f " << enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation) << std::endl;
+							//std::cout << "angulo es: %.2f " << enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation) << std::endl;
 							modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, enemigo1.faceDirection(modelMatrixAstroProta[3], astroInitialOrientation), glm::vec3(0, 1, 0));
 							modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, -astroPosition);
 							playerRespawn = true;
+							isCollisionEnemy = false;
 						}
+							
+
 
 						
 					}
@@ -2102,14 +2485,6 @@ void prepareScene() {
 
 	terrain.setShader(&shaderTerrain);
 
-	////Lamp models
-	//modelLamp1.setShader(&shaderMulLighting);
-	//modelLamp2.setShader(&shaderMulLighting);
-	//modelLampPost2.setShader(&shaderMulLighting);
-
-	////Grass
-	//modelGrass.setShader(&shaderMulLighting);
-
 	//Mayow
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
@@ -2125,6 +2500,25 @@ void prepareScene() {
 
 	muroIzquierdo.setShader(&shaderMulLighting);
 
+	modelBotones.setShader(&shaderMulLighting);
+
+	modelCompuerta.setShader(&shaderMulLighting);
+
+	modelEdCompuerta.setShader(&shaderMulLighting);
+
+	modelGenerador.setShader(&shaderMulLighting);
+
+	modelPlataforma.setShader(&shaderMulLighting);
+
+	modelPlaCompuerta.setShader(&shaderMulLighting);
+
+	modelRokas.setShader(&shaderMulLighting);
+
+	boxReferencia.setShader(&shaderMulLighting);
+
+	modelLuzBotones.setShader(&shaderMulLighting);
+
+	modelLuzGenerador.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene() {
@@ -2133,17 +2527,11 @@ void prepareDepthScene() {
 
 	terrain.setShader(&shaderDepth);
 
-	////Lamp models
-	//modelLamp1.setShader(&shaderDepth);
-	//modelLamp2.setShader(&shaderDepth);
-	//modelLampPost2.setShader(&shaderDepth);
-
-	////Grass
-	//modelGrass.setShader(&shaderDepth);
-
 	//Mayow
 	mayowModelAnimate.setShader(&shaderDepth);
+
 	pivoteCam.setShader(&shaderDepth);
+
 	astroProta.setShader(&shaderDepth);
 
 	muroFondo.setShader(&shaderDepth);
@@ -2153,6 +2541,26 @@ void prepareDepthScene() {
 	muroDerecho.setShader(&shaderDepth);
 
 	muroIzquierdo.setShader(&shaderDepth);
+
+	modelBotones.setShader(&shaderDepth);
+
+	modelCompuerta.setShader(&shaderDepth);
+
+	modelEdCompuerta.setShader(&shaderDepth);
+
+	modelGenerador.setShader(&shaderDepth);
+
+	modelPlataforma.setShader(&shaderDepth);
+
+	modelPlaCompuerta.setShader(&shaderDepth);
+
+	modelRokas.setShader(&shaderDepth);
+
+	boxReferencia.setShader(&shaderDepth);
+
+	modelLuzBotones.setShader(&shaderDepth);
+
+	modelLuzGenerador.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2189,7 +2597,7 @@ void renderScene(bool renderParticles) {
 
 	//Muros
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureWallID);
+	//glBindTexture(GL_TEXTURE_2D, textureWallID);
 	//muroFondo.render(modelMatrixMuroFondo);
 
 	//muroFrontal.render(modelMatrixMuroFrontal);
@@ -2204,13 +2612,6 @@ void renderScene(bool renderParticles) {
 	 *******************************************/
 	// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
 	glActiveTexture(GL_TEXTURE0);
-
-
-
-	// Fountain
-	glDisable(GL_CULL_FACE);
-	modelFountain.render(modelMatrixFountain);
-	glEnable(GL_CULL_FACE);
 
 	// Pivote cam
 	glDisable(GL_CULL_FACE);
@@ -2238,6 +2639,87 @@ void renderScene(bool renderParticles) {
 			glm::vec3(0.021, 0.021, 0.021));
 	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
 	mayowModelAnimate.render(modelMatrixMayowBody);
+
+	/*
+	glm::vec3 ejey = glm::normalize(terrain.getNormalTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]));
+	glm::vec3 ejex = glm::normalize(modelMatrixCompuerta[0]);
+	glm::vec3 ejez = glm::normalize(glm::cross(ejex, ejey));
+	ejex = glm::normalize(glm::cross(ejey, ejez));
+	modelMatrixCompuerta[0] = glm::vec4(ejex, 0.0);
+	modelMatrixCompuerta[1] = glm::vec4(ejey, 0.0);
+	modelMatrixCompuerta[2] = glm::vec4(ejez, 0.0);
+	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]);*/
+
+	//glDisable(GL_BLEND);
+	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
+		modelMatrixCompuerta[3][2]) + 2.0f;
+	glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
+	modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
+		glm::vec3(0.0021, 0.0021, 0.0021));
+	modelCompuerta.setAnimationIndex(1);
+	modelCompuerta.render(modelMatrixCompuertaBody);
+
+
+	//modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+	//	glm::vec3(0, 0, 1));
+
+	for (int i = 0; i < botonesPos.size(); i++) {
+		botonesPos[i].y = terrain.getHeightTerrain(botonesPos[i].x,
+			botonesPos[i].z ) + 1.25f;
+		modelBotones.setPosition(botonesPos[i]);
+		modelBotones.setScale(glm::vec3(1.5, 1.0, 1.0));
+		modelBotones.setOrientation(glm::vec3(-90.0, -180.0, 0));
+		boxReferencia.setPosition(glm::vec3(botonesPos[i].x,
+			botonesPos[i].y + 1.5, botonesPos[i].z));
+		modelLuzBotones.setPosition(glm::vec3(botonesPos[i].x,
+			botonesPos[i].y + 0.6, botonesPos[i].z + 1.1));
+		modelLuzBotones.setScale(glm::vec3(1.5, 2.0, 1.0));
+		if (i == 0) {
+			glBindTexture(GL_TEXTURE_2D, textureYellowID);
+			boxReferencia.render();
+		}
+		if (i == 1) {
+			glBindTexture(GL_TEXTURE_2D, textureBlueID);
+			boxReferencia.render();
+		}
+		if (i == 2) {
+			glBindTexture(GL_TEXTURE_2D, textureOrangeID);
+			boxReferencia.render();
+		}
+		if (i == 3) {
+			glBindTexture(GL_TEXTURE_2D, textureGreenID);
+			boxReferencia.render();
+		}
+		modelLuzBotones.render();
+		modelBotones.render();
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+
+	for (int i = 0; i < generadorPos.size(); i++) {
+		generadorPos[i].y = terrain.getHeightTerrain(generadorPos[i].x,
+			generadorPos[i].z);
+		modelGenerador.setPosition(generadorPos[i]);
+		modelGenerador.setScale(glm::vec3(1.0, 1.0, 1.0));
+		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
+		modelGenerador.render();
+	}
+
+	for (int i = 0; i < rokasPos.size(); i++) {
+		rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
+			rokasPos[i].z) + 1.25f;
+		modelRokas.setPosition(rokasPos[i]);
+		modelRokas.setScale(glm::vec3(1.5, 1.0, 1.0));
+		modelRokas.setOrientation(glm::vec3(-90.0, -180.0, 0));
+		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
+		//modelRokas.render();
+	}
+
+	modelPlataforma.render(modelMatrixPlataforma);
+
+	modelEdCompuerta.render(modelMatrixEdCompuerta);
+
+	modelPlaCompuerta.render(modelMatrixPlaCompuerta);
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
@@ -2429,12 +2911,87 @@ void cameraMove() {
 	if (camaraXcoord < posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(0.1, 0, 0.0));
+				glm::vec3(-0.1, 0, 0.0));
 	}
 	if (camaraXcoord > posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
 			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(-0.1, 0, 0.0));
+				glm::vec3(0.1, 0, 0.0));
+	}
+}
+
+bool excepCollider(std::string string1, std::string string2) {
+	if ((string1.compare("muroFondo") == 0 || string1.compare("muroFrontal") == 0 ||
+		string1.compare("muroDerecho") == 0 || string1.compare("muroIzquierdo") == 0) &&
+		(string2.compare("muroFondo") == 0 || string2.compare("muroFrontal") == 0 ||
+			string2.compare("muroDerecho") == 0 || string2.compare("muroIzquierdo") == 0)) {
+		return true;
+	}
+	for (int i = 0; i < botonesPos.size(); i++) {
+		if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
+			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+//if (isCollision) {
+//	std::cout << "collisionDetection " << collisionDetection.find(it->first)->second << " de "
+//		<< it->first << std::endl;
+//}
+
+void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
+	for (int i = 0; i < botonesPos.size(); i++) {
+		if (collisionDetection.find("botonBox-Y" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-Y" + std::to_string(i))->second << " de "
+				<< "botonBox-Y" + std::to_string(i) << std::endl;
+			//std::cout << "previo a update " << combBotones[i][0] << std::endl;
+			combBotones[i][0] = !combBotones[i][0];
+			//std::cout << "despues de update " << combBotones[i][0] << std::endl;
+		}
+		if (collisionDetection.find("botonBox-B" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-B" + std::to_string(i))->second << " de "
+				<< "botonBox-B" + std::to_string(i) << std::endl;
+			combBotones[i][1] = !combBotones[i][1];
+		}
+		if (collisionDetection.find("botonBox-R" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
+				<< "botonBox-R" + std::to_string(i) << std::endl;
+			combBotones[i][2] = !combBotones[i][2];
+		}
+	}
+}
+
+void updateEscenario1() {
+	if (!enableEscotilla1) {
+		if (combBotones[0][0] && !combBotones[0][1] && !combBotones[0][2]) {
+			lucesBotones[0] = true;
+			std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
+		}
+		else {
+			lucesBotones[0] = false;
+		}
+		if (combBotones[2][0] && !combBotones[2][1] && combBotones[2][2]) {
+			lucesBotones[2] = true;
+			std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
+		}
+		else {
+			lucesBotones[2] = false;
+		}
+		if (combBotones[3][0] && combBotones[3][1] && !combBotones[3][2]) {
+			lucesBotones[3] = true;
+			std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
+		}
+		else {
+			lucesBotones[3] = false;
+		}
+		if (lucesBotones[0] && lucesBotones[2] && lucesBotones[3]) {
+			enableEscotilla1 = true;
+			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
+		}
 	}
 }
 
