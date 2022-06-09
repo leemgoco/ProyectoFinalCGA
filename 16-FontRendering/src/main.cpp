@@ -5,6 +5,8 @@
 //std includes
 #include <string>
 #include <iostream>
+#include <ctime>
+#include <windows.h>
 
 // contains new std::shuffle definition
 #include <algorithm>
@@ -64,7 +66,7 @@ int screenHeight;
 
 const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
-GLFWwindow *window;
+GLFWwindow* window;
 
 Shader shader;
 //Shader con skybox
@@ -100,8 +102,9 @@ Box muroFondo;
 Box muroFrontal;
 Box muroIzquierdo;
 Box muroDerecho;
+Box menu;
 
-ShadowBox *shadowBox;
+ShadowBox* shadowBox;
 
 // Models complex instances
 /*
@@ -132,14 +135,16 @@ Enemy enemigo1;
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID,
-		textureLandingPadID;
+textureLandingPadID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
-		textureTerrainBID, textureTerrainBlendMapID;
+textureTerrainBID, textureTerrainBlendMapID;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
 GLuint skyboxTextureID;
+GLuint textureMenuID;
 
 // Modelo para el redener de texto
-FontTypeRendering::FontTypeRendering *modelText;
+FontTypeRendering::FontTypeRendering* modelText;
+FontTypeRendering::FontTypeRendering* modelText2;
 
 GLenum types[6] = {
 GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -174,11 +179,15 @@ glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixMenu = glm::mat4(1.0f);
 
+float aux;
 int animationIndex = 1;
 int animationIndexMayow = 0;
 int modelSelected = 2;
 bool enableCountSelected = true;
+bool fontbandera = 0;
+int banderaCaminar = 0;
 int limiteIzquierdo = 132 - 80;
 int limiteDerecho = 132 + 85;
 int pasado = 0;
@@ -187,6 +196,7 @@ int cameraSelected = 0;
 bool enableCameraSelected = true;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
+int situacion = 1;
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -198,7 +208,7 @@ std::vector<float> lamp2Orientation = { 21.37 + 90, -65.0 + 90 };
 
 //Posición botones y plataformas
 std::vector<glm::vec3> botonesPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
-		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12)};
+		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12) };
 
 std::vector<glm::vec3> generadorPos = { glm::vec3(10, 0, 10), glm::vec3(
 		20, 0, 10), glm::vec3(30, 0, 10), glm::vec3(40, 0, 10) };
@@ -251,7 +261,7 @@ GLuint depthMap, depthMapFBO;
  * OpenAL config
  */
 
-// OpenAL Defines
+ // OpenAL Defines
 #define NUM_BUFFERS 3
 #define NUM_SOURCES 3
 #define NUM_ENVIRONMENTS 1
@@ -275,18 +285,18 @@ ALuint environment[NUM_ENVIRONMENTS];
 // Configs
 ALsizei size, freq;
 ALenum format;
-ALvoid *data;
+ALvoid* data;
 int ch;
 ALboolean loop;
 std::vector<bool> sourcesPlay = { true, true, true };
 
 // Se definen todos las funciones.
-void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
-void keyCallback(GLFWwindow *window, int key, int scancode, int action,
-		int mode);
-void mouseCallback(GLFWwindow *window, double xpos, double ypos);
-void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod);
-void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action,
+	int mode);
+void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseButtonCallback(GLFWwindow* window, int button, int state, int mod);
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void initParticleBuffers();
 void init(int width, int height, std::string strTitle, bool bFullScreen);
 void destroy();
@@ -295,6 +305,7 @@ void prepareScene();
 void prepareDepthScene();
 void renderScene(bool renderParticles = true);
 void cameraMove();
+void CountDown();
 
 void initParticleBuffers() {
 	// Generate the buffers
@@ -307,23 +318,23 @@ void initParticleBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, startTime);
 	glBufferData(GL_ARRAY_BUFFER, nParticles * sizeof(float), NULL,
-			GL_STATIC_DRAW);
+		GL_STATIC_DRAW);
 
 	// Fill the first velocity buffer with random velocities
 	glm::vec3 v(0.0f);
 	float velocity, theta, phi;
-	GLfloat *data = new GLfloat[nParticles * 3];
+	GLfloat* data = new GLfloat[nParticles * 3];
 	for (unsigned int i = 0; i < nParticles; i++) {
 
 		theta = glm::mix(0.0f, glm::pi<float>() / 6.0f,
-				((float) rand() / RAND_MAX));
-		phi = glm::mix(0.0f, glm::two_pi<float>(), ((float) rand() / RAND_MAX));
+			((float)rand() / RAND_MAX));
+		phi = glm::mix(0.0f, glm::two_pi<float>(), ((float)rand() / RAND_MAX));
 
 		v.x = sinf(theta) * cosf(phi);
 		v.y = cosf(theta);
 		v.z = sinf(theta) * sinf(phi);
 
-		velocity = glm::mix(0.6f, 0.8f, ((float) rand() / RAND_MAX));
+		velocity = glm::mix(0.6f, 0.8f, ((float)rand() / RAND_MAX));
 		v = glm::normalize(v) * velocity;
 
 		data[3 * i] = v.x;
@@ -392,7 +403,7 @@ void initParticleBuffersFire() {
 	}
 	// Shuffle them for better looking results
 	//Random::shuffle(initialAge);
-	auto rng = std::default_random_engine { };
+	auto rng = std::default_random_engine{ };
 	std::shuffle(initialAge.begin(), initialAge.end(), rng);
 	glBindBuffer(GL_ARRAY_BUFFER, age[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, size, initialAge.data());
@@ -467,15 +478,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	if (bFullScreen)
 		window = glfwCreateWindow(width, height, strTitle.c_str(),
-				glfwGetPrimaryMonitor(), nullptr);
+			glfwGetPrimaryMonitor(), nullptr);
 	else
 		window = glfwCreateWindow(width, height, strTitle.c_str(), nullptr,
-				nullptr);
+			nullptr);
 
 	if (window == nullptr) {
 		std::cerr
-				<< "Error to create GLFW window, you can try download the last version of your video card that support OpenGL 3.3+"
-				<< std::endl;
+			<< "Error to create GLFW window, you can try download the last version of your video card that support OpenGL 3.3+"
+			<< std::endl;
 		destroy();
 		exit(-1);
 	}
@@ -508,18 +519,18 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shader.initialize("../Shaders/colorShader.vs", "../Shaders/colorShader.fs");
 	shaderSkybox.initialize("../Shaders/skyBox.vs", "../Shaders/skyBox_fog.fs");
 	shaderMulLighting.initialize(
-			"../Shaders/iluminacion_textura_animation_shadow.vs",
-			"../Shaders/multipleLights_shadow.fs");
+		"../Shaders/iluminacion_textura_animation_shadow.vs",
+		"../Shaders/multipleLights_shadow.fs");
 	shaderTerrain.initialize("../Shaders/terrain_shadow.vs",
-			"../Shaders/terrain_shadow.fs");
+		"../Shaders/terrain_shadow.fs");
 	shaderParticlesFountain.initialize("../Shaders/particlesFountain.vs",
-			"../Shaders/particlesFountain.fs");
+		"../Shaders/particlesFountain.fs");
 	shaderParticlesFire.initialize("../Shaders/particlesFire.vs",
-			"../Shaders/particlesFire.fs", { "Position", "Velocity", "Age" });
+		"../Shaders/particlesFire.fs", { "Position", "Velocity", "Age" });
 	shaderViewDepth.initialize("../Shaders/texturizado.vs",
-			"../Shaders/texturizado_depth_view.fs");
+		"../Shaders/texturizado_depth_view.fs");
 	shaderDepth.initialize("../Shaders/shadow_mapping_depth.vs",
-			"../Shaders/shadow_mapping_depth.fs");
+		"../Shaders/shadow_mapping_depth.fs");
 
 	// Inicializacion de los objetos.
 	skyboxSphere.init();
@@ -559,6 +570,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//modelGrass.loadModel("../models/grass/grassModel.obj");
 	//modelGrass.setShader(&shaderMulLighting);
 
+	//Menu
+
+	//menu.loadModel("../models/menu/menu.obj");
+	menu.init();
+	menu.setShader(&shaderMulLighting);
+	menu.setScale(glm::vec3(3.0f, 1.0f, 2.1f));
 	//Rokas
 	modelRokas.loadModel("../models/rokas/Piedras2.obj");
 	modelRokas.setShader(&shaderMulLighting);
@@ -611,8 +628,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	// Definimos el tamanio de la imagen
 	int imageWidth, imageHeight;
-	FIBITMAP *bitmap;
-	unsigned char *data;
+	FIBITMAP* bitmap;
+	unsigned char* data;
 
 	// Carga de texturas para el skybox
 	Texture skyboxTexture = Texture("");
@@ -627,13 +644,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	for (int i = 0; i < ARRAY_SIZE_IN_ELEMENTS(types); i++) {
 		skyboxTexture = Texture(fileNames[i]);
-		FIBITMAP *bitmap = skyboxTexture.loadImage(true);
-		unsigned char *data = skyboxTexture.convertToData(bitmap, imageWidth,
-				imageHeight);
+		FIBITMAP* bitmap = skyboxTexture.loadImage(true);
+		unsigned char* data = skyboxTexture.convertToData(bitmap, imageWidth,
+			imageHeight);
 		if (data) {
 			glTexImage2D(types[i], 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		} else
+				GL_BGRA, GL_UNSIGNED_BYTE, data);
+		}
+		else
 			std::cout << "Failed to load texture" << std::endl;
 		skyboxTexture.freeImage(bitmap);
 	}
@@ -644,7 +662,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainBackground.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainBackground.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBackgroundID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -662,10 +680,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainBackground.freeImage(bitmap);
@@ -693,10 +712,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainR.freeImage(bitmap);
@@ -724,10 +744,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainG.freeImage(bitmap);
@@ -755,10 +776,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainB.freeImage(bitmap);
@@ -769,7 +791,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bitmap = textureTerrainBlendMap.loadImage(true);
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainBlendMap.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBlendMapID);
 	// Enlazar esa textura a una tipo de textura de 2D.
@@ -787,10 +809,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
 		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
@@ -798,7 +821,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	Texture textureParticlesFountain("../Textures/bluewater.png");
 	bitmap = textureParticlesFountain.loadImage();
 	data = textureParticlesFountain.convertToData(bitmap, imageWidth,
-			imageHeight);
+		imageHeight);
 	glGenTextures(1, &textureParticleFountainID);
 	glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);
 	// set the texture wrapping parameters
@@ -809,11 +832,46 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	if (data) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	textureParticlesFountain.freeImage(bitmap);
+
+	//TEXTURA MENU
+	// Definiendo la textura a utilizar
+	Texture textureMenu("../Textures/menu.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureMenu.loadImage();
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureMenu.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureMenuID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureMenuID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureMenu.freeImage(bitmap);
 
 	Texture textureParticleFire("../Textures/fire.png");
 	bitmap = textureParticleFire.loadImage();
@@ -828,14 +886,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	if (data) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-		GL_BGRA, GL_UNSIGNED_BYTE, data);
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
+	}
+	else
 		std::cout << "Failed to load texture" << std::endl;
 	textureParticleFire.freeImage(bitmap);
 
 	std::uniform_real_distribution<float> distr01 =
-			std::uniform_real_distribution<float>(0.0f, 1.0f);
+		std::uniform_real_distribution<float>(0.0f, 1.0f);
 	std::mt19937 generator;
 	std::random_device rd;
 	generator.seed(rd());
@@ -849,7 +908,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glBindTexture(GL_TEXTURE_1D, texId);
 	glTexStorage1D(GL_TEXTURE_1D, 1, GL_R32F, size);
 	glTexSubImage1D(GL_TEXTURE_1D, 0, 0, size, GL_RED, GL_FLOAT,
-			randData.data());
+		randData.data());
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -859,9 +918,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderParticlesFire.setFloat("ParticleLifetime", particleLifetime);
 	shaderParticlesFire.setFloat("ParticleSize", particleSize);
 	shaderParticlesFire.setVectorFloat3("Accel",
-			glm::value_ptr(glm::vec3(0.0f, 0.1f, 0.0f)));
+		glm::value_ptr(glm::vec3(0.0f, 0.1f, 0.0f)));
 	shaderParticlesFire.setVectorFloat3("Emitter",
-			glm::value_ptr(glm::vec3(0.0f)));
+		glm::value_ptr(glm::vec3(0.0f)));
 
 	glm::mat3 basis;
 	glm::vec3 u, v, n;
@@ -875,7 +934,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	basis[1] = glm::normalize(v);
 	basis[2] = glm::normalize(n);
 	shaderParticlesFire.setMatrix3("EmitterBasis", 1, false,
-			glm::value_ptr(basis));
+		glm::value_ptr(basis));
 
 	/*******************************************
 	 * Inicializacion de los buffers de la fuente
@@ -895,7 +954,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH,
-			SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -904,7 +963,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-			depthMap, 0);
+		depthMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -912,66 +971,70 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	/*******************************************
 	 * OpenAL init
 	 *******************************************/
-	//alutInit(0, nullptr);
-	//alListenerfv(AL_POSITION, listenerPos);
-	//alListenerfv(AL_VELOCITY, listenerVel);
-	//alListenerfv(AL_ORIENTATION, listenerOri);
-	//alGetError(); // clear any error messages
-	//if (alGetError() != AL_NO_ERROR) {
-	//	printf("- Error creating buffers !!\n");
-	//	exit(1);
-	//} else {
-	//	printf("init() - No errors yet.");
-	//}
-	//// Config source 0
-	//// Generate buffers, or else no sound will happen!
-	//alGenBuffers(NUM_BUFFERS, buffer);
-	//buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
-	//buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
-	//buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
-	//int errorAlut = alutGetError();
-	//if (errorAlut != ALUT_ERROR_NO_ERROR) {
-	//	printf("- Error open files with alut %d !!\n", errorAlut);
-	//	exit(2);
-	//}
+	 //alutInit(0, nullptr);
+	 //alListenerfv(AL_POSITION, listenerPos);
+	 //alListenerfv(AL_VELOCITY, listenerVel);
+	 //alListenerfv(AL_ORIENTATION, listenerOri);
+	 //alGetError(); // clear any error messages
+	 //if (alGetError() != AL_NO_ERROR) {
+	 //	printf("- Error creating buffers !!\n");
+	 //	exit(1);
+	 //} else {
+	 //	printf("init() - No errors yet.");
+	 //}
+	 //// Config source 0
+	 //// Generate buffers, or else no sound will happen!
+	 //alGenBuffers(NUM_BUFFERS, buffer);
+	 //buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
+	 //buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
+	 //buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
+	 //int errorAlut = alutGetError();
+	 //if (errorAlut != ALUT_ERROR_NO_ERROR) {
+	 //	printf("- Error open files with alut %d !!\n", errorAlut);
+	 //	exit(2);
+	 //}
 
-	//alGetError(); /* clear error */
-	//alGenSources(NUM_SOURCES, source);
+	 //alGetError(); /* clear error */
+	 //alGenSources(NUM_SOURCES, source);
 
-	//if (alGetError() != AL_NO_ERROR) {
-	//	printf("- Error creating sources !!\n");
-	//	exit(2);
-	//} else {
-	//	printf("init - no errors after alGenSources\n");
-	//}
-	//alSourcef(source[0], AL_PITCH, 1.0f);
-	//alSourcef(source[0], AL_GAIN, 3.0f);
-	//alSourcefv(source[0], AL_POSITION, source0Pos);
-	//alSourcefv(source[0], AL_VELOCITY, source0Vel);
-	//alSourcei(source[0], AL_BUFFER, buffer[0]);
-	//alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	//alSourcef(source[0], AL_MAX_DISTANCE, 2000);
+	 //if (alGetError() != AL_NO_ERROR) {
+	 //	printf("- Error creating sources !!\n");
+	 //	exit(2);
+	 //} else {
+	 //	printf("init - no errors after alGenSources\n");
+	 //}
+	 //alSourcef(source[0], AL_PITCH, 1.0f);
+	 //alSourcef(source[0], AL_GAIN, 3.0f);
+	 //alSourcefv(source[0], AL_POSITION, source0Pos);
+	 //alSourcefv(source[0], AL_VELOCITY, source0Vel);
+	 //alSourcei(source[0], AL_BUFFER, buffer[0]);
+	 //alSourcei(source[0], AL_LOOPING, AL_TRUE);
+	 //alSourcef(source[0], AL_MAX_DISTANCE, 2000);
 
-	//alSourcef(source[1], AL_PITCH, 1.0f);
-	//alSourcef(source[1], AL_GAIN, 3.0f);
-	//alSourcefv(source[1], AL_POSITION, source1Pos);
-	//alSourcefv(source[1], AL_VELOCITY, source1Vel);
-	//alSourcei(source[1], AL_BUFFER, buffer[1]);
-	//alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	//alSourcef(source[1], AL_MAX_DISTANCE, 2000);
+	 //alSourcef(source[1], AL_PITCH, 1.0f);
+	 //alSourcef(source[1], AL_GAIN, 3.0f);
+	 //alSourcefv(source[1], AL_POSITION, source1Pos);
+	 //alSourcefv(source[1], AL_VELOCITY, source1Vel);
+	 //alSourcei(source[1], AL_BUFFER, buffer[1]);
+	 //alSourcei(source[1], AL_LOOPING, AL_TRUE);
+	 //alSourcef(source[1], AL_MAX_DISTANCE, 2000);
 
-	//alSourcef(source[2], AL_PITCH, 1.0f);
-	//alSourcef(source[2], AL_GAIN, 0.3f);
-	//alSourcefv(source[2], AL_POSITION, source2Pos);
-	//alSourcefv(source[2], AL_VELOCITY, source2Vel);
-	//alSourcei(source[2], AL_BUFFER, buffer[2]);
-	//alSourcei(source[2], AL_LOOPING, AL_TRUE);
-	//alSourcef(source[2], AL_MAX_DISTANCE, 500);
+	 //alSourcef(source[2], AL_PITCH, 1.0f);
+	 //alSourcef(source[2], AL_GAIN, 0.3f);
+	 //alSourcefv(source[2], AL_POSITION, source2Pos);
+	 //alSourcefv(source[2], AL_VELOCITY, source2Vel);
+	 //alSourcei(source[2], AL_BUFFER, buffer[2]);
+	 //alSourcei(source[2], AL_LOOPING, AL_TRUE);
+	 //alSourcef(source[2], AL_MAX_DISTANCE, 500);
 
-	// Se inicializa el modelo de texeles.
+	 // Se inicializa el modelo de texeles.
 	modelText = new FontTypeRendering::FontTypeRendering(screenWidth,
-			screenHeight);
+		screenHeight);
 	modelText->Initialize();
+
+	modelText2 = new FontTypeRendering::FontTypeRendering(screenWidth,
+		screenHeight);
+	modelText2->Initialize();
 }
 
 void destroy() {
@@ -1017,6 +1080,7 @@ void destroy() {
 	modelPlataforma.destroy();
 	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
+	menu.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1035,7 +1099,9 @@ void destroy() {
 	glDeleteTextures(1, &textureTerrainBlendMapID);
 	glDeleteTextures(1, &textureParticleFountainID);
 	glDeleteTextures(1, &textureParticleFireID);
+	glDeleteTextures(1, &textureMenuID);
 
+	
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glDeleteTextures(1, &skyboxTextureID);
@@ -1058,14 +1124,14 @@ void destroy() {
 	glDeleteVertexArrays(1, &VAOParticlesFire);
 }
 
-void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes) {
+void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes) {
 	screenWidth = widthRes;
 	screenHeight = heightRes;
 	glViewport(0, 0, widthRes, heightRes);
 }
 
-void keyCallback(GLFWwindow *window, int key, int scancode, int action,
-		int mode) {
+void keyCallback(GLFWwindow* window, int key, int scancode, int action,
+	int mode) {
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
@@ -1075,20 +1141,20 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
 	}
 }
 
-void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
+void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 	offsetX = xpos - lastMousePosX;
 	offsetY = ypos - lastMousePosY;
 	lastMousePosX = xpos;
 	lastMousePosY = ypos;
 }
 
-void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	distanceFromTarget -= yoffset;
 	camera->setDistanceFromTarget(distanceFromTarget);
 	lastDistanceFromTarget = distanceFromTarget;
 }
 
-void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
+void mouseButtonCallback(GLFWwindow* window, int button, int state, int mod) {
 	if (state == GLFW_PRESS) {
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_RIGHT:
@@ -1119,7 +1185,7 @@ bool processInput(bool continueApplication) {
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
 		std::cout << "Esta presente el joystick" << std::endl;
 		int axesCount, buttonCount;
-		const float *axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
 		std::cout << "Número de ejes disponibles :=>" << axesCount << std::endl;
 		std::cout << "Left Stick X axis: " << axes[0] << std::endl;
 		std::cout << "Left Stick Y axis: " << axes[1] << std::endl;
@@ -1130,12 +1196,12 @@ bool processInput(bool continueApplication) {
 
 		if (fabs(axes[1]) > 0.2) {
 			modelMatrixMayow = glm::translate(modelMatrixMayow,
-					glm::vec3(0, 0, -axes[1] * 0.1));
+				glm::vec3(0, 0, -axes[1] * 0.1));
 			animationIndex = 0;
 		}
 		if (fabs(axes[0]) > 0.2) {
 			modelMatrixMayow = glm::rotate(modelMatrixMayow,
-					glm::radians(-axes[0] * 0.5f), glm::vec3(0, 1, 0));
+				glm::radians(-axes[0] * 0.5f), glm::vec3(0, 1, 0));
 			animationIndex = 0;
 		}
 
@@ -1146,10 +1212,10 @@ bool processInput(bool continueApplication) {
 			camera->mouseMoveCamera(0.0, axes[4], deltaTime);
 		}
 
-		const unsigned char *buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1,
-				&buttonCount);
+		const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1,
+			&buttonCount);
 		std::cout << "Número de botones disponibles :=>" << buttonCount
-				<< std::endl;
+			<< std::endl;
 		if (buttons[0] == GLFW_PRESS)
 			std::cout << "Se presiona x" << std::endl;
 
@@ -1217,22 +1283,28 @@ bool processInput(bool continueApplication) {
 		yaw -= 1;
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		animationIndex = 2;
+	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+	//	animationIndex = 2;
+	//}
+
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+		modelMatrixMenu = glm::translate(modelMatrixMenu,
+			glm::vec3(100.0f, 100.0f, 100.0f));
+		fontbandera = 1;		
 	}
 
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
-				glm::vec3(0, 1, 0));
+			glm::vec3(0, 1, 0));
 		animationIndex = 0;
 		astroPosition = modelMatrixAstroProta[3];
 		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
 		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 	} else if (modelSelected
-			== 2&& glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		== 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
-				glm::vec3(0, 1, 0));
+			glm::vec3(0, 1, 0));
 		animationIndex = 0;
 		astroPosition = modelMatrixAstroProta[3];
 		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
@@ -1241,12 +1313,36 @@ bool processInput(bool continueApplication) {
 	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
-				glm::vec3(0.0, 0.0, 0.1));
+			glm::vec3(0.0, 0.0, 0.1));
+		aux += 0.01f;
+		//std::cout << aux << std::endl;
+		if (aux > 0.1f)
+			banderaCaminar = 1;
+		if (aux > 5.0f && banderaCaminar == 1) 
+			banderaCaminar = 2;
+		if (aux > 8.0f && banderaCaminar == 2)
+			banderaCaminar = 3;
+		if (aux > 12.0f && banderaCaminar == 3)
+			banderaCaminar = 4;
+		if (aux > 16.0f && banderaCaminar == 4)
+			banderaCaminar = 5;
+		if (aux > 20.0f && banderaCaminar == 5)
+			banderaCaminar = 6;
+		if (aux > 23.0f && banderaCaminar == 6)
+			banderaCaminar = 7;
+		if (aux > 26.0f && banderaCaminar == 7)
+			banderaCaminar = 8;
+		if (aux > 29.0f && banderaCaminar == 8)
+			banderaCaminar = 9;
+		if (aux > 32.0f && banderaCaminar == 9)
+			banderaCaminar = 10;
+		if (aux > 35.0f && banderaCaminar == 10)
+			banderaCaminar = 11;
 		animationIndex = 0;
-		
+
 		//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
 		//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-		
+
 
 		cameraMove();
 		astroPosition = modelMatrixAstroProta[3];
@@ -1259,15 +1355,15 @@ bool processInput(bool continueApplication) {
 		//float posMayow = mayowModelAnimate.getPosition()[3]
 		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
 		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-    
+
 	} else if (modelSelected
-			== 2&& glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		== 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
-				glm::vec3(0.0, 0.0, -0.1));
+			glm::vec3(0.0, 0.0, -0.1));
 		animationIndex = 0;
 
-		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
+		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
 		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 		cameraMove();
 		astroPosition = modelMatrixAstroProta[3];
@@ -1296,7 +1392,7 @@ bool processInput(bool continueApplication) {
 
 
 	bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-	if(!isJump && keySpaceStatus){
+	if (!isJump && keySpaceStatus) {
 		isJump = true;
 		startTimeJump = currTime;
 		tmv = 0;
@@ -1316,34 +1412,35 @@ void applicationLoop() {
 	glm::vec3 axis;
 	glm::vec3 target;
 	float angleTarget;
+	char vw;
 
-	
 	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 		glm::vec3(0.0f, 5.0f, 23.0f));
 	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 		glm::vec3(0, 0, 1));
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow,
-			glm::vec3(13.0f, 0.05f, -5.0f));
+		glm::vec3(13.0f, 0.05f, -5.0f));
 
 	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
 	//		glm::vec3(0, 1, 0));
 
-
+	modelMatrixMenu = glm::translate(modelMatrixMenu,
+		glm::vec3(0.0f, 0.0f, 0.0f));
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
 	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
 		glm::vec3(1, 0, 0));*/
 
 	modelMatrixFountain = glm::translate(modelMatrixFountain,
-			glm::vec3(5.0, 0.0, -40.0));
+		glm::vec3(5.0, 0.0, -40.0));
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(
-			modelMatrixFountain[3][0], modelMatrixFountain[3][2]) + 0.2;
+		modelMatrixFountain[3][0], modelMatrixFountain[3][2]) + 0.2;
 	modelMatrixFountain = glm::scale(modelMatrixFountain,
-			glm::vec3(10.0f, 10.0f, 10.0f));
+		glm::vec3(10.0f, 10.0f, 10.0f));
 
 	//Posicion de los muros
-	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo, 
+	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo,
 		glm::vec3(0.0f, 0.0f, -10.0f));
 	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
 		glm::vec3(75.0f, 20.0f, 0.0f));
@@ -1394,7 +1491,7 @@ void applicationLoop() {
 		std::map<std::string, bool> collisionDetection;
 
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
-				(float) screenWidth / (float) screenHeight, 0.1f, 100.0f);
+			(float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 
 		/*if (modelSelected == 1) {
 			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
@@ -1419,7 +1516,7 @@ void applicationLoop() {
 				angleTarget = -angleTarget;
 			camera->setCameraTarget(target);
 			camera->setAngleTarget(angleTarget);
-			
+
 			camera->updateCamera();
 			view = camera->getViewMatrix();
 
@@ -1433,7 +1530,7 @@ void applicationLoop() {
 
 		// Projection light shadow mapping
 		glm::mat4 lightProjection = glm::mat4(1.0f), lightView = glm::mat4(
-				1.0f);
+			1.0f);
 		glm::mat4 lightSpaceMatrix;
 
 		lightProjection[0][0] = 2.0f / shadowBox->getWidth();
@@ -1442,12 +1539,12 @@ void applicationLoop() {
 		lightProjection[3][3] = 1.0f;
 
 		lightView = glm::lookAt(centerBox,
-				centerBox + glm::normalize(-lightPos),
-				glm::vec3(0.0, 1.0, 0.0));
+			centerBox + glm::normalize(-lightPos),
+			glm::vec3(0.0, 1.0, 0.0));
 
 		lightSpaceMatrix = lightProjection * lightView;
 		shaderDepth.setMatrix4("lightSpaceMatrix", 1, false,
-				glm::value_ptr(lightSpaceMatrix));
+			glm::value_ptr(lightSpaceMatrix));
 
 		// Settea la matriz de vista y projection al shader con solo color
 		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
@@ -1455,41 +1552,41 @@ void applicationLoop() {
 
 		// Settea la matriz de vista y projection al shader con skybox
 		shaderSkybox.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
+			glm::value_ptr(projection));
 		shaderSkybox.setMatrix4("view", 1, false,
-				glm::value_ptr(glm::mat4(glm::mat3(view))));
+			glm::value_ptr(glm::mat4(glm::mat3(view))));
 		// Settea la matriz de vista y projection al shader con multiples luces
 		shaderMulLighting.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
+			glm::value_ptr(projection));
 		shaderMulLighting.setMatrix4("view", 1, false, glm::value_ptr(view));
 		shaderMulLighting.setMatrix4("lightSpaceMatrix", 1, false,
-				glm::value_ptr(lightSpaceMatrix));
+			glm::value_ptr(lightSpaceMatrix));
 		// Settea la matriz de vista y projection al shader con multiples luces
 		shaderTerrain.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
+			glm::value_ptr(projection));
 		shaderTerrain.setMatrix4("view", 1, false, glm::value_ptr(view));
 		shaderTerrain.setMatrix4("lightSpaceMatrix", 1, false,
-				glm::value_ptr(lightSpaceMatrix));
+			glm::value_ptr(lightSpaceMatrix));
 		// Settea la matriz de vista y projection al shader para el fountain
 		shaderParticlesFountain.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
+			glm::value_ptr(projection));
 		shaderParticlesFountain.setMatrix4("view", 1, false,
-				glm::value_ptr(view));
+			glm::value_ptr(view));
 		// Settea la matriz de vista y projection al shader para el fuego
 		shaderParticlesFire.setInt("Pass", 2);
 		shaderParticlesFire.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
+			glm::value_ptr(projection));
 		shaderParticlesFire.setMatrix4("view", 1, false, glm::value_ptr(view));
 
 		/*******************************************
 		 * Propiedades de neblina
 		 *******************************************/
 		shaderMulLighting.setVectorFloat3("fogColor",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+			glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
 		shaderTerrain.setVectorFloat3("fogColor",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+			glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
 		shaderSkybox.setVectorFloat3("fogColor",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+			glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
 
 		/*******************************************
 		 * Propiedades Luz direccional
@@ -1499,13 +1596,13 @@ void applicationLoop() {
 		else
 			shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
 		shaderMulLighting.setVectorFloat3("directionalLight.light.ambient",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+			glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 		shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
+			glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
 		shaderMulLighting.setVectorFloat3("directionalLight.light.specular",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+			glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 		shaderMulLighting.setVectorFloat3("directionalLight.direction",
-				glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
+			glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
 
 		/*******************************************
 		 * Propiedades Luz direccional Terrain
@@ -1515,170 +1612,170 @@ void applicationLoop() {
 		else
 			shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
 		shaderTerrain.setVectorFloat3("directionalLight.light.ambient",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+			glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 		shaderTerrain.setVectorFloat3("directionalLight.light.diffuse",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
+			glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
 		shaderTerrain.setVectorFloat3("directionalLight.light.specular",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+			glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 		shaderTerrain.setVectorFloat3("directionalLight.direction",
-				glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
+			glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
 
 		/*******************************************
 		 * Propiedades SpotLights
 		 *******************************************/
-		/*glm::vec3 spotPosition = glm::vec3(
-				modelMatrixHeli * glm::vec4(0.32437, 0.226053, 1.79149, 1.0));
-		shaderMulLighting.setInt("spotLightCount", 1);
-		shaderTerrain.setInt("spotLightCount", 1);
-		shaderMulLighting.setVectorFloat3("spotLights[0].light.ambient",
-				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
-		shaderMulLighting.setVectorFloat3("spotLights[0].light.diffuse",
-				glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
-		shaderMulLighting.setVectorFloat3("spotLights[0].light.specular",
-				glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
-		shaderMulLighting.setVectorFloat3("spotLights[0].position",
-				glm::value_ptr(spotPosition));
-		shaderMulLighting.setVectorFloat3("spotLights[0].direction",
-				glm::value_ptr(glm::vec3(0, -1, 0)));
-		shaderMulLighting.setFloat("spotLights[0].constant", 1.0);
-		shaderMulLighting.setFloat("spotLights[0].linear", 0.074);
-		shaderMulLighting.setFloat("spotLights[0].quadratic", 0.03);
-		shaderMulLighting.setFloat("spotLights[0].cutOff",
-				cos(glm::radians(12.5f)));
-		shaderMulLighting.setFloat("spotLights[0].outerCutOff",
-				cos(glm::radians(15.0f)));
-		shaderTerrain.setVectorFloat3("spotLights[0].light.ambient",
-				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
-		shaderTerrain.setVectorFloat3("spotLights[0].light.diffuse",
-				glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
-		shaderTerrain.setVectorFloat3("spotLights[0].light.specular",
-				glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
-		shaderTerrain.setVectorFloat3("spotLights[0].position",
-				glm::value_ptr(spotPosition));
-		shaderTerrain.setVectorFloat3("spotLights[0].direction",
-				glm::value_ptr(glm::vec3(0, -1, 0)));
-		shaderTerrain.setFloat("spotLights[0].constant", 1.0);
-		shaderTerrain.setFloat("spotLights[0].linear", 0.074);
-		shaderTerrain.setFloat("spotLights[0].quadratic", 0.03);
-		shaderTerrain.setFloat("spotLights[0].cutOff",
-				cos(glm::radians(12.5f)));
-		shaderTerrain.setFloat("spotLights[0].outerCutOff",
-				cos(glm::radians(15.0f)));*/
+		 /*glm::vec3 spotPosition = glm::vec3(
+				 modelMatrixHeli * glm::vec4(0.32437, 0.226053, 1.79149, 1.0));
+		 shaderMulLighting.setInt("spotLightCount", 1);
+		 shaderTerrain.setInt("spotLightCount", 1);
+		 shaderMulLighting.setVectorFloat3("spotLights[0].light.ambient",
+				 glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+		 shaderMulLighting.setVectorFloat3("spotLights[0].light.diffuse",
+				 glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
+		 shaderMulLighting.setVectorFloat3("spotLights[0].light.specular",
+				 glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
+		 shaderMulLighting.setVectorFloat3("spotLights[0].position",
+				 glm::value_ptr(spotPosition));
+		 shaderMulLighting.setVectorFloat3("spotLights[0].direction",
+				 glm::value_ptr(glm::vec3(0, -1, 0)));
+		 shaderMulLighting.setFloat("spotLights[0].constant", 1.0);
+		 shaderMulLighting.setFloat("spotLights[0].linear", 0.074);
+		 shaderMulLighting.setFloat("spotLights[0].quadratic", 0.03);
+		 shaderMulLighting.setFloat("spotLights[0].cutOff",
+				 cos(glm::radians(12.5f)));
+		 shaderMulLighting.setFloat("spotLights[0].outerCutOff",
+				 cos(glm::radians(15.0f)));
+		 shaderTerrain.setVectorFloat3("spotLights[0].light.ambient",
+				 glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+		 shaderTerrain.setVectorFloat3("spotLights[0].light.diffuse",
+				 glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
+		 shaderTerrain.setVectorFloat3("spotLights[0].light.specular",
+				 glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
+		 shaderTerrain.setVectorFloat3("spotLights[0].position",
+				 glm::value_ptr(spotPosition));
+		 shaderTerrain.setVectorFloat3("spotLights[0].direction",
+				 glm::value_ptr(glm::vec3(0, -1, 0)));
+		 shaderTerrain.setFloat("spotLights[0].constant", 1.0);
+		 shaderTerrain.setFloat("spotLights[0].linear", 0.074);
+		 shaderTerrain.setFloat("spotLights[0].quadratic", 0.03);
+		 shaderTerrain.setFloat("spotLights[0].cutOff",
+				 cos(glm::radians(12.5f)));
+		 shaderTerrain.setFloat("spotLights[0].outerCutOff",
+				 cos(glm::radians(15.0f)));*/
 
-		/*******************************************
+		 /*******************************************
 		 * Propiedades PointLights
 		 *******************************************/
 		shaderMulLighting.setInt("pointLightCount",
-				lamp1Position.size() + lamp2Orientation.size());
+			lamp1Position.size() + lamp2Orientation.size());
 		shaderTerrain.setInt("pointLightCount",
-				lamp1Position.size() + lamp2Orientation.size());
+			lamp1Position.size() + lamp2Orientation.size());
 		for (int i = 0; i < lamp1Position.size(); i++) {
 			glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
 			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					lamp1Position[i]);
+				lamp1Position[i]);
 			matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
-					glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
+				glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
 			matrixAdjustLamp = glm::scale(matrixAdjustLamp,
-					glm::vec3(0.5, 0.5, 0.5));
+				glm::vec3(0.5, 0.5, 0.5));
 			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					glm::vec3(0, 10.3585, 0));
+				glm::vec3(0, 10.3585, 0));
 			glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+				"pointLights[" + std::to_string(i) + "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+				"pointLights[" + std::to_string(i) + "].light.specular",
+				glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].position",
-					glm::value_ptr(lampPosition));
+				"pointLights[" + std::to_string(i) + "].position",
+				glm::value_ptr(lampPosition));
 			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(i) + "].constant", 1.0);
+				"pointLights[" + std::to_string(i) + "].constant", 1.0);
 			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(i) + "].linear", 0.09);
+				"pointLights[" + std::to_string(i) + "].linear", 0.09);
 			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(i) + "].quadratic", 0.01);
+				"pointLights[" + std::to_string(i) + "].quadratic", 0.01);
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+				"pointLights[" + std::to_string(i) + "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+				"pointLights[" + std::to_string(i) + "].light.specular",
+				glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].position",
-					glm::value_ptr(lampPosition));
+				"pointLights[" + std::to_string(i) + "].position",
+				glm::value_ptr(lampPosition));
 			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(i) + "].constant", 1.0);
+				"pointLights[" + std::to_string(i) + "].constant", 1.0);
 			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(i) + "].linear", 0.09);
+				"pointLights[" + std::to_string(i) + "].linear", 0.09);
 			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(i) + "].quadratic", 0.02);
+				"pointLights[" + std::to_string(i) + "].quadratic", 0.02);
 		}
 		for (int i = 0; i < lamp2Position.size(); i++) {
 			glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
 			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					lamp2Position[i]);
+				lamp2Position[i]);
 			matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
-					glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+				glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
 			matrixAdjustLamp = glm::scale(matrixAdjustLamp,
-					glm::vec3(1.0, 1.0, 1.0));
+				glm::vec3(1.0, 1.0, 1.0));
 			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					glm::vec3(0.759521, 5.00174, 0));
+				glm::vec3(0.759521, 5.00174, 0));
 			glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.ambient",
+				glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.specular",
+				glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
 			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].position", glm::value_ptr(lampPosition));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].position", glm::value_ptr(lampPosition));
 			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].constant", 1.0);
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].constant", 1.0);
 			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].linear", 0.09);
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].linear", 0.09);
 			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].quadratic", 0.01);
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].quadratic", 0.01);
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.ambient",
+				glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.specular",
+				glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
 			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].position", glm::value_ptr(lampPosition));
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].position", glm::value_ptr(lampPosition));
 			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].constant", 1.0);
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].constant", 1.0);
 			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].linear", 0.09);
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].linear", 0.09);
 			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].quadratic", 0.02);
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].quadratic", 0.02);
 		}
 
 		/*******************************************
@@ -1697,22 +1794,22 @@ void applicationLoop() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		/*******************************************
-		 * Debug to view the texture view map
-		 *******************************************/
+		* Debug to view the texture view map
+		*******************************************/
 		// reset viewport
 		/*glViewport(0, 0, screenWidth, screenHeight);
-		 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		 // render Depth map to quad for visual debugging
-		 shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		 shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		 glActiveTexture(GL_TEXTURE0);
-		 glBindTexture(GL_TEXTURE_2D, depthMap);
-		 boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
-		 boxViewDepth.render();*/
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// render Depth map to quad for visual debugging
+		shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
+		shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
+		boxViewDepth.render();*/
 
 		/*******************************************
-		 * 2.- We render the normal objects
-		 *******************************************/
+		* 2.- We render the normal objects
+		*******************************************/
 		glViewport(0, 0, screenWidth, screenHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		prepareScene();
@@ -1737,73 +1834,73 @@ void applicationLoop() {
 		glDepthFunc(oldDepthFuncMode);
 		renderScene();
 		/*******************************************
-		 * Debug to box light box
-		 *******************************************/
+		* Debug to box light box
+		*******************************************/
 		/*glm::vec3 front = glm::normalize(-lightPos);
-		 glm::vec3 right = glm::normalize(glm::cross(glm::vec3(0, 1, 0), front));
-		 glm::vec3 up = glm::normalize(glm::cross(front, right));
-		 glDisable(GL_CULL_FACE);
-		 glm::mat4 boxViewTransform = glm::mat4(1.0f);
-		 boxViewTransform = glm::translate(boxViewTransform, centerBox);
-		 boxViewTransform[0] = glm::vec4(right, 0.0);
-		 boxViewTransform[1] = glm::vec4(up, 0.0);
-		 boxViewTransform[2] = glm::vec4(front, 0.0);
-		 boxViewTransform = glm::scale(boxViewTransform, glm::vec3(shadowBox->getWidth(), shadowBox->getHeight(), shadowBox->getLength()));
-		 boxLightViewBox.enableWireMode();
-		 boxLightViewBox.render(boxViewTransform);
-		 glEnable(GL_CULL_FACE);*/
+		glm::vec3 right = glm::normalize(glm::cross(glm::vec3(0, 1, 0), front));
+		glm::vec3 up = glm::normalize(glm::cross(front, right));
+		glDisable(GL_CULL_FACE);
+		glm::mat4 boxViewTransform = glm::mat4(1.0f);
+		boxViewTransform = glm::translate(boxViewTransform, centerBox);
+		boxViewTransform[0] = glm::vec4(right, 0.0);
+		boxViewTransform[1] = glm::vec4(up, 0.0);
+		boxViewTransform[2] = glm::vec4(front, 0.0);
+		boxViewTransform = glm::scale(boxViewTransform, glm::vec3(shadowBox->getWidth(), shadowBox->getHeight(), shadowBox->getLength()));
+		boxLightViewBox.enableWireMode();
+		boxLightViewBox.render(boxViewTransform);
+		glEnable(GL_CULL_FACE);*/
 
-		/*******************************************
-		 * Creacion de colliders
-		 * IMPORTANT do this before interpolations
-		 *******************************************/
+		  /*******************************************
+		   * Creacion de colliders
+		   * IMPORTANT do this before interpolations
+		   *******************************************/
 
-		// Lamps1 colliders
-		//for (int i = 0; i < lamp1Position.size(); i++) {
-		//	AbstractModel::OBB lampCollider;
-		//	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			lamp1Position[i]);
-		//	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
-		//			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
-		//	addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i),
-		//			lampCollider, modelMatrixColliderLamp);
-		//	// Set the orientation of collider before doing the scale
-		//	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-		//	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
-		//			glm::vec3(0.5, 0.5, 0.5));
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			modelLamp1.getObb().c);
-		//	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-		//	lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
-		//	std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) =
-		//			lampCollider;
-		//}
+		   // Lamps1 colliders
+		   //for (int i = 0; i < lamp1Position.size(); i++) {
+		   //	AbstractModel::OBB lampCollider;
+		   //	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
+		   //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		   //			lamp1Position[i]);
+		   //	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
+		   //			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
+		   //	addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i),
+		   //			lampCollider, modelMatrixColliderLamp);
+		   //	// Set the orientation of collider before doing the scale
+		   //	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
+		   //	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
+		   //			glm::vec3(0.5, 0.5, 0.5));
+		   //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		   //			modelLamp1.getObb().c);
+		   //	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
+		   //	lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		   //	std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) =
+		   //			lampCollider;
+		   //}
 
-		// Lamps2 colliders
-		//for (int i = 0; i < lamp2Position.size(); i++) {
-		//	AbstractModel::OBB lampCollider;
-		//	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			lamp2Position[i]);
-		//	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
-		//			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-		//	addOrUpdateColliders(collidersOBB, "lamp2-" + std::to_string(i),
-		//			lampCollider, modelMatrixColliderLamp);
-		//	// Set the orientation of collider before doing the scale
-		//	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-		//	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
-		//			glm::vec3(1.0, 1.0, 1.0));
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			modelLampPost2.getObb().c);
-		//	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-		//	lampCollider.e = modelLampPost2.getObb().e
-		//			* glm::vec3(1.0, 1.0, 1.0);
-		//	std::get<0>(collidersOBB.find("lamp2-" + std::to_string(i))->second) =
-		//			lampCollider;
-		//}
+		   // Lamps2 colliders
+		   //for (int i = 0; i < lamp2Position.size(); i++) {
+		   //	AbstractModel::OBB lampCollider;
+		   //	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
+		   //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		   //			lamp2Position[i]);
+		   //	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
+		   //			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+		   //	addOrUpdateColliders(collidersOBB, "lamp2-" + std::to_string(i),
+		   //			lampCollider, modelMatrixColliderLamp);
+		   //	// Set the orientation of collider before doing the scale
+		   //	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
+		   //	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
+		   //			glm::vec3(1.0, 1.0, 1.0));
+		   //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		   //			modelLampPost2.getObb().c);
+		   //	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
+		   //	lampCollider.e = modelLampPost2.getObb().e
+		   //			* glm::vec3(1.0, 1.0, 1.0);
+		   //	std::get<0>(collidersOBB.find("lamp2-" + std::to_string(i))->second) =
+		   //			lampCollider;
+		   //}
 
-		//Botones colliders
+		   //Botones colliders
 		for (int i = 0; i < botonesPos.size(); i++) {
 			AbstractModel::OBB botonCollider;
 			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
@@ -1812,7 +1909,7 @@ void applicationLoop() {
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
 				glm::vec3(0, 0, -0.2));
 			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-					glm::radians(-90.0f), glm::vec3(1, 0, 0));
+				glm::radians(-90.0f), glm::vec3(1, 0, 0));
 			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
 				glm::radians(-180.0f), glm::vec3(0, 0, 1));
 			/*modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
@@ -1822,12 +1919,12 @@ void applicationLoop() {
 			// Set the orientation of collider before doing the scale
 			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
 			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
-					glm::vec3(1.5, 0.9, 1.0));
+				glm::vec3(1.5, 0.9, 1.0));
 			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
-					modelBotones.getObb().c);
+				modelBotones.getObb().c);
 			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
 			botonCollider.e = modelBotones.getObb().e
-					* glm::vec3(1.5, 0.9, 1.0);
+				* glm::vec3(1.5, 0.9, 1.0);
 			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
 				botonCollider;
 		}
@@ -1897,21 +1994,21 @@ void applicationLoop() {
 		AbstractModel::OBB mayowCollider;
 		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
 		modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
-				glm::radians(-90.0f), glm::vec3(1, 0, 0));
+			glm::radians(-90.0f), glm::vec3(1, 0, 0));
 		// Set the orientation of collider before doing the scale
 		mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
 		modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
-				glm::vec3(0.021, 0.021, 0.021));
+			glm::vec3(0.021, 0.021, 0.021));
 		modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
-				glm::vec3(mayowModelAnimate.getObb().c.x,
-						mayowModelAnimate.getObb().c.y,
-						mayowModelAnimate.getObb().c.z));
+			glm::vec3(mayowModelAnimate.getObb().c.x,
+				mayowModelAnimate.getObb().c.y,
+				mayowModelAnimate.getObb().c.z));
 		mayowCollider.e = mayowModelAnimate.getObb().e
-				* glm::vec3(0.021, 0.021, 0.021)
-				* glm::vec3(0.787401574, 0.787401574, 0.787401574);
+			* glm::vec3(0.021, 0.021, 0.021)
+			* glm::vec3(0.787401574, 0.787401574, 0.787401574);
 		mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
 		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider,
-				modelMatrixMayow);
+			modelMatrixMayow);
 
 		//Collider de astroProta
 		AbstractModel::OBB astroProtaCollider;
@@ -1990,28 +2087,28 @@ void applicationLoop() {
 		 * Render de colliders
 		 *******************************************/
 		for (std::map<std::string,
-				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersOBB.begin(); it != collidersOBB.end(); it++) {
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersOBB.begin(); it != collidersOBB.end(); it++) {
 			glm::mat4 matrixCollider = glm::mat4(1.0);
 			matrixCollider = glm::translate(matrixCollider,
-					std::get<0>(it->second).c);
+				std::get<0>(it->second).c);
 			matrixCollider = matrixCollider
-					* glm::mat4(std::get<0>(it->second).u);
+				* glm::mat4(std::get<0>(it->second).u);
 			matrixCollider = glm::scale(matrixCollider,
-					std::get<0>(it->second).e * 2.0f);
+				std::get<0>(it->second).e * 2.0f);
 			boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
 			boxCollider.enableWireMode();
 			boxCollider.render(matrixCollider);
 		}
 
 		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersSBB.begin(); it != collidersSBB.end(); it++) {
 			glm::mat4 matrixCollider = glm::mat4(1.0);
 			matrixCollider = glm::translate(matrixCollider,
-					std::get<0>(it->second).c);
+				std::get<0>(it->second).c);
 			matrixCollider = glm::scale(matrixCollider,
-					glm::vec3(std::get<0>(it->second).ratio * 2.0f));
+				glm::vec3(std::get<0>(it->second).ratio * 2.0f));
 			sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
 			sphereCollider.enableWireMode();
 			sphereCollider.render(matrixCollider);
@@ -2021,15 +2118,15 @@ void applicationLoop() {
 		 * Test Colisions
 		 *******************************************/
 		for (std::map<std::string,
-				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersOBB.begin(); it != collidersOBB.end(); it++) {
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersOBB.begin(); it != collidersOBB.end(); it++) {
 			bool isCollision = false;
 			for (std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
+				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+				collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
 				if (it != jt
-						&& testOBBOBB(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
+					&& testOBBOBB(std::get<0>(it->second),
+						std::get<0>(jt->second))) {
 					if (!((it->first.compare("muroFondo") == 0 || it->first.compare("muroFrontal") == 0 ||
 						it->first.compare("muroDerecho") == 0 || it->first.compare("muroIzquierdo") == 0) &&
 						(jt->first.compare("muroFondo") == 0 || jt->first.compare("muroFrontal") == 0 ||
@@ -2042,58 +2139,58 @@ void applicationLoop() {
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first,
-					isCollision);
+				isCollision);
 		}
 
 		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersSBB.begin(); it != collidersSBB.end(); it++) {
 			bool isCollision = false;
 			for (std::map<std::string,
-					std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersSBB.begin(); jt != collidersSBB.end(); jt++) {
+				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator jt =
+				collidersSBB.begin(); jt != collidersSBB.end(); jt++) {
 				if (it != jt
-						&& testSphereSphereIntersection(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
+					&& testSphereSphereIntersection(std::get<0>(it->second),
+						std::get<0>(jt->second))) {
 					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+						<< jt->first << std::endl;
 					isCollision = true;
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first,
-					isCollision);
+				isCollision);
 		}
 
 		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersSBB.begin(); it != collidersSBB.end(); it++) {
 			bool isCollision = false;
 			std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.begin();
+				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+				collidersOBB.begin();
 			for (; jt != collidersOBB.end(); jt++) {
 				if (testSphereOBox(std::get<0>(it->second),
-						std::get<0>(jt->second))) {
+					std::get<0>(jt->second))) {
 					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+						<< jt->first << std::endl;
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first,
-							isCollision);
+						isCollision);
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first,
-					isCollision);
+				isCollision);
 		}
 
 		std::map<std::string, bool>::iterator colIt;
 		for (colIt = collisionDetection.begin();
-				colIt != collisionDetection.end(); colIt++) {
+			colIt != collisionDetection.end(); colIt++) {
 			std::map<std::string,
-					std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-					collidersSBB.find(colIt->first);
+				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+				collidersSBB.find(colIt->first);
 			std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.find(colIt->first);
+				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+				collidersOBB.find(colIt->first);
 			if (it != collidersSBB.end()) {
 				if (!colIt->second)
 					addOrUpdateColliders(collidersSBB, it->first);
@@ -2120,25 +2217,62 @@ void applicationLoop() {
 		 * State machines
 		 *******************************************/
 
-		// State machine for the lambo car
-		/*switch (stateDoor) {
-		case 0:
-			dorRotCount += 0.5;
-			if (dorRotCount > 75)
-				stateDoor = 1;
-			break;
-		case 1:
-			dorRotCount -= 0.5;
-			if (dorRotCount < 0) {
-				dorRotCount = 0.0;
-				stateDoor = 0;
-			}
-			break;
-		}*/
-
-		modelText->render("Texto en openGL", -1, 0);
+		 // State machine for the lambo car
+		 /*switch (stateDoor) {
+		 case 0:
+			 dorRotCount += 0.5;
+			 if (dorRotCount > 75)
+				 stateDoor = 1;
+			 break;
+		 case 1:
+			 dorRotCount -= 0.5;
+			 if (dorRotCount < 0) {
+				 dorRotCount = 0.0;
+				 stateDoor = 0;
+			 }
+			 break;
+		 }*/
+		if (fontbandera == 1){
+			modelText->render("Oxigeno", 0.7, 0.95, 15, 0.5, 1.0, 1.0, 1.0);
+			std::cout << situacion << std::endl;
+			switch (situacion)
+			{
+			case 1:
+				if (banderaCaminar == 1) 
+					modelText2->render("100%", 0.7, 0.9, 12, 0.0, 1.0, 0.0, 1.0);
+				if (banderaCaminar == 2) 
+					modelText2->render("90%", 0.7, 0.9, 12, 0.0, 1.0, 0.0, 1.0);
+				if (banderaCaminar == 3) 
+					modelText2->render("80%", 0.7, 0.9, 12, 0.0, 1.0, 0.0, 1.0);
+				if (banderaCaminar == 4)
+					modelText2->render("70%", 0.7, 0.9, 12, 1.0, 1.0, 0.0, 1.0);
+				if (banderaCaminar == 5) 
+					modelText2->render("60%", 0.7, 0.9, 12, 1.0, 1.0, 0.0, 1.0);
+				if (banderaCaminar == 6) 
+					modelText2->render("50%", 0.7, 0.9, 12, 1.0, 1.0, 0.0, 1.0);
+				if (banderaCaminar == 7) 
+					modelText2->render("40%", 0.7, 0.9, 12, 1.0, 0.5, 0.0, 1.0);
+				if (banderaCaminar == 8) 
+					modelText2->render("30%", 0.7, 0.9, 12, 1.0, 0.5, 0.0, 1.0);
+				if (banderaCaminar == 9) 
+					modelText2->render("20%", 0.7, 0.9, 12, 1.0, 0.5, 0.0, 1.0);
+				if (banderaCaminar == 10) 
+					modelText2->render("10%", 0.7, 0.9, 12, 1.0, 0.0, 0.0, 1.0);
+				if (banderaCaminar == 11) {
+					modelText2->render("0%", 0.7, 0.9, 12, 1.0, 0.0, 0.0, 1.0);
+					Sleep(2);
+					situacion = 0;
+				}
+				break;
+			case 0:
+				modelText2->render("Te quedaste sin oxigeno!", -0.5, 0, 30, 1.0, 0.0, 0.0, 1.0);
+				system("Pause");
+				break;
+			}	
+		}
 		glfwSwapBuffers(window);
-
+		//CountDown();
+			
 		/****************************+
 		 * Open AL sound data
 		 */
@@ -2233,6 +2367,8 @@ void prepareScene() {
 	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	modelRokas.setShader(&shaderMulLighting);
+	
+	menu.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene() {
@@ -2275,6 +2411,8 @@ void prepareDepthScene() {
 	modelPlaCompuerta.setShader(&shaderDepth);
 
 	modelRokas.setShader(&shaderDepth);
+
+	menu.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2324,7 +2462,7 @@ void renderScene(bool renderParticles) {
 	/*******************************************
 	 * Custom objects obj
 	 *******************************************/
-	// Forze to enable the unit texture to 0 always ----------------- IMPORTANT
+	 // Forze to enable the unit texture to 0 always ----------------- IMPORTANT
 	glActiveTexture(GL_TEXTURE0);
 
 
@@ -2344,20 +2482,20 @@ void renderScene(bool renderParticles) {
 	 * Custom Anim objects obj
 	 *******************************************/
 	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
-			+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
-					modelMatrixMayow[3][2]);
+		+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
+			modelMatrixMayow[3][2]);
 	tmv = currTime - startTimeJump;
 	if (modelMatrixMayow[3][1]
-			< terrain.getHeightTerrain(modelMatrixMayow[3][0],
-					modelMatrixMayow[3][2])) {
+		< terrain.getHeightTerrain(modelMatrixMayow[3][0],
+			modelMatrixMayow[3][2])) {
 		isJump = false;
 		modelMatrixMayow[3][1] = terrain.getHeightTerrain(
-				modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	}
 	//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody,
-			glm::vec3(0.021, 0.021, 0.021));
+		glm::vec3(0.021, 0.021, 0.021));
 	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
 	mayowModelAnimate.render(modelMatrixMayowBody);
 
@@ -2386,7 +2524,7 @@ void renderScene(bool renderParticles) {
 
 	for (int i = 0; i < botonesPos.size(); i++) {
 		botonesPos[i].y = terrain.getHeightTerrain(botonesPos[i].x,
-			botonesPos[i].z ) + 1.25f;
+			botonesPos[i].z) + 1.25f;
 		modelBotones.setPosition(botonesPos[i]);
 		modelBotones.setScale(glm::vec3(1.5, 1.0, 1.0));
 		modelBotones.setOrientation(glm::vec3(-90.0, -180.0, 0));
@@ -2418,6 +2556,14 @@ void renderScene(bool renderParticles) {
 	modelEdCompuerta.render(modelMatrixEdCompuerta);
 
 	modelPlaCompuerta.render(modelMatrixPlaCompuerta);
+
+	glDisable(GL_CULL_FACE);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureMenuID);
+	menu.setOrientation(glm::vec3(65.0, 0, 0));
+	menu.setPosition(glm::vec3(0.0f, 9.75f, 33.0f));
+	menu.render(modelMatrixMenu);
+	glEnable(GL_CULL_FACE);
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
@@ -2614,6 +2760,28 @@ void renderScene(bool renderParticles) {
 	glEnable(GL_CULL_FACE);
 }
 
+//void wait(short seconds) {
+//	clock_t endwait;
+//	endwait = clock() + seconds * CLOCKS_PER_SEC;
+//	while (clock() < endwait);
+//}
+//
+//void CountDown()
+//{
+//	for (short minutes = 100; minutes >= 0; --minutes)
+//	{
+//		for (short seconds = 59; seconds >= 0; --seconds)
+//		{
+//			if (minutes == 0 && seconds == 0)
+//				
+//			std::cout << minutes << ':' << seconds << std::endl;
+//			//wait(1);
+//			//system("CLS");
+//		}
+//		//wait(60);
+//	}
+//}
+
 void cameraMove() {
 	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 	int camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
@@ -2629,7 +2797,7 @@ void cameraMove() {
 	}
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	init(800, 700, "Window GLFW", false);
 	applicationLoop();
 	destroy();
