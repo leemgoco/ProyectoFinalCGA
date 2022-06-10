@@ -1514,7 +1514,7 @@ bool processInput(bool continueApplication) {
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
 			animationIndex = 0;
-			timer += 0.09f;
+			timer += 0.01f;
 			std::cout << timer << std::endl;
 			if (timer > 0.1f) 
 				banderaCaminar = 1;
@@ -1811,7 +1811,8 @@ void applicationLoop() {
 						glm::vec3(0.0f, 5.0f, 23.0f));
 					modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 						glm::vec3(0, 0, 1));
-					empiezaJuego = false; //linea que genera problemas
+					//linea que genera problemas
+					//empiezaJuego = false; 
 					tiempoRespawnProta++;
 					if (tiempoRespawnProta > 50) {						
 						playerRespawn2 = false;
