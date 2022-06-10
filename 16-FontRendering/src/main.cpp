@@ -2406,7 +2406,7 @@ void inicialMatrixs() {
 
 	//Model escenario 2
 	modelMatrixEscenario2 = glm::translate(modelMatrixEscenario2,
-		glm::vec3(28.0f, 0.0f, -2.0f));
+		glm::vec3(25.5f, 0.0f, -5.0f));
 	modelMatrixEscenario2 = glm::scale(modelMatrixEscenario2,
 		glm::vec3(2.9f, 2.0f, 3.1f));
 	modelMatrixEscenario2 = glm::rotate(modelMatrixEscenario2, glm::radians(-90.0f),
@@ -2414,7 +2414,7 @@ void inicialMatrixs() {
 
 	//Posicion de los muros escenario 2
 	modelMatrixMuroFondo2 = glm::translate(modelMatrixMuroFondo2,
-		glm::vec3(0.0f, 0.0f, -35.0f));
+		glm::vec3(0.0f, 0.0f, -37.0f));
 	modelMatrixMuroFondo2 = glm::scale(modelMatrixMuroFondo2,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 	modelMatrixMuroFrontal2 = glm::translate(modelMatrixMuroFrontal2,
@@ -2422,11 +2422,11 @@ void inicialMatrixs() {
 	modelMatrixMuroFrontal2 = glm::scale(modelMatrixMuroFrontal2,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 	modelMatrixMuroDerecho2 = glm::translate(modelMatrixMuroDerecho2,
-		glm::vec3(56.5f, 0.0f, 15.0f));
+		glm::vec3(53.5f, 0.0f, -10.0f));
 	modelMatrixMuroDerecho2 = glm::scale(modelMatrixMuroDerecho2,
 		glm::vec3(0.0f, 20.0f, 70.0f));
 	modelMatrixMuroIzquierdo2 = glm::translate(modelMatrixMuroIzquierdo2,
-		glm::vec3(-60.0f, 0.0f, 15.0f));
+		glm::vec3(-62.0f, 0.0f, -10.0f));
 	modelMatrixMuroIzquierdo2 = glm::scale(modelMatrixMuroIzquierdo2,
 		glm::vec3(0.0f, 20.0f, 70.0f));
 
