@@ -1691,27 +1691,26 @@ void applicationLoop() {
 			view = cameraFP->getViewMatrix();
 		}
 
-		empiezaJuego = true;
 		if (escenario1) {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
+			if (!empiezaJuego) {
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glViewport(0, 0, screenWidth, screenHeight);
+				shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
+				shaderTexture.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, textureActivaID);
+				shaderTexture.setInt("outTexture", 0);
+				boxMenu.render();
+				glfwSwapBuffers(window);
+				continue;
+			}
+			empiezaJuego = true;
 			preRender1();
 			renderScene();
 			collidersManagmentEs1();
 			soundEscene1();
-		}
-
-		if (!empiezaJuego) {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glViewport(0, 0, screenWidth, screenHeight);
-			shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-			shaderTexture.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, textureActivaID);
-			shaderTexture.setInt("outTexture", 0);
-			boxMenu.render();
-			glfwSwapBuffers(window);
-			continue;
 		}
 
 		/*******************************************
