@@ -104,6 +104,10 @@ Box muroFondo;
 Box muroFrontal;
 Box muroIzquierdo;
 Box muroDerecho;
+Box muroFondo2;
+Box muroFrontal2;
+Box muroIzquierdo2;
+Box muroDerecho2;
 Box boxReferencia;
 Box boxMenu;
 
@@ -134,6 +138,15 @@ Model modelPlaCompuerta;
 Model modelRokas;
 Model modelLuzGenerador;
 Model modelLuzBotones;
+Model modelEscenario2;
+Model modelBidones;
+Model modelCaja1;
+Model modelCaja2;
+Model modelCompu;
+Model modelCuerpo;
+Model modelEstanteria;
+
+
 
 //Enemigos
 Enemy enemigo1(glm::vec3(13.0f, 0.05f, -5.0f), "enemy1");
@@ -141,13 +154,13 @@ Enemy enemigo2(glm::vec3(13.0f, 0.05f, -5.0f), "enemy2");
 Enemy enemigo3(glm::vec3(13.0f, 0.05f, -5.0f), "enemy3");
 
 // Terrain model instance
-Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
+Terrain terrain(-1, -1, 200, 1, "../Textures/heightmap.png");
 Terrain terrain2(-1, -1, 200, 16, "../Textures/heightmap.png");
 
 GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
 textureGreenID, texturePurpleID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
-textureTerrainBID, textureTerrainBlendMapID;
+textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
 GLuint skyboxTextureID;
 GLuint textureMenuID, textureMenu2ID, textureActivaID;
@@ -185,10 +198,15 @@ glm::mat4 modelMatrixPivoteCam = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
 glm::mat4 modelMatrixAstroProta = glm::mat4(1.0f);
+glm::mat4 modelMatrixAstroProta2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroFondo2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroFrontal2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroIzquierdo2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixMuroDerecho2 = glm::mat4(1.0f);
 glm::mat4 defaultMatrix = glm::mat4(1.0f);
 glm::mat4 defaultMatrix2 = glm::mat4(1.0f);
 
@@ -201,6 +219,7 @@ glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixEscenario2 = glm::mat4(1.0f);
 
 float timer;
 int banderaCaminar = 0;
@@ -229,8 +248,9 @@ bool empiezaJuego = false;
 bool pressEnter = false;
 
 
-bool escenario1 = true;
-bool escenario2 = false;
+bool escenario1 = false;
+bool escenario2 = true;
+
 //bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
@@ -359,6 +379,7 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view);
 void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view);
 void cameraMove();
 bool excepCollider(std::string string1, std::string string2);
+bool excepCollider2(std::string string1, std::string string2);
 void updateBotonCollider(std::map<std::string, bool> collisionDetection);
 void updateEscenario1();
 void preRender1();
@@ -690,6 +711,34 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	muroIzquierdo.init();
 	muroIzquierdo.setShader(&shaderMulLighting);
 
+	//Escenario2
+	modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
+	modelEscenario2.setShader(&shaderMulLighting);
+
+	//Bidones
+	modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
+	modelBidones.setShader(&shaderMulLighting);
+
+	//Caja1
+	modelCaja1.loadModel("../models/SegundoEscenario/Caja1.obj");
+	modelCaja1.setShader(&shaderMulLighting);
+
+	//Caja2
+	modelCaja2.loadModel("../models/SegundoEscenario/Caja2.obj");
+	modelCaja2.setShader(&shaderMulLighting);
+
+	//Compu
+	modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
+	modelCompu.setShader(&shaderMulLighting);
+
+	//Cuerpo
+	modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
+	modelCuerpo.setShader(&shaderMulLighting);
+
+	//Estanteria
+	modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
+	modelEstanteria.setShader(&shaderMulLighting);
+
 	cameraFP->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
 	camera->setSensitivity(1.0);
@@ -917,6 +966,39 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainBlendMap.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar
+	Texture textureTerrainBlendMap2("../Textures/blendMap3.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureTerrainBlendMap2.loadImage(true);
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureTerrainBlendMap2.convertToData(bitmap, imageWidth,
+		imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureTerrainBlendMapID2);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID2);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainBlendMap2.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
 	Texture textureYellow("../Textures/Texturas/Amarillo.png");
@@ -1282,6 +1364,9 @@ void destroy() {
 	// Custom objects animate
 	mayowModelAnimate.destroy();
 
+	//modelos segundo escenario
+	modelEscenario2.destroy();
+
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteTextures(1, &textureBlueID);
@@ -1295,6 +1380,7 @@ void destroy() {
 	glDeleteTextures(1, &textureTerrainGID);
 	glDeleteTextures(1, &textureTerrainBID);
 	glDeleteTextures(1, &textureTerrainBlendMapID);
+	glDeleteTextures(1, &textureTerrainBlendMapID2);
 	glDeleteTextures(1, &textureParticleFountainID);
 	glDeleteTextures(1, &textureParticleFireID);
 
@@ -1998,23 +2084,6 @@ void renderScene(bool renderParticles) {
 	/*******************************************
 	 * Custom Anim objects obj
 	 *******************************************/
-	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
-		+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
-			modelMatrixMayow[3][2]);
-	tmv = currTime - startTimeJump;
-	if (modelMatrixMayow[3][1]
-		< terrain.getHeightTerrain(modelMatrixMayow[3][0],
-			modelMatrixMayow[3][2])) {
-		isJump = false;
-		modelMatrixMayow[3][1] = terrain.getHeightTerrain(
-			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-	}
-	//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
-	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody,
-		glm::vec3(0.021, 0.021, 0.021));
-	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
-	mayowModelAnimate.render(modelMatrixMayowBody);
 
 	/*
 	glm::vec3 ejey = glm::normalize(terrain.getNormalTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]));
@@ -2294,47 +2363,39 @@ void renderScene(bool renderParticles) {
 }
 
 void inicialMatrixs() {
+	//Pivote de Camara
 	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 		glm::vec3(0.0f, 5.0f, 23.0f));
 	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 		glm::vec3(0, 0, 1));
 
+	//Enemigo
 	modelMatrixMayow = glm::translate(modelMatrixMayow,
 		glm::vec3(13.0f, 0.05f, -5.0f));
 
-
-	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
-	//		glm::vec3(0, 1, 0));
-
-
+	//Matriz
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
 	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
 		glm::vec3(1, 0, 0));*/
 
-	modelMatrixFountain = glm::translate(modelMatrixFountain,
-		glm::vec3(5.0, 0.0, -40.0));
-	modelMatrixFountain[3][1] = terrain.getHeightTerrain(
-		modelMatrixFountain[3][0], modelMatrixFountain[3][2]) + 0.2;
-	modelMatrixFountain = glm::scale(modelMatrixFountain,
-		glm::vec3(10.0f, 10.0f, 10.0f));
+	//Matriz
+	modelMatrixAstroProta2 = glm::translate(modelMatrixAstroProta2,
+		glm::vec3(0.0f, 0.0f, -20.0f));
 
-	//Posicion de los muros
+	//Posicion de los muros escenario 1
 	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo,
 		glm::vec3(0.0f, 0.0f, -10.0f));
 	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
 		glm::vec3(75.0f, 20.0f, 0.0f));
-
 	modelMatrixMuroFrontal = glm::translate(modelMatrixMuroFrontal,
 		glm::vec3(0.0f, 0.0f, 28.0f));
 	modelMatrixMuroFrontal = glm::scale(modelMatrixMuroFrontal,
 		glm::vec3(75.0f, 20.0f, 0.0f));
-
 	modelMatrixMuroDerecho = glm::translate(modelMatrixMuroDerecho,
 		glm::vec3(85.0f, 0.0f, 15.0f));
 	modelMatrixMuroDerecho = glm::scale(modelMatrixMuroDerecho,
 		glm::vec3(0.0f, 20.0f, 70.0f));
-
 	modelMatrixMuroIzquierdo = glm::translate(modelMatrixMuroIzquierdo,
 		glm::vec3(-73.0f, 0.0f, 15.0f));
 	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
@@ -2342,6 +2403,36 @@ void inicialMatrixs() {
 
 	modelMatrixCompuerta = glm::translate(modelMatrixCompuerta,
 		glm::vec3(5.9f, 0.0f, 8.8f));
+
+	//Model escenario 2
+	modelMatrixEscenario2 = glm::translate(modelMatrixEscenario2,
+		glm::vec3(28.0f, 0.0f, -2.0f));
+	modelMatrixEscenario2 = glm::scale(modelMatrixEscenario2,
+		glm::vec3(2.9f, 2.0f, 3.1f));
+	modelMatrixEscenario2 = glm::rotate(modelMatrixEscenario2, glm::radians(-90.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//Posicion de los muros escenario 2
+	modelMatrixMuroFondo2 = glm::translate(modelMatrixMuroFondo2,
+		glm::vec3(0.0f, 0.0f, -35.0f));
+	modelMatrixMuroFondo2 = glm::scale(modelMatrixMuroFondo2,
+		glm::vec3(75.0f, 20.0f, 0.0f));
+	modelMatrixMuroFrontal2 = glm::translate(modelMatrixMuroFrontal2,
+		glm::vec3(0.0f, 0.0f, -1.50f));
+	modelMatrixMuroFrontal2 = glm::scale(modelMatrixMuroFrontal2,
+		glm::vec3(75.0f, 20.0f, 0.0f));
+	modelMatrixMuroDerecho2 = glm::translate(modelMatrixMuroDerecho2,
+		glm::vec3(56.5f, 0.0f, 15.0f));
+	modelMatrixMuroDerecho2 = glm::scale(modelMatrixMuroDerecho2,
+		glm::vec3(0.0f, 20.0f, 70.0f));
+	modelMatrixMuroIzquierdo2 = glm::translate(modelMatrixMuroIzquierdo2,
+		glm::vec3(-60.0f, 0.0f, 15.0f));
+	modelMatrixMuroIzquierdo2 = glm::scale(modelMatrixMuroIzquierdo2,
+		glm::vec3(0.0f, 20.0f, 70.0f));
+
+
+	//
+
 }
 
 void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
@@ -3190,6 +3281,20 @@ void prepareScene2() {
 	modelLuzBotones.setShader(&shaderMulLighting);
 
 	modelLuzGenerador.setShader(&shaderMulLighting);
+
+	modelEscenario2.setShader(&shaderMulLighting);
+
+	modelBidones.setShader(&shaderMulLighting);
+
+	modelCaja1.setShader(&shaderMulLighting);
+
+	modelCaja2.setShader(&shaderMulLighting);
+
+	modelCompu.setShader(&shaderMulLighting);
+
+	modelCuerpo.setShader(&shaderMulLighting);
+
+	modelEstanteria.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene2() {
@@ -3231,6 +3336,20 @@ void prepareDepthScene2() {
 	modelLuzBotones.setShader(&shaderDepth);
 
 	modelLuzGenerador.setShader(&shaderDepth);
+
+	modelEscenario2.setShader(&shaderDepth);
+
+	modelBidones.setShader(&shaderDepth);
+
+	modelCaja1.setShader(&shaderDepth);
+
+	modelCaja2.setShader(&shaderDepth);
+
+	modelCompu.setShader(&shaderDepth);
+
+	modelCuerpo.setShader(&shaderDepth);
+
+	modelEstanteria.setShader(&shaderDepth);
 }
 
 void renderScene2(bool renderParticles) {
@@ -3252,7 +3371,7 @@ void renderScene2(bool renderParticles) {
 	shaderTerrain.setInt("bTexture", 3);
 	// Se activa la textura del blend map
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID2);
 	shaderTerrain.setInt("blendMapTexture", 4);
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(40, 40)));
 	terrain.render();
@@ -3286,13 +3405,63 @@ void renderScene2(bool renderParticles) {
 	//astroProta
 	glDisable(GL_CULL_FACE);
 	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
-		modelMatrixAstroProta[3][2]);
+		modelMatrixAstroProta[3][2]-20.0);
 	glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
+	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 20.0;
 	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
 	astroProta.render(modelMatrixAstroBody);
 	glEnable(GL_CULL_FACE);
+
+	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
+		+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
+			modelMatrixMayow[3][2]);
+	tmv = currTime - startTimeJump;
+	if (modelMatrixMayow[3][1]
+		< terrain.getHeightTerrain(modelMatrixMayow[3][0],
+			modelMatrixMayow[3][2])) {
+		isJump = false;
+		modelMatrixMayow[3][1] = terrain.getHeightTerrain(
+			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+	}
+	//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
+	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody,
+		glm::vec3(0.021, 0.021, 0.021));
+	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
+	mayowModelAnimate.render(modelMatrixMayowBody);
+
+	//escenario2
+	glDisable(GL_CULL_FACE);
+	modelEscenario2.render(modelMatrixEscenario2);
+
+	//Bidones
+	modelBidones.setPosition(glm::vec3(-10.0, 1.0, -20.0));
+	modelBidones.render();
+
+	//Caja1
+	modelCaja1.setPosition(glm::vec3(-5.0, 1.0, -20.0));
+	modelCaja1.render();
+
+	//Caja2
+	modelCaja2.setPosition(glm::vec3(0.0, 1.0, -20.0));
+	modelCaja2.render();
+
+	//Compu
+	modelCompu.setPosition(glm::vec3(5.0, 1.0, -20.0));
+	modelCompu.render();
+
+	//Cuerpo
+	modelCuerpo.setPosition(glm::vec3(10.0, 1.0, -20.0));
+	modelCuerpo.render();
+
+	//Estanteria
+	modelEstanteria.setPosition(glm::vec3(15.0, 1.0, -20.0));
+	modelEstanteria.render();
+
+	glEnable(GL_CULL_FACE);
+
 }
 
 void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view) {
@@ -3462,6 +3631,7 @@ void collidersManagmentEs2() {
 	glm::mat4 modelmatrixColliderAstroProta = glm::mat4(modelMatrixAstroProta);
 	// Set the orientation of collider before doing the scale
 	astroProtaCollider.u = glm::quat_cast(modelmatrixColliderAstroProta);
+	modelmatrixColliderAstroProta[3].z += -20.0;
 	modelmatrixColliderAstroProta = glm::scale(modelmatrixColliderAstroProta,
 		glm::vec3(1.5, 4.0, 1.4));
 	modelmatrixColliderAstroProta = glm::translate(modelmatrixColliderAstroProta,
@@ -3474,61 +3644,81 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "astroProta", astroProtaCollider,
 		modelMatrixAstroProta);
 
+	// Collider de mayow
+	AbstractModel::OBB mayowCollider;
+	glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
+	modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
+		glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	// Set the orientation of collider before doing the scale
+	mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
+	modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
+		glm::vec3(0.021, 0.021, 0.021));
+	modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
+		glm::vec3(mayowModelAnimate.getObb().c.x,
+			mayowModelAnimate.getObb().c.y,
+			mayowModelAnimate.getObb().c.z));
+	mayowCollider.e = mayowModelAnimate.getObb().e
+		* glm::vec3(0.021, 0.021, 0.021)
+		* glm::vec3(0.787401574, 0.787401574, 0.787401574);
+	mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
+	addOrUpdateColliders(collidersOBB2, "mayow", mayowCollider,
+		modelMatrixMayow);
+
 	//Collider muro fondo
 	AbstractModel::OBB muroFondoCollider;
-	glm::mat4 modelmatrixColliderMuroFondo = glm::mat4(modelMatrixMuroFondo);
+	glm::mat4 modelmatrixColliderMuroFondo = glm::mat4(modelMatrixMuroFondo2);
 	// Set the orientation of collider before doing the scale
 	muroFondoCollider.u = glm::quat_cast(modelmatrixColliderMuroFondo);
 	modelmatrixColliderMuroFondo = glm::translate(modelmatrixColliderMuroFondo,
-		glm::vec3(muroFondo.getObb().c.x,
-			muroFondo.getObb().c.y,
-			muroFondo.getObb().c.z));
+		glm::vec3(muroFondo2.getObb().c.x,
+			muroFondo2.getObb().c.y,
+			muroFondo2.getObb().c.z));
 	muroFondoCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
 	muroFondoCollider.c = glm::vec3(modelmatrixColliderMuroFondo[3]);
-	addOrUpdateColliders(collidersOBB2, "muroFondo", muroFondoCollider,
-		modelMatrixMuroFondo);
+	addOrUpdateColliders(collidersOBB2, "muroFondo2", muroFondoCollider,
+		modelMatrixMuroFondo2);
 
 	//Collider muro frontal
 	AbstractModel::OBB muroFrontalCollider;
-	glm::mat4 modelmatrixColliderMuroFrontal = glm::mat4(modelMatrixMuroFrontal);
+	glm::mat4 modelmatrixColliderMuroFrontal = glm::mat4(modelMatrixMuroFrontal2);
 	// Set the orientation of collider before doing the scale
 	muroFrontalCollider.u = glm::quat_cast(modelmatrixColliderMuroFrontal);
 	modelmatrixColliderMuroFrontal = glm::translate(modelmatrixColliderMuroFrontal,
-		glm::vec3(muroFrontal.getObb().c.x,
-			muroFrontal.getObb().c.y,
-			muroFrontal.getObb().c.z));
+		glm::vec3(muroFrontal2.getObb().c.x,
+			muroFrontal2.getObb().c.y,
+			muroFrontal2.getObb().c.z));
 	muroFrontalCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
 	muroFrontalCollider.c = glm::vec3(modelmatrixColliderMuroFrontal[3]);
-	addOrUpdateColliders(collidersOBB2, "muroFrontal", muroFrontalCollider,
-		modelMatrixMuroFrontal);
+	addOrUpdateColliders(collidersOBB2, "muroFrontal2", muroFrontalCollider,
+		modelMatrixMuroFrontal2);
 
 	//Collider muro derecho
 	AbstractModel::OBB muroDerechoCollider;
-	glm::mat4 modelmatrixColliderMuroDerecho = glm::mat4(modelMatrixMuroDerecho);
+	glm::mat4 modelmatrixColliderMuroDerecho = glm::mat4(modelMatrixMuroDerecho2);
 	// Set the orientation of collider before doing the scale
 	muroDerechoCollider.u = glm::quat_cast(modelmatrixColliderMuroDerecho);
 	modelmatrixColliderMuroDerecho = glm::translate(modelmatrixColliderMuroDerecho,
-		glm::vec3(muroDerecho.getObb().c.x,
-			muroDerecho.getObb().c.y,
-			muroDerecho.getObb().c.z));
+		glm::vec3(muroDerecho2.getObb().c.x,
+			muroDerecho2.getObb().c.y,
+			muroDerecho2.getObb().c.z));
 	muroDerechoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
 	muroDerechoCollider.c = glm::vec3(modelmatrixColliderMuroDerecho[3]);
-	addOrUpdateColliders(collidersOBB2, "muroDerecho", muroDerechoCollider,
-		modelMatrixMuroDerecho);
+	addOrUpdateColliders(collidersOBB2, "muroDerecho2", muroDerechoCollider,
+		modelMatrixMuroDerecho2);
 
 	//Collider muro izquierdo
 	AbstractModel::OBB muroIzquierdoCollider;
-	glm::mat4 modelmatrixColliderMuroIzquierdo = glm::mat4(modelMatrixMuroIzquierdo);
+	glm::mat4 modelmatrixColliderMuroIzquierdo = glm::mat4(modelMatrixMuroIzquierdo2);
 	// Set the orientation of collider before doing the scale
 	muroIzquierdoCollider.u = glm::quat_cast(modelmatrixColliderMuroIzquierdo);
 	modelmatrixColliderMuroIzquierdo = glm::translate(modelmatrixColliderMuroIzquierdo,
-		glm::vec3(muroIzquierdo.getObb().c.x,
-			muroIzquierdo.getObb().c.y,
-			muroIzquierdo.getObb().c.z));
+		glm::vec3(muroIzquierdo2.getObb().c.x,
+			muroIzquierdo2.getObb().c.y,
+			muroIzquierdo2.getObb().c.z));
 	muroIzquierdoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
 	muroIzquierdoCollider.c = glm::vec3(modelmatrixColliderMuroIzquierdo[3]);
-	addOrUpdateColliders(collidersOBB2, "muroIzquierdo", muroIzquierdoCollider,
-		modelMatrixMuroIzquierdo);
+	addOrUpdateColliders(collidersOBB2, "muroIzquierdo2", muroIzquierdoCollider,
+		modelMatrixMuroIzquierdo2);
 
 	//Render colliders
 	for (std::map<std::string,
@@ -3545,6 +3735,120 @@ void collidersManagmentEs2() {
 		boxCollider.enableWireMode();
 		boxCollider.render(matrixCollider);
 	}
+
+	/*******************************************
+	 * Test Colisions
+	 *******************************************/
+	bool isCollisionG = false;
+	bool isCollisionEnemy = false;
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersOBB2.begin(); it != collidersOBB2.end(); it++) {
+		bool isCollision = false;
+		for (std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersOBB2.begin(); jt != collidersOBB2.end(); jt++) {
+			if (it != jt
+				&& testOBBOBB(std::get<0>(it->second),
+					std::get<0>(jt->second))) {
+				if (!(excepCollider2(it->first, jt->first)))
+				{
+					std::cout << "Colision " << it->first << " with "
+						<< jt->first << std::endl;
+
+					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
+						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
+						isCollisionEnemy = true;
+
+					isCollision = true;
+					isCollisionG = true;
+				}
+			}
+		}
+		addOrUpdateCollisionDetection(collisionDetection, it->first,
+			isCollision);
+	}
+
+	if (isCollisionG && actionE && !enableEscotilla1) {
+		std::cout << "EntraISC " << std::endl;
+		updateBotonCollider(collisionDetection);
+		actionE = false;
+	}
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersSBB2.begin(); it != collidersSBB2.end(); it++) {
+		bool isCollision = false;
+		for (std::map<std::string,
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersSBB2.begin(); jt != collidersSBB2.end(); jt++) {
+			if (it != jt
+				&& testSphereSphereIntersection(std::get<0>(it->second),
+					std::get<0>(jt->second))) {
+				//std::cout << "Colision " << it->first << " with "
+				//		<< jt->first << std::endl;
+				isCollision = true;
+			}
+		}
+		addOrUpdateCollisionDetection(collisionDetection, it->first,
+			isCollision);
+	}
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersSBB2.begin(); it != collidersSBB2.end(); it++) {
+		bool isCollision = false;
+		std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersOBB2.begin();
+		for (; jt != collidersOBB2.end(); jt++) {
+			if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
+				std::cout << "Colision " << it->first << " with "
+					<< jt->first << std::endl;
+
+				isCollision = true;
+				addOrUpdateCollisionDetection(collisionDetection, jt->first,
+					isCollision);
+			}
+		}
+		addOrUpdateCollisionDetection(collisionDetection, it->first,
+			isCollision);
+	}
+
+	std::map<std::string, bool>::iterator colIt;
+	for (colIt = collisionDetection.begin();
+		colIt != collisionDetection.end(); colIt++) {
+		std::map<std::string,
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersSBB2.find(colIt->first);
+		std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersOBB2.find(colIt->first);
+		if (it != collidersSBB2.end()) {
+			if (!colIt->second)
+				addOrUpdateColliders(collidersSBB2, it->first);
+		}
+		if (jt != collidersOBB2.end()) {
+			if (!colIt->second) {
+				addOrUpdateColliders(collidersOBB2, jt->first);
+			}
+			else {
+				if (jt->first.compare("mayow") == 0) {
+					if (isCollisionEnemy == true) {
+						enemigo1.respawn = true;
+						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+						playerRespawn = true;
+						isCollisionEnemy = false;
+					}
+				}
+				if (jt->first.compare("astroProta") == 0) {
+					modelMatrixAstroProta = std::get<1>(jt->second);
+				}
+			}
+		}
+	}
+
 }
 
 void soundEscene2() {
@@ -3608,6 +3912,24 @@ bool excepCollider(std::string string1, std::string string2) {
 		string1.compare("muroDerecho") == 0 || string1.compare("muroIzquierdo") == 0) &&
 		(string2.compare("muroFondo") == 0 || string2.compare("muroFrontal") == 0 ||
 			string2.compare("muroDerecho") == 0 || string2.compare("muroIzquierdo") == 0)) {
+		return true;
+	}
+	for (int i = 0; i < botonesPos.size(); i++) {
+		if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
+			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool excepCollider2(std::string string1, std::string string2) {
+	if ((string1.compare("muroFondo2") == 0 || string1.compare("muroFrontal2") == 0 ||
+		string1.compare("muroDerecho2") == 0 || string1.compare("muroIzquierdo2") == 0) &&
+		(string2.compare("muroFondo2") == 0 || string2.compare("muroFrontal2") == 0 ||
+			string2.compare("muroDerecho2") == 0 || string2.compare("muroIzquierdo2") == 0)) {
 		return true;
 	}
 	for (int i = 0; i < botonesPos.size(); i++) {
