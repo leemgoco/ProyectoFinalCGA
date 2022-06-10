@@ -5,6 +5,8 @@
 //std includes
 #include <string>
 #include <iostream>
+#include <time.h>
+#include <chrono>
 
 // contains new std::shuffle definition
 #include <algorithm>
@@ -81,6 +83,8 @@ Shader shaderParticlesFire;
 Shader shaderViewDepth;
 //Shader para dibujar el buffer de profunidad
 Shader shaderDepth;
+//Shader para dibujar un objeto con solo textura
+Shader shaderTexture;
 
 std::shared_ptr<FirstPersonCamera> cameraFP(new FirstPersonCamera());
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
@@ -100,6 +104,8 @@ Box muroFondo;
 Box muroFrontal;
 Box muroIzquierdo;
 Box muroDerecho;
+Box boxReferencia;
+Box boxMenu;
 
 ShadowBox* shadowBox;
 
@@ -137,13 +143,15 @@ Enemy enemigo3(glm::vec3(13.0f, 0.05f, -5.0f), "enemy3");
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/heightmap.png");
 
-GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID,
-		textureLandingPadID;
+GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
+textureGreenID, texturePurpleID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
 textureTerrainBID, textureTerrainBlendMapID;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
 GLuint skyboxTextureID;
-GLuint textureMenuID;
+GLuint textureMenuID, textureMenu2ID, textureActivaID;
+
+
 
 // Modelo para el redener de texto
 FontTypeRendering::FontTypeRendering* modelText;
@@ -184,27 +192,27 @@ glm::mat4 defaultMatrix = glm::mat4(1.0f);
 
 //vectors
 glm::vec3 astroPosition;
-glm::vec3 astroOrigin = glm::vec3(0.0f,0.0f,0.0f);
+glm::vec3 astroOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
 glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
 glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
-glm::mat4 modelMatrixMenu = glm::mat4(1.0f);
 
-float aux;
+float timer;
+int banderaCaminar = 0;
+bool fontbandera = false;
 int animationIndex = 1;
 int animationIndexMayow = 0;
 int modelSelected = 2;
 bool enableCountSelected = true;
-bool fontbandera = 0;
-int banderaCaminar = 0;
 int limiteIzquierdo = 132 - 80;
 int limiteDerecho = 132 + 85;
 int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
 int tiempoRespawnProta = 0;
+int situacion = 1;
 bool enableCameraSelected = true;
 bool playerRespawn = false;
 bool enableAction = true;
@@ -213,19 +221,20 @@ bool enableEscotilla1 = false;
 bool cambianivel2 = false;
 bool cambianivel3 = false;
 bool empiezaJuego = false;
+bool pressEnter = false;
+bool pressOption = false;
 
 bool escenario1 = true;
 bool escenario2 = false;
 //bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
-int situacion = 1;
 
-std::vector<std::vector<bool>> combBotones = { 
-	{false, false, false}, 
+std::vector<std::vector<bool>> combBotones = {
 	{false, false, false},
 	{false, false, false},
-	{false, false, false}};
+	{false, false, false},
+	{false, false, false} };
 
 std::vector<bool> lucesBotones = { false, false, false, false };
 
@@ -343,6 +352,9 @@ void renderScene2(bool renderParticles = true);
 void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view);
 void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view);
 void cameraMove();
+bool excepCollider(std::string string1, std::string string2);
+void updateBotonCollider(std::map<std::string, bool> collisionDetection);
+void updateEscenario1();
 
 
 void initParticleBuffers() {
@@ -569,6 +581,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		"../Shaders/texturizado_depth_view.fs");
 	shaderDepth.initialize("../Shaders/shadow_mapping_depth.vs",
 		"../Shaders/shadow_mapping_depth.fs");
+	shaderTexture.initialize("../Shaders/texturizado.vs", "../Shaders/texturizado.fs");
 
 	// Inicializacion de los objetos.
 	skyboxSphere.init();
@@ -599,9 +612,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxReferencia.init();
 	boxReferencia.setShader(&shaderMulLighting);
 
-	////Grass
-	//modelGrass.loadModel("../models/grass/grassModel.obj");
-	//modelGrass.setShader(&shaderMulLighting);
+	boxMenu.init();
+	boxMenu.setShader(&shaderMulLighting);
+	boxMenu.setPosition(glm::vec3(0.0, -6.0, 0.0));
+	boxMenu.setScale(glm::vec3(38.0, 33.0, 1.0));
+	boxMenu.setOrientation(glm::vec3(-25.0, 0.0, 0.0));
 
 	//Rokas
 	modelRokas.loadModel("../models/rokas/Piedras2.obj");
@@ -759,6 +774,38 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureTerrainR.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar para el INICIO
+	Texture textureMenu1("../Textures/Menu.png");
+	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
+	bitmap = textureMenu1.loadImage();
+	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
+	data = textureMenu1.convertToData(bitmap, imageWidth, imageHeight);
+	// Creando la textura con id 1
+	glGenTextures(1, &textureMenuID);
+	// Enlazar esa textura a una tipo de textura de 2D.
+	glBindTexture(GL_TEXTURE_2D, textureMenuID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Verifica si se pudo abrir la textura
+	if (data) {
+		// Transferis los datos de la imagen a memoria
+		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
+		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
+		// a los datos
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureMenu1.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
 	Texture textureTerrainG("../Textures/BlendMap/Rocas.png");
@@ -1010,40 +1057,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	textureParticlesFountain.freeImage(bitmap);
 
-	//TEXTURA MENU
-	// Definiendo la textura a utilizar
-	Texture textureMenu("../Textures/menu.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureMenu.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureMenu.convertToData(bitmap, imageWidth,
-		imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureMenuID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureMenuID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureMenu.freeImage(bitmap);
-
 	Texture textureParticleFire("../Textures/fire.png");
 	bitmap = textureParticleFire.loadImage();
 	data = textureParticleFire.convertToData(bitmap, imageWidth, imageHeight);
@@ -1247,6 +1260,9 @@ void destroy() {
 	modelPlataforma.destroy();
 	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
+	modelLuzBotones.destroy();
+	modelLuzGenerador.destroy();
+	boxReferencia.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1266,9 +1282,7 @@ void destroy() {
 	glDeleteTextures(1, &textureTerrainBlendMapID);
 	glDeleteTextures(1, &textureParticleFountainID);
 	glDeleteTextures(1, &textureParticleFireID);
-	glDeleteTextures(1, &textureMenuID);
 
-	
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glDeleteTextures(1, &skyboxTextureID);
@@ -1346,6 +1360,13 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 
+	if (!empiezaJuego) {
+		bool pressEnter = glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS;
+		if (textureActivaID == textureMenuID && pressEnter)
+			empiezaJuego = true;
+			fontbandera = true;
+	}
+
 	enemigo1.setMatrixEnemigo(modelMatrixMayow);
 
 
@@ -1413,7 +1434,7 @@ bool processInput(bool continueApplication) {
 	}
 	offsetX = 0;
 	offsetY = 0;
-	
+
 
 	if (enableCameraSelected && glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS
 		&& (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS
@@ -1441,73 +1462,109 @@ bool processInput(bool continueApplication) {
 		yaw -= 1;
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		animationIndex = 2;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
-		enableAction = true;
-		actionE = false;
-	}
+	if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
 
-	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-	//	animationIndex = 2;
-	//}
+		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
 
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
+		if (enableAction && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			enableAction = false;
+			actionE = true;
+			animationIndex = 2;
+			std::cout << "actionE:" << actionE << std::endl;
+		}
+		else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+			enableAction = true;
+			actionE = false;
+		}
+
+		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
 				glm::vec3(0, 1, 0));
-		animationIndex = 0;
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+			animationIndex = 0;
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
-	} else if (modelSelected
-			== 2&& glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
+		}
+		else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
 				glm::vec3(0, 1, 0));
-		animationIndex = 0;
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
-	}
-	if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+			animationIndex = 0;
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+		}
+		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
-		animationIndex = 0;
-		
-		//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-		//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-		
+			animationIndex = 0;
+			timer += 0.01f;
+			std::cout << timer << std::endl;
+			if (timer > 0.1f) 
+				banderaCaminar = 1;
+			if (timer > 5.0f && banderaCaminar == 1)
+				banderaCaminar = 2;
+			if (timer > 8.0f && banderaCaminar == 2) 
+				banderaCaminar = 3;
+			if (timer > 12.0f && banderaCaminar == 3)
+				banderaCaminar = 4;
+			if (timer > 16.0f && banderaCaminar == 4)
+				banderaCaminar = 5;
+			if (timer > 20.0f && banderaCaminar == 5)
+				banderaCaminar = 6;
+			if (timer > 23.0f && banderaCaminar == 6)
+				banderaCaminar = 7;
+			if (timer > 26.0f && banderaCaminar == 7)
+				banderaCaminar = 8;
+			if (timer > 29.0f && banderaCaminar == 8)
+				banderaCaminar = 9;
+			if (timer > 32.0f && banderaCaminar == 9)
+				banderaCaminar = 10;
+			if (timer > 35.0f && banderaCaminar == 10)
+				banderaCaminar = 11;
+			std::cout << banderaCaminar << std::endl;
+			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+
 
 			cameraMove();
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
 
+			animationIndex = 0;
 
-		//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-		//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-		//float posMayow = mayowModelAnimate.getPosition()[3]
-		//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
-		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-    
-	} else if (modelSelected
-			== 2&& glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+
+
+
+		}
+		else if (modelSelected
+			== 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
-		animationIndex = 0;
+			animationIndex = 0;
+			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+			cameraMove();
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
-		std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
-		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-		cameraMove();
-		astroPosition = modelMatrixAstroProta[3];
-		enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-		//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
-			//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-			//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-			//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
+		/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
+		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
+			cameraMove();
+			astroPosition = modelMatrixAstroProta[3];
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+
+				//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
+				//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
+				//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
 		}
 
 	}
@@ -1526,7 +1583,7 @@ bool processInput(bool continueApplication) {
 			playerRespawn = false;
 			tiempoRespawnProta = 0;
 		}
-		
+
 	}
 
 	if (enemigo1.cercaDeProta(enemigo1.distanceToPersonaje) == true)
@@ -1544,7 +1601,7 @@ bool processInput(bool continueApplication) {
 			enemigo1.respawn = false;
 			tiempo = 0.0f;
 		}
-			
+
 	}
 	else if (enemigo1.respawn == false) {
 		modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
@@ -1565,14 +1622,14 @@ bool processInput(bool continueApplication) {
 	return continueApplication;
 }
 
-void applicationLoop(){
+void applicationLoop() {
 
 	bool psi = true;
 	glm::mat4 view;
 	glm::vec3 axis;
 	glm::vec3 target;
 	float angleTarget;
-	char vw;
+
 
 	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 		glm::vec3(0.0f, 5.0f, 23.0f));
@@ -1586,8 +1643,7 @@ void applicationLoop(){
 	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
 	//		glm::vec3(0, 1, 0));
 
-	modelMatrixMenu = glm::translate(modelMatrixMenu,
-		glm::vec3(0.0f, 0.0f, 0.0f));
+
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 0.0f));
 	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
@@ -1638,6 +1694,9 @@ void applicationLoop(){
 
 	shadowBox = new ShadowBox(-lightPos, camera.get(), 15.0f, 0.1f, 45.0f);
 
+	//Asignacion de valor de textura
+	textureActivaID = textureMenuID;
+
 	while (psi) {
 		currTime = TimeManager::Instance().GetTime();
 		if (currTime - lastTime < 0.016666667) {
@@ -1650,19 +1709,6 @@ void applicationLoop(){
 		psi = processInput(true);
 
 		std::map<std::string, bool> collisionDetection;
-
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
-				(float) screenWidth / (float) screenHeight, 0.1f, 100.0f);
-
-		/*if (modelSelected == 1) {
-			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
-			target = modelMatrixPivoteCam[3];
-		} else {
-			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
-			target = modelMatrixMayow[3];
-		}*/
 
 		if (cameraSelected == 0) {
 			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
@@ -1686,257 +1732,23 @@ void applicationLoop(){
 			view = cameraFP->getViewMatrix();
 		}
 
-		shadowBox->update(screenWidth, screenHeight);
-		glm::vec3 centerBox = shadowBox->getCenter();
+		updateEscenario1();
 
-		// Projection light shadow mapping
-		glm::mat4 lightProjection = glm::mat4(1.0f), lightView = glm::mat4(
-				1.0f);
-		glm::mat4 lightSpaceMatrix;
-
-		lightProjection[0][0] = 2.0f / shadowBox->getWidth();
-		lightProjection[1][1] = 2.0f / shadowBox->getHeight();
-		lightProjection[2][2] = -2.0f / shadowBox->getLength();
-		lightProjection[3][3] = 1.0f;
-
-		lightView = glm::lookAt(centerBox,
-				centerBox + glm::normalize(-lightPos),
-				glm::vec3(0.0, 1.0, 0.0));
-
-		lightSpaceMatrix = lightProjection * lightView;
-		shaderDepth.setMatrix4("lightSpaceMatrix", 1, false,
-				glm::value_ptr(lightSpaceMatrix));
-
-		// Settea la matriz de vista y projection al shader con solo color
-		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
-		shader.setMatrix4("view", 1, false, glm::value_ptr(view));
-
-		// Settea la matriz de vista y projection al shader con skybox
-		shaderSkybox.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
-		shaderSkybox.setMatrix4("view", 1, false,
-				glm::value_ptr(glm::mat4(glm::mat3(view))));
-		// Settea la matriz de vista y projection al shader con multiples luces
-		shaderMulLighting.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
-		shaderMulLighting.setMatrix4("view", 1, false, glm::value_ptr(view));
-		shaderMulLighting.setMatrix4("lightSpaceMatrix", 1, false,
-				glm::value_ptr(lightSpaceMatrix));
-		// Settea la matriz de vista y projection al shader con multiples luces
-		shaderTerrain.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
-		shaderTerrain.setMatrix4("view", 1, false, glm::value_ptr(view));
-		shaderTerrain.setMatrix4("lightSpaceMatrix", 1, false,
-				glm::value_ptr(lightSpaceMatrix));
-		// Settea la matriz de vista y projection al shader para el fountain
-		shaderParticlesFountain.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
-		shaderParticlesFountain.setMatrix4("view", 1, false,
-				glm::value_ptr(view));
-		// Settea la matriz de vista y projection al shader para el fuego
-		shaderParticlesFire.setInt("Pass", 2);
-		shaderParticlesFire.setMatrix4("projection", 1, false,
-				glm::value_ptr(projection));
-		shaderParticlesFire.setMatrix4("view", 1, false, glm::value_ptr(view));
-
-		/*******************************************
-		 * Propiedades de neblina
-		 *******************************************/
-		shaderMulLighting.setVectorFloat3("fogColor",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
-		shaderTerrain.setVectorFloat3("fogColor",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
-		shaderSkybox.setVectorFloat3("fogColor",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
-
-		/*******************************************
-		 * Propiedades Luz direccional
-		 *******************************************/
-		if (cameraSelected == 0)
-			shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
-		else
-			shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
-		shaderMulLighting.setVectorFloat3("directionalLight.light.ambient",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
-		shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
-		shaderMulLighting.setVectorFloat3("directionalLight.light.specular",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
-		shaderMulLighting.setVectorFloat3("directionalLight.direction",
-				glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
-
-		/*******************************************
-		 * Propiedades Luz direccional Terrain
-		 *******************************************/
-		if (cameraSelected == 0)
-			shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
-		else
-			shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
-		shaderTerrain.setVectorFloat3("directionalLight.light.ambient",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
-		shaderTerrain.setVectorFloat3("directionalLight.light.diffuse",
-				glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
-		shaderTerrain.setVectorFloat3("directionalLight.light.specular",
-				glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
-		shaderTerrain.setVectorFloat3("directionalLight.direction",
-				glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
-
-		/*******************************************
-		 * Propiedades SpotLights
-		 *******************************************/
-		/*glm::vec3 spotPosition = glm::vec3(
-				modelMatrixHeli * glm::vec4(0.32437, 0.226053, 1.79149, 1.0));
-		shaderMulLighting.setInt("spotLightCount", 1);
-		shaderTerrain.setInt("spotLightCount", 1);
-		shaderMulLighting.setVectorFloat3("spotLights[0].light.ambient",
-				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
-		shaderMulLighting.setVectorFloat3("spotLights[0].light.diffuse",
-				glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
-		shaderMulLighting.setVectorFloat3("spotLights[0].light.specular",
-				glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
-		shaderMulLighting.setVectorFloat3("spotLights[0].position",
-				glm::value_ptr(spotPosition));
-		shaderMulLighting.setVectorFloat3("spotLights[0].direction",
-				glm::value_ptr(glm::vec3(0, -1, 0)));
-		shaderMulLighting.setFloat("spotLights[0].constant", 1.0);
-		shaderMulLighting.setFloat("spotLights[0].linear", 0.074);
-		shaderMulLighting.setFloat("spotLights[0].quadratic", 0.03);
-		shaderMulLighting.setFloat("spotLights[0].cutOff",
-				cos(glm::radians(12.5f)));
-		shaderMulLighting.setFloat("spotLights[0].outerCutOff",
-				cos(glm::radians(15.0f)));
-		shaderTerrain.setVectorFloat3("spotLights[0].light.ambient",
-				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
-		shaderTerrain.setVectorFloat3("spotLights[0].light.diffuse",
-				glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
-		shaderTerrain.setVectorFloat3("spotLights[0].light.specular",
-				glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
-		shaderTerrain.setVectorFloat3("spotLights[0].position",
-				glm::value_ptr(spotPosition));
-		shaderTerrain.setVectorFloat3("spotLights[0].direction",
-				glm::value_ptr(glm::vec3(0, -1, 0)));
-		shaderTerrain.setFloat("spotLights[0].constant", 1.0);
-		shaderTerrain.setFloat("spotLights[0].linear", 0.074);
-		shaderTerrain.setFloat("spotLights[0].quadratic", 0.03);
-		shaderTerrain.setFloat("spotLights[0].cutOff",
-				cos(glm::radians(12.5f)));
-		shaderTerrain.setFloat("spotLights[0].outerCutOff",
-				cos(glm::radians(15.0f)));*/
-
-		/*******************************************
-		 * Propiedades PointLights
-		 *******************************************/
-		shaderMulLighting.setInt("pointLightCount",
-				lamp1Position.size() + lamp2Orientation.size());
-		shaderTerrain.setInt("pointLightCount",
-				lamp1Position.size() + lamp2Orientation.size());
-		for (int i = 0; i < lamp1Position.size(); i++) {
-			glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
-			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					lamp1Position[i]);
-			matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
-					glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
-			matrixAdjustLamp = glm::scale(matrixAdjustLamp,
-					glm::vec3(0.5, 0.5, 0.5));
-			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					glm::vec3(0, 10.3585, 0));
-			glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].position",
-					glm::value_ptr(lampPosition));
-			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(i) + "].constant", 1.0);
-			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(i) + "].linear", 0.09);
-			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(i) + "].quadratic", 0.01);
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(i) + "].position",
-					glm::value_ptr(lampPosition));
-			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(i) + "].constant", 1.0);
-			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(i) + "].linear", 0.09);
-			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(i) + "].quadratic", 0.02);
+		if (escenario1) {
+			lucesEscenari1(shadowBox, &view);
 		}
-		for (int i = 0; i < lamp2Position.size(); i++) {
-			glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
-			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					lamp2Position[i]);
-			matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
-					glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-			matrixAdjustLamp = glm::scale(matrixAdjustLamp,
-					glm::vec3(1.0, 1.0, 1.0));
-			matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-					glm::vec3(0.759521, 5.00174, 0));
-			glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
-			shaderMulLighting.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].position", glm::value_ptr(lampPosition));
-			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].constant", 1.0);
-			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].linear", 0.09);
-			shaderMulLighting.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].quadratic", 0.01);
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.ambient",
-					glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.diffuse",
-					glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].light.specular",
-					glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
-			shaderTerrain.setVectorFloat3(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].position", glm::value_ptr(lampPosition));
-			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].constant", 1.0);
-			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].linear", 0.09);
-			shaderTerrain.setFloat(
-					"pointLights[" + std::to_string(lamp1Position.size() + i)
-							+ "].quadratic", 0.02);
+
+		if (!empiezaJuego) {
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, screenWidth, screenHeight);
+			shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
+			shaderTexture.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textureActivaID);
+			shaderTexture.setInt("outTexture", 0);
+			boxMenu.render();
+			glfwSwapBuffers(window);
+			continue;
 		}
 
 		/*******************************************
@@ -1955,22 +1767,22 @@ void applicationLoop(){
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		/*******************************************
-		* Debug to view the texture view map
-		*******************************************/
-		// reset viewport
-		/*glViewport(0, 0, screenWidth, screenHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// render Depth map to quad for visual debugging
-		shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
-		boxViewDepth.render();*/
+		 * Debug to view the texture view map
+		 *******************************************/
+		 // reset viewport
+		 /*glViewport(0, 0, screenWidth, screenHeight);
+		  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		  // render Depth map to quad for visual debugging
+		  shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
+		  shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
+		  glActiveTexture(GL_TEXTURE0);
+		  glBindTexture(GL_TEXTURE_2D, depthMap);
+		  boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
+		  boxViewDepth.render();*/
 
-		/*******************************************
-		* 2.- We render the normal objects
-		*******************************************/
+		  /*******************************************
+		   * 2.- We render the normal objects
+		   *******************************************/
 		glViewport(0, 0, screenWidth, screenHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		prepareScene();
@@ -1997,21 +1809,21 @@ void applicationLoop(){
 		renderScene();
 
 		/*******************************************
-		* Debug to box light box
-		*******************************************/
-		/*glm::vec3 front = glm::normalize(-lightPos);
-		glm::vec3 right = glm::normalize(glm::cross(glm::vec3(0, 1, 0), front));
-		glm::vec3 up = glm::normalize(glm::cross(front, right));
-		glDisable(GL_CULL_FACE);
-		glm::mat4 boxViewTransform = glm::mat4(1.0f);
-		boxViewTransform = glm::translate(boxViewTransform, centerBox);
-		boxViewTransform[0] = glm::vec4(right, 0.0);
-		boxViewTransform[1] = glm::vec4(up, 0.0);
-		boxViewTransform[2] = glm::vec4(front, 0.0);
-		boxViewTransform = glm::scale(boxViewTransform, glm::vec3(shadowBox->getWidth(), shadowBox->getHeight(), shadowBox->getLength()));
-		boxLightViewBox.enableWireMode();
-		boxLightViewBox.render(boxViewTransform);
-		glEnable(GL_CULL_FACE);*/
+		 * Debug to box light box
+		 *******************************************/
+		 /*glm::vec3 front = glm::normalize(-lightPos);
+		  glm::vec3 right = glm::normalize(glm::cross(glm::vec3(0, 1, 0), front));
+		  glm::vec3 up = glm::normalize(glm::cross(front, right));
+		  glDisable(GL_CULL_FACE);
+		  glm::mat4 boxViewTransform = glm::mat4(1.0f);
+		  boxViewTransform = glm::translate(boxViewTransform, centerBox);
+		  boxViewTransform[0] = glm::vec4(right, 0.0);
+		  boxViewTransform[1] = glm::vec4(up, 0.0);
+		  boxViewTransform[2] = glm::vec4(front, 0.0);
+		  boxViewTransform = glm::scale(boxViewTransform, glm::vec3(shadowBox->getWidth(), shadowBox->getHeight(), shadowBox->getLength()));
+		  boxLightViewBox.enableWireMode();
+		  boxLightViewBox.render(boxViewTransform);
+		  glEnable(GL_CULL_FACE);*/
 
 		  /*******************************************
 		   * Creacion de colliders
@@ -2106,7 +1918,25 @@ void applicationLoop(){
 				modelBotones.getObb().c);
 			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
 			botonCollider.e = modelBotones.getObb().e
-					* glm::vec3(1.5, 0.9, 1.0);
+				* glm::vec3(1.5, 0.9, 1.0);
+			//Y boton
+			botonColliderY.u = glm::quat_cast(modelMatrixColliderBotonY);
+			modelMatrixColliderBotonY = glm::scale(modelMatrixColliderBotonY,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderY.c = glm::vec3(modelMatrixColliderBotonY[3]);
+			botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			//B boton
+			botonColliderB.u = glm::quat_cast(modelMatrixColliderBotonB);
+			modelMatrixColliderBotonB = glm::scale(modelMatrixColliderBotonB,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderB.c = glm::vec3(modelMatrixColliderBotonB[3]);
+			botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+			//R boton
+			botonColliderR.u = glm::quat_cast(modelMatrixColliderBotonR);
+			modelMatrixColliderBotonR = glm::scale(modelMatrixColliderBotonR,
+				glm::vec3(0.3, 0.5, 0.3));
+			botonColliderR.c = glm::vec3(modelMatrixColliderBotonR[3]);
+			botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
 			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
 				botonCollider;
 			std::get<0>(collidersOBB.find("botonBox-Y" + std::to_string(i))->second) =
@@ -2316,12 +2146,9 @@ void applicationLoop(){
 				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
 				collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
 				if (it != jt
-						&& testOBBOBB(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
-					if (!((it->first.compare("muroFondo") == 0 || it->first.compare("muroFrontal") == 0 ||
-						it->first.compare("muroDerecho") == 0 || it->first.compare("muroIzquierdo") == 0) &&
-						(jt->first.compare("muroFondo") == 0 || jt->first.compare("muroFrontal") == 0 ||
-							jt->first.compare("muroDerecho") == 0 || jt->first.compare("muroIzquierdo") == 0)))
+					&& testOBBOBB(std::get<0>(it->second),
+						std::get<0>(jt->second))) {
+					if (!(excepCollider(it->first, jt->first)))
 					{
 						std::cout << "Colision " << it->first << " with "
 							<< jt->first << std::endl;
@@ -2354,10 +2181,10 @@ void applicationLoop(){
 				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator jt =
 				collidersSBB.begin(); jt != collidersSBB.end(); jt++) {
 				if (it != jt
-						&& testSphereSphereIntersection(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+					&& testSphereSphereIntersection(std::get<0>(it->second),
+						std::get<0>(jt->second))) {
+					//std::cout << "Colision " << it->first << " with "
+					//		<< jt->first << std::endl;
 					isCollision = true;
 				}
 			}
@@ -2373,10 +2200,10 @@ void applicationLoop(){
 				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
 				collidersOBB.begin();
 			for (; jt != collidersOBB.end(); jt++) {
-				if (testSphereOBox(std::get<0>(it->second),
-						std::get<0>(jt->second))) {
+				if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
 					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
+						<< jt->first << std::endl;
+
 					isCollision = true;
 					addOrUpdateCollisionDetection(collisionDetection, jt->first,
 						isCollision);
@@ -2405,7 +2232,7 @@ void applicationLoop(){
 				}
 				else {
 
-					
+
 					if (jt->first.compare("mayow") == 0) {
 
 						//modelMatrixMayow = std::get<1>(jt->second);
@@ -2418,19 +2245,19 @@ void applicationLoop(){
 							playerRespawn = true;
 							isCollisionEnemy = false;
 						}
-							
 
 
-						
+
+
 					}
 					if (jt->first.compare("astroProta") == 0) {
 
 						modelMatrixAstroProta = std::get<1>(jt->second);
-						
-							
+
+
 
 					}
-						
+
 					/*if (jt->first.compare("dart") == 0)
 						modelMatrixDart = std::get<1>(jt->second);*/
 				}
@@ -2460,47 +2287,45 @@ void applicationLoop(){
 			 }
 			 break;
 		 }*/
-		if (fontbandera == 1){
+
+		if (fontbandera == 1) {
 			modelText->render("Oxigeno", 0.7, 0.95, 15, 0.5, 1.0, 1.0, 1.0);
 			std::cout << situacion << std::endl;
 			switch (situacion)
 			{
 			case 1:
-				if (banderaCaminar == 1) 
+				if (banderaCaminar == 1)
 					modelText2->render("100%", 0.7, 0.9, 12, 0.0, 1.0, 0.0, 1.0);
-				if (banderaCaminar == 2) 
+				if (banderaCaminar == 2)
 					modelText2->render("90%", 0.7, 0.9, 12, 0.0, 1.0, 0.0, 1.0);
-				if (banderaCaminar == 3) 
+				if (banderaCaminar == 3)
 					modelText2->render("80%", 0.7, 0.9, 12, 0.0, 1.0, 0.0, 1.0);
 				if (banderaCaminar == 4)
 					modelText2->render("70%", 0.7, 0.9, 12, 1.0, 1.0, 0.0, 1.0);
-				if (banderaCaminar == 5) 
+				if (banderaCaminar == 5)
 					modelText2->render("60%", 0.7, 0.9, 12, 1.0, 1.0, 0.0, 1.0);
-				if (banderaCaminar == 6) 
+				if (banderaCaminar == 6)
 					modelText2->render("50%", 0.7, 0.9, 12, 1.0, 1.0, 0.0, 1.0);
-				if (banderaCaminar == 7) 
+				if (banderaCaminar == 7)
 					modelText2->render("40%", 0.7, 0.9, 12, 1.0, 0.5, 0.0, 1.0);
-				if (banderaCaminar == 8) 
+				if (banderaCaminar == 8)
 					modelText2->render("30%", 0.7, 0.9, 12, 1.0, 0.5, 0.0, 1.0);
-				if (banderaCaminar == 9) 
+				if (banderaCaminar == 9)
 					modelText2->render("20%", 0.7, 0.9, 12, 1.0, 0.5, 0.0, 1.0);
-				if (banderaCaminar == 10) 
+				if (banderaCaminar == 10)
 					modelText2->render("10%", 0.7, 0.9, 12, 1.0, 0.0, 0.0, 1.0);
 				if (banderaCaminar == 11) {
 					modelText2->render("0%", 0.7, 0.9, 12, 1.0, 0.0, 0.0, 1.0);
-					Sleep(2);
 					situacion = 0;
 				}
 				break;
 			case 0:
 				modelText2->render("Te quedaste sin oxigeno!", -0.5, 0, 30, 1.0, 0.0, 0.0, 1.0);
-				system("Pause");
 				break;
-			}	
+			}
 		}
 		glfwSwapBuffers(window);
-		//CountDown();
-			
+
 		/****************************+
 		 * Open AL sound data
 		 */
@@ -2587,6 +2412,12 @@ void prepareScene() {
 	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	modelRokas.setShader(&shaderMulLighting);
+
+	boxReferencia.setShader(&shaderMulLighting);
+
+	modelLuzBotones.setShader(&shaderMulLighting);
+
+	modelLuzGenerador.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene() {
@@ -2623,6 +2454,12 @@ void prepareDepthScene() {
 	modelPlaCompuerta.setShader(&shaderDepth);
 
 	modelRokas.setShader(&shaderDepth);
+
+	boxReferencia.setShader(&shaderDepth);
+
+	modelLuzBotones.setShader(&shaderDepth);
+
+	modelLuzGenerador.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles) {
@@ -2782,14 +2619,6 @@ void renderScene(bool renderParticles) {
 	modelEdCompuerta.render(modelMatrixEdCompuerta);
 
 	modelPlaCompuerta.render(modelMatrixPlaCompuerta);
-
-	glDisable(GL_CULL_FACE);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureMenuID);
-	menu.setOrientation(glm::vec3(65.0, 0, 0));
-	menu.setPosition(glm::vec3(0.0f, 9.75f, 33.0f));
-	menu.render(modelMatrixMenu);
-	glEnable(GL_CULL_FACE);
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
@@ -2975,6 +2804,267 @@ void renderScene(bool renderParticles) {
 	glEnable(GL_CULL_FACE);
 }
 
+void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
+
+	glm::vec3 lightPos = glm::vec3(10.0, 10.0, 0.0);
+
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
+		(float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+
+	shadowBox->update(screenWidth, screenHeight);
+	glm::vec3 centerBox = shadowBox->getCenter();
+
+	// Projection light shadow mapping
+	glm::mat4 lightProjection = glm::mat4(1.0f), lightView = glm::mat4(
+		1.0f);
+	glm::mat4 lightSpaceMatrix;
+
+	lightProjection[0][0] = 2.0f / shadowBox->getWidth();
+	lightProjection[1][1] = 2.0f / shadowBox->getHeight();
+	lightProjection[2][2] = -2.0f / shadowBox->getLength();
+	lightProjection[3][3] = 1.0f;
+
+	lightView = glm::lookAt(centerBox,
+		centerBox + glm::normalize(-lightPos),
+		glm::vec3(0.0, 1.0, 0.0));
+
+	lightSpaceMatrix = lightProjection * lightView;
+	shaderDepth.setMatrix4("lightSpaceMatrix", 1, false,
+		glm::value_ptr(lightSpaceMatrix));
+
+	// Settea la matriz de vista y projection al shader con solo color
+	shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
+	shader.setMatrix4("view", 1, false, glm::value_ptr(*view));
+
+	// Settea la matriz de vista y projection al shader con skybox
+	shaderSkybox.setMatrix4("projection", 1, false,
+		glm::value_ptr(projection));
+	shaderSkybox.setMatrix4("view", 1, false,
+		glm::value_ptr(glm::mat4(glm::mat3(*view))));
+	// Settea la matriz de vista y projection al shader con multiples luces
+	shaderMulLighting.setMatrix4("projection", 1, false,
+		glm::value_ptr(projection));
+	shaderMulLighting.setMatrix4("view", 1, false, glm::value_ptr(*view));
+	shaderMulLighting.setMatrix4("lightSpaceMatrix", 1, false,
+		glm::value_ptr(lightSpaceMatrix));
+	// Settea la matriz de vista y projection al shader con multiples luces
+	shaderTerrain.setMatrix4("projection", 1, false,
+		glm::value_ptr(projection));
+	shaderTerrain.setMatrix4("view", 1, false, glm::value_ptr(*view));
+	shaderTerrain.setMatrix4("lightSpaceMatrix", 1, false,
+		glm::value_ptr(lightSpaceMatrix));
+	// Settea la matriz de vista y projection al shader para el fountain
+	shaderParticlesFountain.setMatrix4("projection", 1, false,
+		glm::value_ptr(projection));
+	shaderParticlesFountain.setMatrix4("view", 1, false,
+		glm::value_ptr(*view));
+	// Settea la matriz de vista y projection al shader para el fuego
+	shaderParticlesFire.setInt("Pass", 2);
+	shaderParticlesFire.setMatrix4("projection", 1, false,
+		glm::value_ptr(projection));
+	shaderParticlesFire.setMatrix4("view", 1, false, glm::value_ptr(*view));
+
+	/*******************************************
+	 * Propiedades de neblina
+	 *******************************************/
+	shaderMulLighting.setVectorFloat3("fogColor",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+	shaderTerrain.setVectorFloat3("fogColor",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+	shaderSkybox.setVectorFloat3("fogColor",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+
+	/*******************************************
+	 * Propiedades Luz direccional
+	 *******************************************/
+	if (cameraSelected == 0)
+		shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
+	else
+		shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.ambient",
+		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.specular",
+		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+	shaderMulLighting.setVectorFloat3("directionalLight.direction",
+		glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
+
+	/*******************************************
+	 * Propiedades Luz direccional Terrain
+	 *******************************************/
+	if (cameraSelected == 0)
+		shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
+	else
+		shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
+	shaderTerrain.setVectorFloat3("directionalLight.light.ambient",
+		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+	shaderTerrain.setVectorFloat3("directionalLight.light.diffuse",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
+	shaderTerrain.setVectorFloat3("directionalLight.light.specular",
+		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+	shaderTerrain.setVectorFloat3("directionalLight.direction",
+		glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
+
+	/*******************************************
+	 * Propiedades SpotLights
+	 *******************************************/
+	 /*glm::vec3 spotPosition = glm::vec3(
+			 modelMatrixHeli * glm::vec4(0.32437, 0.226053, 1.79149, 1.0));
+	 shaderMulLighting.setInt("spotLightCount", 1);
+	 shaderTerrain.setInt("spotLightCount", 1);
+	 shaderMulLighting.setVectorFloat3("spotLights[0].light.ambient",
+			 glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+	 shaderMulLighting.setVectorFloat3("spotLights[0].light.diffuse",
+			 glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
+	 shaderMulLighting.setVectorFloat3("spotLights[0].light.specular",
+			 glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
+	 shaderMulLighting.setVectorFloat3("spotLights[0].position",
+			 glm::value_ptr(spotPosition));
+	 shaderMulLighting.setVectorFloat3("spotLights[0].direction",
+			 glm::value_ptr(glm::vec3(0, -1, 0)));
+	 shaderMulLighting.setFloat("spotLights[0].constant", 1.0);
+	 shaderMulLighting.setFloat("spotLights[0].linear", 0.074);
+	 shaderMulLighting.setFloat("spotLights[0].quadratic", 0.03);
+	 shaderMulLighting.setFloat("spotLights[0].cutOff",
+			 cos(glm::radians(12.5f)));
+	 shaderMulLighting.setFloat("spotLights[0].outerCutOff",
+			 cos(glm::radians(15.0f)));
+	 shaderTerrain.setVectorFloat3("spotLights[0].light.ambient",
+			 glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+	 shaderTerrain.setVectorFloat3("spotLights[0].light.diffuse",
+			 glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
+	 shaderTerrain.setVectorFloat3("spotLights[0].light.specular",
+			 glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
+	 shaderTerrain.setVectorFloat3("spotLights[0].position",
+			 glm::value_ptr(spotPosition));
+	 shaderTerrain.setVectorFloat3("spotLights[0].direction",
+			 glm::value_ptr(glm::vec3(0, -1, 0)));
+	 shaderTerrain.setFloat("spotLights[0].constant", 1.0);
+	 shaderTerrain.setFloat("spotLights[0].linear", 0.074);
+	 shaderTerrain.setFloat("spotLights[0].quadratic", 0.03);
+	 shaderTerrain.setFloat("spotLights[0].cutOff",
+			 cos(glm::radians(12.5f)));
+	 shaderTerrain.setFloat("spotLights[0].outerCutOff",
+			 cos(glm::radians(15.0f)));*/
+
+			 /*******************************************
+			  * Propiedades PointLights
+			  *******************************************/
+	shaderMulLighting.setInt("pointLightCount",
+		lamp1Position.size() + lamp2Orientation.size());
+	shaderTerrain.setInt("pointLightCount",
+		lamp1Position.size() + lamp2Orientation.size());
+	for (int i = 0; i < lamp1Position.size(); i++) {
+		glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
+		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
+			lamp1Position[i]);
+		matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
+			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
+		matrixAdjustLamp = glm::scale(matrixAdjustLamp,
+			glm::vec3(0.5, 0.5, 0.5));
+		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
+			glm::vec3(0, 10.3585, 0));
+		glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].light.ambient",
+			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].light.diffuse",
+			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].light.specular",
+			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].position",
+			glm::value_ptr(lampPosition));
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(i) + "].constant", 1.0);
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(i) + "].linear", 0.09);
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(i) + "].quadratic", 0.01);
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].light.ambient",
+			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].light.diffuse",
+			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].light.specular",
+			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].position",
+			glm::value_ptr(lampPosition));
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(i) + "].constant", 1.0);
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(i) + "].linear", 0.09);
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(i) + "].quadratic", 0.02);
+	}
+	for (int i = 0; i < lamp2Position.size(); i++) {
+		glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
+		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
+			lamp2Position[i]);
+		matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
+			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+		matrixAdjustLamp = glm::scale(matrixAdjustLamp,
+			glm::vec3(1.0, 1.0, 1.0));
+		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
+			glm::vec3(0.759521, 5.00174, 0));
+		glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].light.ambient",
+			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].light.diffuse",
+			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].light.specular",
+			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].position", glm::value_ptr(lampPosition));
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].constant", 1.0);
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].linear", 0.09);
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].quadratic", 0.01);
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].light.ambient",
+			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].light.diffuse",
+			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].light.specular",
+			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].position", glm::value_ptr(lampPosition));
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].constant", 1.0);
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].linear", 0.09);
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			+ "].quadratic", 0.02);
+	}
+}
+
 void cameraMove() {
 	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 	int camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
@@ -2990,7 +3080,77 @@ void cameraMove() {
 	}
 }
 
-int main(int argc, char **argv) {
+bool excepCollider(std::string string1, std::string string2) {
+	if ((string1.compare("muroFondo") == 0 || string1.compare("muroFrontal") == 0 ||
+		string1.compare("muroDerecho") == 0 || string1.compare("muroIzquierdo") == 0) &&
+		(string2.compare("muroFondo") == 0 || string2.compare("muroFrontal") == 0 ||
+			string2.compare("muroDerecho") == 0 || string2.compare("muroIzquierdo") == 0)) {
+		return true;
+	}
+	for (int i = 0; i < botonesPos.size(); i++) {
+		if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
+			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
+				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
+	for (int i = 0; i < botonesPos.size(); i++) {
+		if (collisionDetection.find("botonBox-Y" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-Y" + std::to_string(i))->second << " de "
+				<< "botonBox-Y" + std::to_string(i) << std::endl;
+			//std::cout << "previo a update " << combBotones[i][0] << std::endl;
+			combBotones[i][0] = !combBotones[i][0];
+			//std::cout << "despues de update " << combBotones[i][0] << std::endl;
+		}
+		if (collisionDetection.find("botonBox-B" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-B" + std::to_string(i))->second << " de "
+				<< "botonBox-B" + std::to_string(i) << std::endl;
+			combBotones[i][1] = !combBotones[i][1];
+		}
+		if (collisionDetection.find("botonBox-R" + std::to_string(i))->second) {
+			std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
+				<< "botonBox-R" + std::to_string(i) << std::endl;
+			combBotones[i][2] = !combBotones[i][2];
+		}
+	}
+}
+
+void updateEscenario1() {
+	if (!enableEscotilla1) {
+		if (combBotones[0][0] && !combBotones[0][1] && !combBotones[0][2]) {
+			lucesBotones[0] = true;
+			std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
+		}
+		else {
+			lucesBotones[0] = false;
+		}
+		if (combBotones[2][0] && !combBotones[2][1] && combBotones[2][2]) {
+			lucesBotones[2] = true;
+			std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
+		}
+		else {
+			lucesBotones[2] = false;
+		}
+		if (combBotones[3][0] && combBotones[3][1] && !combBotones[3][2]) {
+			lucesBotones[3] = true;
+			std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
+		}
+		else {
+			lucesBotones[3] = false;
+		}
+		if (lucesBotones[0] && lucesBotones[2] && lucesBotones[3]) {
+			enableEscotilla1 = true;
+			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
+		}
+	}
+}
+
+int main(int argc, char** argv) {
 	init(800, 700, "Window GLFW", false);
 	applicationLoop();
 	destroy();
