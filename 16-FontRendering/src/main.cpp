@@ -1811,6 +1811,7 @@ void applicationLoop() {
 						glm::vec3(0.0f, 5.0f, 23.0f));
 					modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 						glm::vec3(0, 0, 1));
+					empiezaJuego = false; //linea que genera problemas
 					tiempoRespawnProta++;
 					if (tiempoRespawnProta > 50) {						
 						playerRespawn2 = false;
