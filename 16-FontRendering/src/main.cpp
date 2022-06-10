@@ -229,8 +229,8 @@ bool empiezaJuego = false;
 bool pressEnter = false;
 
 
-bool escenario1 = false;
-bool escenario2 = true;
+bool escenario1 = true;
+bool escenario2 = false;
 //bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
