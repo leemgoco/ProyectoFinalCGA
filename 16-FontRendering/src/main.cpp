@@ -342,6 +342,14 @@ void cameraMove();
 bool excepCollider(std::string string1, std::string string2);
 void updateBotonCollider(std::map<std::string, bool> collisionDetection);
 void updateEscenario1();
+void preRender1();
+void collidersManagmentEs1();
+void soundEscene1();
+void inicialMatrixs();
+void updateEscenario2();
+void preRender2();
+void collidersManagmentEs2();
+void soundEscene2();
 
 
 void initParticleBuffers() {
@@ -1390,9 +1398,11 @@ bool processInput(bool continueApplication) {
 			glm::vec3(0, 0, 1));
 		yaw -= 1;
 	}
-
+	//std::cout << "respaw empieza el juego:" << (playerRespawn == false && empiezaJuego == true) << std::endl;
+	//std::cout << "respaw empieza el cambia nivel:" << (playerRespawn == false && cambianivel2 == true) << std::endl;
+	//std::cout << "respaw empieza el cambia nivel 2:" << (playerRespawn == false && cambianivel3 == true) << std::endl;
 	if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
-
+		//std::cout << "primer if:" << actionE << std::endl;
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
 
@@ -1501,8 +1511,8 @@ bool processInput(bool continueApplication) {
 		enemigo1.velocidad = 0.05 * 1.5f;
 
 	if (enemigo1.respawn == true) {
-		modelMatrixMayow = glm::translate(modelMatrixMayow,
-			glm::vec3(0.0f, 0.0f, 0.0f));
+		/*modelMatrixMayow = glm::translate(modelMatrixMayow,
+			glm::vec3(0.0f, 0.0f, 0.0f));*/
 		tiempo += 1;
 
 
@@ -1513,7 +1523,7 @@ bool processInput(bool continueApplication) {
 			
 	}
 	else if (enemigo1.respawn == false) {
-		modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
+		//modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
 		//modelMatrixMayow = glm::rotate(modelMatrixMayow, enemigo1.faceDirection(vectorDireccionEnemigo), glm::vec3(0,1,0));
 	}
 
@@ -1539,56 +1549,7 @@ void applicationLoop(){
 	glm::vec3 target;
 	float angleTarget;
 
-	
-	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-		glm::vec3(0.0f, 5.0f, 23.0f));
-	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
-		glm::vec3(0, 0, 1));
-
-	modelMatrixMayow = glm::translate(modelMatrixMayow,
-			glm::vec3(13.0f, 0.05f, -5.0f));
-
-
-	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
-	//		glm::vec3(0, 1, 0));
-
-
-	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
-		glm::vec3(0.0f, 0.0f, 0.0f));
-	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
-		glm::vec3(1, 0, 0));*/
-
-	modelMatrixFountain = glm::translate(modelMatrixFountain,
-			glm::vec3(5.0, 0.0, -40.0));
-	modelMatrixFountain[3][1] = terrain.getHeightTerrain(
-			modelMatrixFountain[3][0], modelMatrixFountain[3][2]) + 0.2;
-	modelMatrixFountain = glm::scale(modelMatrixFountain,
-			glm::vec3(10.0f, 10.0f, 10.0f));
-
-	//Posicion de los muros
-	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo, 
-		glm::vec3(0.0f, 0.0f, -10.0f));
-	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
-		glm::vec3(75.0f, 20.0f, 0.0f));
-
-	modelMatrixMuroFrontal = glm::translate(modelMatrixMuroFrontal,
-		glm::vec3(0.0f, 0.0f, 28.0f));
-	modelMatrixMuroFrontal = glm::scale(modelMatrixMuroFrontal,
-		glm::vec3(75.0f, 20.0f, 0.0f));
-
-	modelMatrixMuroDerecho = glm::translate(modelMatrixMuroDerecho,
-		glm::vec3(85.0f, 0.0f, 15.0f));
-	modelMatrixMuroDerecho = glm::scale(modelMatrixMuroDerecho,
-		glm::vec3(0.0f, 20.0f, 70.0f));
-
-	modelMatrixMuroIzquierdo = glm::translate(modelMatrixMuroIzquierdo,
-		glm::vec3(-73.0f, 0.0f, 15.0f));
-	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
-		glm::vec3(0.0f, 20.0f, 70.0f));
-
-	modelMatrixCompuerta = glm::translate(modelMatrixCompuerta,
-		glm::vec3(5.9f, 0.0f, 8.8f));
-
+	inicialMatrixs();
 
 	lastTime = TimeManager::Instance().GetTime();
 
@@ -1614,8 +1575,6 @@ void applicationLoop(){
 		deltaTime = TimeManager::Instance().DeltaTime;
 		psi = processInput(true);
 
-		std::map<std::string, bool> collisionDetection;
-
 		if (cameraSelected == 0) {
 			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
@@ -1638,68 +1597,15 @@ void applicationLoop(){
 			view = cameraFP->getViewMatrix();
 		}
 
-		updateEscenario1();
-
+		empiezaJuego = true;
 		if (escenario1) {
+			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
+			preRender1();
+			renderScene();
+			collidersManagmentEs1();
+			soundEscene1();
 		}
-
-		/*******************************************
-		 * 1.- We render the depth buffer
-		 *******************************************/
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// render scene from light's point of view
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		//glCullFace(GL_FRONT);
-		prepareDepthScene();
-		renderScene(false);
-		//glCullFace(GL_BACK);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		/*******************************************
-		 * Debug to view the texture view map
-		 *******************************************/
-		// reset viewport
-		/*glViewport(0, 0, screenWidth, screenHeight);
-		 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		 // render Depth map to quad for visual debugging
-		 shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		 shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		 glActiveTexture(GL_TEXTURE0);
-		 glBindTexture(GL_TEXTURE_2D, depthMap);
-		 boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
-		 boxViewDepth.render();*/
-
-		/*******************************************
-		 * 2.- We render the normal objects
-		 *******************************************/
-		glViewport(0, 0, screenWidth, screenHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		prepareScene();
-		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		shaderMulLighting.setInt("shadowMap", 10);
-		shaderTerrain.setInt("shadowMap", 10);
-		/*******************************************
-		 * Skybox
-		 *******************************************/
-		GLint oldCullFaceMode;
-		GLint oldDepthFuncMode;
-		// deshabilita el modo del recorte de caras ocultas para ver las esfera desde adentro
-		glGetIntegerv(GL_CULL_FACE_MODE, &oldCullFaceMode);
-		glGetIntegerv(GL_DEPTH_FUNC, &oldDepthFuncMode);
-		shaderSkybox.setFloat("skybox", 0);
-		glCullFace(GL_FRONT);
-		glDepthFunc(GL_LEQUAL);
-		glActiveTexture(GL_TEXTURE0);
-		skyboxSphere.render();
-		glCullFace(oldCullFaceMode);
-		glDepthFunc(oldDepthFuncMode);
-
-		renderScene();
 
 		/*******************************************
 		 * Debug to box light box
@@ -1718,447 +1624,6 @@ void applicationLoop(){
 		 boxLightViewBox.render(boxViewTransform);
 		 glEnable(GL_CULL_FACE);*/
 
-		/*******************************************
-		 * Creacion de colliders
-		 * IMPORTANT do this before interpolations
-		 *******************************************/
-
-		// Lamps1 colliders
-		//for (int i = 0; i < lamp1Position.size(); i++) {
-		//	AbstractModel::OBB lampCollider;
-		//	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			lamp1Position[i]);
-		//	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
-		//			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
-		//	addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i),
-		//			lampCollider, modelMatrixColliderLamp);
-		//	// Set the orientation of collider before doing the scale
-		//	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-		//	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
-		//			glm::vec3(0.5, 0.5, 0.5));
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			modelLamp1.getObb().c);
-		//	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-		//	lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
-		//	std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) =
-		//			lampCollider;
-		//}
-
-		// Lamps2 colliders
-		//for (int i = 0; i < lamp2Position.size(); i++) {
-		//	AbstractModel::OBB lampCollider;
-		//	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			lamp2Position[i]);
-		//	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
-		//			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-		//	addOrUpdateColliders(collidersOBB, "lamp2-" + std::to_string(i),
-		//			lampCollider, modelMatrixColliderLamp);
-		//	// Set the orientation of collider before doing the scale
-		//	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-		//	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
-		//			glm::vec3(1.0, 1.0, 1.0));
-		//	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		//			modelLampPost2.getObb().c);
-		//	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-		//	lampCollider.e = modelLampPost2.getObb().e
-		//			* glm::vec3(1.0, 1.0, 1.0);
-		//	std::get<0>(collidersOBB.find("lamp2-" + std::to_string(i))->second) =
-		//			lampCollider;
-		//}
-
-		//Botones colliders
-		for (int i = 0; i < botonesPos.size(); i++) {
-			AbstractModel::OBB botonCollider;
-			AbstractModel::OBB botonColliderY;
-			AbstractModel::OBB botonColliderB;
-			AbstractModel::OBB botonColliderR;
-			glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
-			glm::mat4 modelMatrixColliderBotonY = glm::mat4(1.0);
-			glm::mat4 modelMatrixColliderBotonB = glm::mat4(1.0);
-			glm::mat4 modelMatrixColliderBotonR = glm::mat4(1.0);
-			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
-				botonesPos[i]);
-			//Botones colores
-			modelMatrixColliderBotonY = glm::translate(modelMatrixColliderBoton,
-				glm::vec3(-1.0, -0.4, 1.2));
-			modelMatrixColliderBotonB = glm::translate(modelMatrixColliderBoton,
-				glm::vec3(0.0, -0.4, 1.2));
-			modelMatrixColliderBotonR = glm::translate(modelMatrixColliderBoton,
-				glm::vec3(1.0, -0.4, 1.2));
-			//Retomar caja general
-			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
-				glm::vec3(0, 0, -0.2));
-			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-					glm::radians(-90.0f), glm::vec3(1, 0, 0));
-			modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-				glm::radians(-180.0f), glm::vec3(0, 0, 1));
-			//adds
-			addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
-				botonCollider, modelMatrixColliderBoton);
-			addOrUpdateColliders(collidersOBB, "botonBox-Y" + std::to_string(i),
-				botonColliderY, modelMatrixColliderBotonY);
-			addOrUpdateColliders(collidersOBB, "botonBox-B" + std::to_string(i),
-				botonColliderB, modelMatrixColliderBotonB);
-			addOrUpdateColliders(collidersOBB, "botonBox-R" + std::to_string(i),
-				botonColliderR, modelMatrixColliderBotonR);
-			// Set the orientation of collider before doing the scale
-			botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
-			modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
-					glm::vec3(1.5, 0.9, 1.0));
-			modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
-					modelBotones.getObb().c);
-			botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
-			botonCollider.e = modelBotones.getObb().e
-					* glm::vec3(1.5, 0.9, 1.0);
-			//Y boton
-			botonColliderY.u = glm::quat_cast(modelMatrixColliderBotonY);
-			modelMatrixColliderBotonY = glm::scale(modelMatrixColliderBotonY,
-				glm::vec3(0.3, 0.5, 0.3));
-			botonColliderY.c = glm::vec3(modelMatrixColliderBotonY[3]);
-			botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
-			//B boton
-			botonColliderB.u = glm::quat_cast(modelMatrixColliderBotonB);
-			modelMatrixColliderBotonB = glm::scale(modelMatrixColliderBotonB,
-				glm::vec3(0.3, 0.5, 0.3));
-			botonColliderB.c = glm::vec3(modelMatrixColliderBotonB[3]);
-			botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
-			//R boton
-			botonColliderR.u = glm::quat_cast(modelMatrixColliderBotonR);
-			modelMatrixColliderBotonR = glm::scale(modelMatrixColliderBotonR,
-				glm::vec3(0.3, 0.5, 0.3));
-			botonColliderR.c = glm::vec3(modelMatrixColliderBotonR[3]);
-			botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
-			std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
-				botonCollider;
-			std::get<0>(collidersOBB.find("botonBox-Y" + std::to_string(i))->second) =
-				botonColliderY;
-			std::get<0>(collidersOBB.find("botonBox-B" + std::to_string(i))->second) =
-				botonColliderB;
-			std::get<0>(collidersOBB.find("botonBox-R" + std::to_string(i))->second) =
-				botonColliderR;
-		}
-
-		//Botones generadores
-		for (int i = 0; i < generadorPos.size(); i++) {
-			AbstractModel::OBB generadorCollider;
-			glm::mat4 modelMatrixColliderGenerador = glm::mat4(1.0);
-			modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
-				generadorPos[i]);
-			//modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
-			//		glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-			addOrUpdateColliders(collidersOBB, "gene-" + std::to_string(i),
-				generadorCollider, modelMatrixColliderGenerador);
-			// Set the orientation of collider before doing the scale
-			generadorCollider.u = glm::quat_cast(modelMatrixColliderGenerador);
-			modelMatrixColliderGenerador = glm::scale(modelMatrixColliderGenerador,
-				glm::vec3(1.0, 1.0, 1.0));
-			modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
-				modelGenerador.getObb().c);
-			generadorCollider.c = glm::vec3(modelMatrixColliderGenerador[3]);
-			generadorCollider.e = modelGenerador.getObb().e
-				* glm::vec3(1.0, 1.0, 1.0);
-			std::get<0>(collidersOBB.find("gene-" + std::to_string(i))->second) =
-				generadorCollider;
-		}
-
-		// Collider de compuerta
-		AbstractModel::OBB compuertaCollider;
-		glm::mat4 modelmatrixColliderCompuerta = glm::mat4(modelMatrixCompuerta);
-		modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
-			glm::radians(-90.0f), glm::vec3(1, 0, 0));
-		// Set the orientation of collider before doing the scale
-		compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
-		modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
-			glm::vec3(0.021, 0.021, 0.021));
-		modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,
-			glm::vec3(modelCompuerta.getObb().c.x,
-				modelCompuerta.getObb().c.y,
-				modelCompuerta.getObb().c.z));
-		compuertaCollider.e = modelCompuerta.getObb().e
-			* glm::vec3(0.021, 0.021, 0.021);
-		compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
-		addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
-			modelMatrixCompuerta);
-
-		// Collider de edificio compuerta
-		AbstractModel::OBB edCompuertaCollider;
-		glm::mat4 modelmatrixColliderEdCompuerta = glm::mat4(modelMatrixEdCompuerta);
-		modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
-			glm::radians(-90.0f), glm::vec3(1, 0, 0));
-		// Set the orientation of collider before doing the scale
-		edCompuertaCollider.u = glm::quat_cast(modelmatrixColliderEdCompuerta);
-		modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
-			glm::vec3(0.021, 0.021, 0.021));
-		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
-			glm::vec3(modelEdCompuerta.getObb().c.x,
-				modelEdCompuerta.getObb().c.y,
-				modelEdCompuerta.getObb().c.z));
-		edCompuertaCollider.e = modelEdCompuerta.getObb().e
-			* glm::vec3(0.021, 0.021, 0.021);
-		edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
-		addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider,
-			modelMatrixEdCompuerta);
-
-		// Collider de mayow
-		AbstractModel::OBB mayowCollider;
-		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
-		modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
-				glm::radians(-90.0f), glm::vec3(1, 0, 0));
-		// Set the orientation of collider before doing the scale
-		mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
-		modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
-				glm::vec3(0.021, 0.021, 0.021));
-		modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
-				glm::vec3(mayowModelAnimate.getObb().c.x,
-						mayowModelAnimate.getObb().c.y,
-						mayowModelAnimate.getObb().c.z));
-		mayowCollider.e = mayowModelAnimate.getObb().e
-				* glm::vec3(0.021, 0.021, 0.021)
-				* glm::vec3(0.787401574, 0.787401574, 0.787401574);
-		mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
-		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider,
-				modelMatrixMayow);
-
-		//Collider de astroProta
-		AbstractModel::OBB astroProtaCollider;
-		glm::mat4 modelmatrixColliderAstroProta = glm::mat4(modelMatrixAstroProta);
-		// Set the orientation of collider before doing the scale
-		astroProtaCollider.u = glm::quat_cast(modelmatrixColliderAstroProta);
-		modelmatrixColliderAstroProta = glm::scale(modelmatrixColliderAstroProta,
-			glm::vec3(1.5, 4.0, 1.4));
-		modelmatrixColliderAstroProta = glm::translate(modelmatrixColliderAstroProta,
-			glm::vec3(astroProta.getObb().c.x,
-				astroProta.getObb().c.y + 0.28,
-				astroProta.getObb().c.z + 0.28));
-		astroProtaCollider.e = astroProta.getObb().e
-			* glm::vec3(1.5, 4.0, 1.4);
-		astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
-		addOrUpdateColliders(collidersOBB, "astroProta", astroProtaCollider,
-			modelMatrixAstroProta);
-
-		//Collider muro fondo
-		AbstractModel::OBB muroFondoCollider;
-		glm::mat4 modelmatrixColliderMuroFondo = glm::mat4(modelMatrixMuroFondo);
-		// Set the orientation of collider before doing the scale
-		muroFondoCollider.u = glm::quat_cast(modelmatrixColliderMuroFondo);
-		modelmatrixColliderMuroFondo = glm::translate(modelmatrixColliderMuroFondo,
-			glm::vec3(muroFondo.getObb().c.x,
-				muroFondo.getObb().c.y,
-				muroFondo.getObb().c.z));
-		muroFondoCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
-		muroFondoCollider.c = glm::vec3(modelmatrixColliderMuroFondo[3]);
-		addOrUpdateColliders(collidersOBB, "muroFondo", muroFondoCollider,
-			modelMatrixMuroFondo);
-
-		//Collider muro frontal
-		AbstractModel::OBB muroFrontalCollider;
-		glm::mat4 modelmatrixColliderMuroFrontal = glm::mat4(modelMatrixMuroFrontal);
-		// Set the orientation of collider before doing the scale
-		muroFrontalCollider.u = glm::quat_cast(modelmatrixColliderMuroFrontal);
-		modelmatrixColliderMuroFrontal = glm::translate(modelmatrixColliderMuroFrontal,
-			glm::vec3(muroFrontal.getObb().c.x,
-				muroFrontal.getObb().c.y,
-				muroFrontal.getObb().c.z));
-		muroFrontalCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
-		muroFrontalCollider.c = glm::vec3(modelmatrixColliderMuroFrontal[3]);
-		addOrUpdateColliders(collidersOBB, "muroFrontal", muroFrontalCollider,
-			modelMatrixMuroFrontal);
-
-		//Collider muro derecho
-		AbstractModel::OBB muroDerechoCollider;
-		glm::mat4 modelmatrixColliderMuroDerecho = glm::mat4(modelMatrixMuroDerecho);
-		// Set the orientation of collider before doing the scale
-		muroDerechoCollider.u = glm::quat_cast(modelmatrixColliderMuroDerecho);
-		modelmatrixColliderMuroDerecho = glm::translate(modelmatrixColliderMuroDerecho,
-			glm::vec3(muroDerecho.getObb().c.x,
-				muroDerecho.getObb().c.y,
-				muroDerecho.getObb().c.z));
-		muroDerechoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
-		muroDerechoCollider.c = glm::vec3(modelmatrixColliderMuroDerecho[3]);
-		addOrUpdateColliders(collidersOBB, "muroDerecho", muroDerechoCollider,
-			modelMatrixMuroDerecho);
-
-		//Collider muro izquierdo
-		AbstractModel::OBB muroIzquierdoCollider;
-		glm::mat4 modelmatrixColliderMuroIzquierdo = glm::mat4(modelMatrixMuroIzquierdo);
-		// Set the orientation of collider before doing the scale
-		muroIzquierdoCollider.u = glm::quat_cast(modelmatrixColliderMuroIzquierdo);
-		modelmatrixColliderMuroIzquierdo = glm::translate(modelmatrixColliderMuroIzquierdo,
-			glm::vec3(muroIzquierdo.getObb().c.x,
-				muroIzquierdo.getObb().c.y,
-				muroIzquierdo.getObb().c.z));
-		muroIzquierdoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
-		muroIzquierdoCollider.c = glm::vec3(modelmatrixColliderMuroIzquierdo[3]);
-		addOrUpdateColliders(collidersOBB, "muroIzquierdo", muroIzquierdoCollider,
-			modelMatrixMuroIzquierdo);
-
-		/*******************************************
-		 * Render de colliders
-		 *******************************************/
-		for (std::map<std::string,
-				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersOBB.begin(); it != collidersOBB.end(); it++) {
-			glm::mat4 matrixCollider = glm::mat4(1.0);
-			matrixCollider = glm::translate(matrixCollider,
-					std::get<0>(it->second).c);
-			matrixCollider = matrixCollider
-					* glm::mat4(std::get<0>(it->second).u);
-			matrixCollider = glm::scale(matrixCollider,
-					std::get<0>(it->second).e * 2.0f);
-			boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-			boxCollider.enableWireMode();
-			boxCollider.render(matrixCollider);
-		}
-
-		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			glm::mat4 matrixCollider = glm::mat4(1.0);
-			matrixCollider = glm::translate(matrixCollider,
-					std::get<0>(it->second).c);
-			matrixCollider = glm::scale(matrixCollider,
-					glm::vec3(std::get<0>(it->second).ratio * 2.0f));
-			sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-			sphereCollider.enableWireMode();
-			sphereCollider.render(matrixCollider);
-		}
-
-		/*******************************************
-		 * Test Colisions
-		 *******************************************/
-		bool isCollisionG = false;
-		bool isCollisionEnemy = false;
-
-		for (std::map<std::string,
-				std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersOBB.begin(); it != collidersOBB.end(); it++) {
-			bool isCollision = false;
-			for (std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
-				if (it != jt
-						&& testOBBOBB(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
-					if (!(excepCollider(it->first, jt->first)))
-					{
-						std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
-
-						if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
-							&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
-							isCollisionEnemy = true;
-
-
-						isCollision = true;
-						isCollisionG = true;
-					}
-				}
-			}
-			addOrUpdateCollisionDetection(collisionDetection, it->first,
-					isCollision);
-		}
-
-		if (isCollisionG && actionE && !enableEscotilla1) {
-			std::cout << "EntraISC " << std::endl;
-			updateBotonCollider(collisionDetection);
-			actionE = false;
-		}
-
-		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			bool isCollision = false;
-			for (std::map<std::string,
-					std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersSBB.begin(); jt != collidersSBB.end(); jt++) {
-				if (it != jt
-						&& testSphereSphereIntersection(std::get<0>(it->second),
-								std::get<0>(jt->second))) {
-					//std::cout << "Colision " << it->first << " with "
-					//		<< jt->first << std::endl;
-					isCollision = true;
-				}
-			}
-			addOrUpdateCollisionDetection(collisionDetection, it->first,
-					isCollision);
-		}
-
-		for (std::map<std::string,
-				std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-				collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			bool isCollision = false;
-			std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.begin();
-			for (; jt != collidersOBB.end(); jt++) {
-				if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
-					std::cout << "Colision " << it->first << " with "
-							<< jt->first << std::endl;
-
-					isCollision = true;
-					addOrUpdateCollisionDetection(collisionDetection, jt->first,
-							isCollision);
-				}
-			}
-			addOrUpdateCollisionDetection(collisionDetection, it->first,
-					isCollision);
-		}
-
-		std::map<std::string, bool>::iterator colIt;
-		for (colIt = collisionDetection.begin();
-				colIt != collisionDetection.end(); colIt++) {
-			std::map<std::string,
-					std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-					collidersSBB.find(colIt->first);
-			std::map<std::string,
-					std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
-					collidersOBB.find(colIt->first);
-			if (it != collidersSBB.end()) {
-				if (!colIt->second)
-					addOrUpdateColliders(collidersSBB, it->first);
-			}
-			if (jt != collidersOBB.end()) {
-				if (!colIt->second) {
-					addOrUpdateColliders(collidersOBB, jt->first);
-				}
-				else {
-
-					
-					if (jt->first.compare("mayow") == 0) {
-
-						//modelMatrixMayow = std::get<1>(jt->second);
-						/*std::cout << "Colisionó de " << colIt->first << " with "
-							<< jt->first << std::endl;*/
-
-						if (isCollisionEnemy == true) {
-							enemigo1.respawn = true;
-							modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
-							playerRespawn = true;
-							isCollisionEnemy = false;
-						}
-							
-
-
-						
-					}
-					if (jt->first.compare("astroProta") == 0) {
-
-						modelMatrixAstroProta = std::get<1>(jt->second);
-						
-							
-
-					}
-						
-					/*if (jt->first.compare("dart") == 0)
-						modelMatrixDart = std::get<1>(jt->second);*/
-				}
-			}
-		}
-
-		// Constantes de animaciones
-		/*rotHelHelY += 0.5;*/
 		animationIndex = 1;
 
 		/*******************************************
@@ -2183,55 +1648,6 @@ void applicationLoop(){
 
 		modelText->render("Texto en openGL", -1, 0);
 		glfwSwapBuffers(window);
-
-		/****************************+
-		 * Open AL sound data
-		 */
-		source0Pos[0] = modelMatrixFountain[3].x;
-		source0Pos[1] = modelMatrixFountain[3].y;
-		source0Pos[2] = modelMatrixFountain[3].z;
-		alSourcefv(source[0], AL_POSITION, source0Pos);
-
-		/*source2Pos[0] = modelMatrixDart[3].x;
-		source2Pos[1] = modelMatrixDart[3].y;
-		source2Pos[2] = modelMatrixDart[3].z;
-		alSourcefv(source[2], AL_POSITION, source2Pos);*/
-
-		// Listener for the Thris person camera
-		listenerPos[0] = modelMatrixMayow[3].x;
-		listenerPos[1] = modelMatrixMayow[3].y;
-		listenerPos[2] = modelMatrixMayow[3].z;
-		alListenerfv(AL_POSITION, listenerPos);
-
-		glm::vec3 upModel = glm::normalize(modelMatrixMayow[1]);
-		glm::vec3 frontModel = glm::normalize(modelMatrixMayow[2]);
-
-		listenerOri[0] = frontModel.x;
-		listenerOri[1] = frontModel.y;
-		listenerOri[2] = frontModel.z;
-		listenerOri[3] = upModel.x;
-		listenerOri[4] = upModel.y;
-		listenerOri[5] = upModel.z;
-
-		// Listener for the First person camera
-		/*listenerPos[0] = camera->getPosition().x;
-		 listenerPos[1] = camera->getPosition().y;
-		 listenerPos[2] = camera->getPosition().z;
-		 alListenerfv(AL_POSITION, listenerPos);
-		 listenerOri[0] = camera->getFront().x;
-		 listenerOri[1] = camera->getFront().y;
-		 listenerOri[2] = camera->getFront().z;
-		 listenerOri[3] = camera->getUp().x;
-		 listenerOri[4] = camera->getUp().y;
-		 listenerOri[5] = camera->getUp().z;*/
-		alListenerfv(AL_ORIENTATION, listenerOri);
-
-		for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
-			if (sourcesPlay[i]) {
-				sourcesPlay[i] = false;
-				alSourcePlay(source[i]);
-			}
-		}
 	}
 }
 
@@ -2354,7 +1770,7 @@ void renderScene(bool renderParticles) {
 
 	//Muros
 	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, textureWallID);
+	//glBindTexture(GL_TEXTURE_2D, textureYellowID);
 	//muroFondo.render(modelMatrixMuroFondo);
 
 	//muroFrontal.render(modelMatrixMuroFrontal);
@@ -2662,6 +2078,57 @@ void renderScene(bool renderParticles) {
 	glEnable(GL_CULL_FACE);
 }
 
+void inicialMatrixs() {
+	modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+		glm::vec3(0.0f, 5.0f, 23.0f));
+	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+		glm::vec3(0, 0, 1));
+
+	modelMatrixMayow = glm::translate(modelMatrixMayow,
+		glm::vec3(13.0f, 0.05f, -5.0f));
+
+
+	//modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f),
+	//		glm::vec3(0, 1, 0));
+
+
+	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+		glm::vec3(0.0f, 0.0f, 0.0f));
+	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
+		glm::vec3(1, 0, 0));*/
+
+	modelMatrixFountain = glm::translate(modelMatrixFountain,
+		glm::vec3(5.0, 0.0, -40.0));
+	modelMatrixFountain[3][1] = terrain.getHeightTerrain(
+		modelMatrixFountain[3][0], modelMatrixFountain[3][2]) + 0.2;
+	modelMatrixFountain = glm::scale(modelMatrixFountain,
+		glm::vec3(10.0f, 10.0f, 10.0f));
+
+	//Posicion de los muros
+	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo,
+		glm::vec3(0.0f, 0.0f, -10.0f));
+	modelMatrixMuroFondo = glm::scale(modelMatrixMuroFondo,
+		glm::vec3(75.0f, 20.0f, 0.0f));
+
+	modelMatrixMuroFrontal = glm::translate(modelMatrixMuroFrontal,
+		glm::vec3(0.0f, 0.0f, 28.0f));
+	modelMatrixMuroFrontal = glm::scale(modelMatrixMuroFrontal,
+		glm::vec3(75.0f, 20.0f, 0.0f));
+
+	modelMatrixMuroDerecho = glm::translate(modelMatrixMuroDerecho,
+		glm::vec3(85.0f, 0.0f, 15.0f));
+	modelMatrixMuroDerecho = glm::scale(modelMatrixMuroDerecho,
+		glm::vec3(0.0f, 20.0f, 70.0f));
+
+	modelMatrixMuroIzquierdo = glm::translate(modelMatrixMuroIzquierdo,
+		glm::vec3(-73.0f, 0.0f, 15.0f));
+	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
+		glm::vec3(0.0f, 20.0f, 70.0f));
+
+	modelMatrixCompuerta = glm::translate(modelMatrixCompuerta,
+		glm::vec3(5.9f, 0.0f, 8.8f));
+}
+
 void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 
 	glm::vec3 lightPos = glm::vec3(10.0, 10.0, 0.0);
@@ -2923,6 +2390,555 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 	}
 }
 
+void preRender1() {
+	/*******************************************
+		 * 1.- We render the depth buffer
+	*******************************************/
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// render scene from light's point of view
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	//glCullFace(GL_FRONT);
+	prepareDepthScene();
+	renderScene(false);
+	//glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	/*******************************************
+	 * Debug to view the texture view map
+	*******************************************/
+	 // reset viewport
+	 /*glViewport(0, 0, screenWidth, screenHeight);
+	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	  // render Depth map to quad for visual debugging
+	  shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
+	  shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
+	  glActiveTexture(GL_TEXTURE0);
+	  glBindTexture(GL_TEXTURE_2D, depthMap);
+	  boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
+	  boxViewDepth.render();*/
+
+	 /*******************************************
+	   * 2.- We render the normal objects
+	 *******************************************/
+	glViewport(0, 0, screenWidth, screenHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	prepareScene();
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	shaderMulLighting.setInt("shadowMap", 10);
+	shaderTerrain.setInt("shadowMap", 10);
+	/*******************************************
+	 * Skybox
+	 *******************************************/
+	GLint oldCullFaceMode;
+	GLint oldDepthFuncMode;
+	// deshabilita el modo del recorte de caras ocultas para ver las esfera desde adentro
+	glGetIntegerv(GL_CULL_FACE_MODE, &oldCullFaceMode);
+	glGetIntegerv(GL_DEPTH_FUNC, &oldDepthFuncMode);
+	shaderSkybox.setFloat("skybox", 0);
+	glCullFace(GL_FRONT);
+	glDepthFunc(GL_LEQUAL);
+	glActiveTexture(GL_TEXTURE0);
+	skyboxSphere.render();
+	glCullFace(oldCullFaceMode);
+	glDepthFunc(oldDepthFuncMode);
+}
+
+void collidersManagmentEs1() {
+	std::map<std::string, bool> collisionDetection;
+	/*******************************************
+		 * Creacion de colliders
+		 * IMPORTANT do this before interpolations
+		 *******************************************/
+
+		 // Lamps1 colliders
+		 //for (int i = 0; i < lamp1Position.size(); i++) {
+		 //	AbstractModel::OBB lampCollider;
+		 //	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
+		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		 //			lamp1Position[i]);
+		 //	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
+		 //			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
+		 //	addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i),
+		 //			lampCollider, modelMatrixColliderLamp);
+		 //	// Set the orientation of collider before doing the scale
+		 //	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
+		 //	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
+		 //			glm::vec3(0.5, 0.5, 0.5));
+		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		 //			modelLamp1.getObb().c);
+		 //	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
+		 //	lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
+		 //	std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) =
+		 //			lampCollider;
+		 //}
+
+		 // Lamps2 colliders
+		 //for (int i = 0; i < lamp2Position.size(); i++) {
+		 //	AbstractModel::OBB lampCollider;
+		 //	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
+		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		 //			lamp2Position[i]);
+		 //	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
+		 //			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+		 //	addOrUpdateColliders(collidersOBB, "lamp2-" + std::to_string(i),
+		 //			lampCollider, modelMatrixColliderLamp);
+		 //	// Set the orientation of collider before doing the scale
+		 //	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
+		 //	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
+		 //			glm::vec3(1.0, 1.0, 1.0));
+		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
+		 //			modelLampPost2.getObb().c);
+		 //	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
+		 //	lampCollider.e = modelLampPost2.getObb().e
+		 //			* glm::vec3(1.0, 1.0, 1.0);
+		 //	std::get<0>(collidersOBB.find("lamp2-" + std::to_string(i))->second) =
+		 //			lampCollider;
+		 //}
+
+		 //Botones colliders
+	for (int i = 0; i < botonesPos.size(); i++) {
+		AbstractModel::OBB botonCollider;
+		AbstractModel::OBB botonColliderY;
+		AbstractModel::OBB botonColliderB;
+		AbstractModel::OBB botonColliderR;
+		glm::mat4 modelMatrixColliderBoton = glm::mat4(1.0);
+		glm::mat4 modelMatrixColliderBotonY = glm::mat4(1.0);
+		glm::mat4 modelMatrixColliderBotonB = glm::mat4(1.0);
+		glm::mat4 modelMatrixColliderBotonR = glm::mat4(1.0);
+		modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+			botonesPos[i]);
+		//Botones colores
+		modelMatrixColliderBotonY = glm::translate(modelMatrixColliderBoton,
+			glm::vec3(-1.0, -0.4, 1.2));
+		modelMatrixColliderBotonB = glm::translate(modelMatrixColliderBoton,
+			glm::vec3(0.0, -0.4, 1.2));
+		modelMatrixColliderBotonR = glm::translate(modelMatrixColliderBoton,
+			glm::vec3(1.0, -0.4, 1.2));
+		//Retomar caja general
+		modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+			glm::vec3(0, 0, -0.2));
+		modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+			glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+			glm::radians(-180.0f), glm::vec3(0, 0, 1));
+		//adds
+		addOrUpdateColliders(collidersOBB, "botonBox-" + std::to_string(i),
+			botonCollider, modelMatrixColliderBoton);
+		addOrUpdateColliders(collidersOBB, "botonBox-Y" + std::to_string(i),
+			botonColliderY, modelMatrixColliderBotonY);
+		addOrUpdateColliders(collidersOBB, "botonBox-B" + std::to_string(i),
+			botonColliderB, modelMatrixColliderBotonB);
+		addOrUpdateColliders(collidersOBB, "botonBox-R" + std::to_string(i),
+			botonColliderR, modelMatrixColliderBotonR);
+		// Set the orientation of collider before doing the scale
+		botonCollider.u = glm::quat_cast(modelMatrixColliderBoton);
+		modelMatrixColliderBoton = glm::scale(modelMatrixColliderBoton,
+			glm::vec3(1.5, 0.9, 1.0));
+		modelMatrixColliderBoton = glm::translate(modelMatrixColliderBoton,
+			modelBotones.getObb().c);
+		botonCollider.c = glm::vec3(modelMatrixColliderBoton[3]);
+		botonCollider.e = modelBotones.getObb().e
+			* glm::vec3(1.5, 0.9, 1.0);
+		//Y boton
+		botonColliderY.u = glm::quat_cast(modelMatrixColliderBotonY);
+		modelMatrixColliderBotonY = glm::scale(modelMatrixColliderBotonY,
+			glm::vec3(0.3, 0.5, 0.3));
+		botonColliderY.c = glm::vec3(modelMatrixColliderBotonY[3]);
+		botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+		//B boton
+		botonColliderB.u = glm::quat_cast(modelMatrixColliderBotonB);
+		modelMatrixColliderBotonB = glm::scale(modelMatrixColliderBotonB,
+			glm::vec3(0.3, 0.5, 0.3));
+		botonColliderB.c = glm::vec3(modelMatrixColliderBotonB[3]);
+		botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+		//R boton
+		botonColliderR.u = glm::quat_cast(modelMatrixColliderBotonR);
+		modelMatrixColliderBotonR = glm::scale(modelMatrixColliderBotonR,
+			glm::vec3(0.3, 0.5, 0.3));
+		botonColliderR.c = glm::vec3(modelMatrixColliderBotonR[3]);
+		botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+		std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
+			botonCollider;
+		std::get<0>(collidersOBB.find("botonBox-Y" + std::to_string(i))->second) =
+			botonColliderY;
+		std::get<0>(collidersOBB.find("botonBox-B" + std::to_string(i))->second) =
+			botonColliderB;
+		std::get<0>(collidersOBB.find("botonBox-R" + std::to_string(i))->second) =
+			botonColliderR;
+	}
+
+	//Botones generadores
+	for (int i = 0; i < generadorPos.size(); i++) {
+		AbstractModel::OBB generadorCollider;
+		glm::mat4 modelMatrixColliderGenerador = glm::mat4(1.0);
+		modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
+			generadorPos[i]);
+		//modelMatrixColliderBoton = glm::rotate(modelMatrixColliderBoton,
+		//		glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
+		addOrUpdateColliders(collidersOBB, "gene-" + std::to_string(i),
+			generadorCollider, modelMatrixColliderGenerador);
+		// Set the orientation of collider before doing the scale
+		generadorCollider.u = glm::quat_cast(modelMatrixColliderGenerador);
+		modelMatrixColliderGenerador = glm::scale(modelMatrixColliderGenerador,
+			glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
+			modelGenerador.getObb().c);
+		generadorCollider.c = glm::vec3(modelMatrixColliderGenerador[3]);
+		generadorCollider.e = modelGenerador.getObb().e
+			* glm::vec3(1.0, 1.0, 1.0);
+		std::get<0>(collidersOBB.find("gene-" + std::to_string(i))->second) =
+			generadorCollider;
+	}
+
+	// Collider de compuerta
+	AbstractModel::OBB compuertaCollider;
+	glm::mat4 modelmatrixColliderCompuerta = glm::mat4(modelMatrixCompuerta);
+	modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
+		glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	// Set the orientation of collider before doing the scale
+	compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
+	modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
+		glm::vec3(0.021, 0.021, 0.021));
+	modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,
+		glm::vec3(modelCompuerta.getObb().c.x,
+			modelCompuerta.getObb().c.y,
+			modelCompuerta.getObb().c.z));
+	compuertaCollider.e = modelCompuerta.getObb().e
+		* glm::vec3(0.021, 0.021, 0.021);
+	compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
+	addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
+		modelMatrixCompuerta);
+
+	// Collider de edificio compuerta
+	AbstractModel::OBB edCompuertaCollider;
+	glm::mat4 modelmatrixColliderEdCompuerta = glm::mat4(modelMatrixEdCompuerta);
+	modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
+		glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	// Set the orientation of collider before doing the scale
+	edCompuertaCollider.u = glm::quat_cast(modelmatrixColliderEdCompuerta);
+	modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
+		glm::vec3(0.021, 0.021, 0.021));
+	modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
+		glm::vec3(modelEdCompuerta.getObb().c.x,
+			modelEdCompuerta.getObb().c.y,
+			modelEdCompuerta.getObb().c.z));
+	edCompuertaCollider.e = modelEdCompuerta.getObb().e
+		* glm::vec3(0.021, 0.021, 0.021);
+	edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
+	addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider,
+		modelMatrixEdCompuerta);
+
+	// Collider de mayow
+	AbstractModel::OBB mayowCollider;
+	glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
+	modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
+		glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	// Set the orientation of collider before doing the scale
+	mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
+	modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
+		glm::vec3(0.021, 0.021, 0.021));
+	modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
+		glm::vec3(mayowModelAnimate.getObb().c.x,
+			mayowModelAnimate.getObb().c.y,
+			mayowModelAnimate.getObb().c.z));
+	mayowCollider.e = mayowModelAnimate.getObb().e
+		* glm::vec3(0.021, 0.021, 0.021)
+		* glm::vec3(0.787401574, 0.787401574, 0.787401574);
+	mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
+	addOrUpdateColliders(collidersOBB, "mayow", mayowCollider,
+		modelMatrixMayow);
+
+	//Collider de astroProta
+	AbstractModel::OBB astroProtaCollider;
+	glm::mat4 modelmatrixColliderAstroProta = glm::mat4(modelMatrixAstroProta);
+	// Set the orientation of collider before doing the scale
+	astroProtaCollider.u = glm::quat_cast(modelmatrixColliderAstroProta);
+	modelmatrixColliderAstroProta = glm::scale(modelmatrixColliderAstroProta,
+		glm::vec3(1.5, 4.0, 1.4));
+	modelmatrixColliderAstroProta = glm::translate(modelmatrixColliderAstroProta,
+		glm::vec3(astroProta.getObb().c.x,
+			astroProta.getObb().c.y + 0.28,
+			astroProta.getObb().c.z + 0.28));
+	astroProtaCollider.e = astroProta.getObb().e
+		* glm::vec3(1.5, 4.0, 1.4);
+	astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
+	addOrUpdateColliders(collidersOBB, "astroProta", astroProtaCollider,
+		modelMatrixAstroProta);
+
+	//Collider muro fondo
+	AbstractModel::OBB muroFondoCollider;
+	glm::mat4 modelmatrixColliderMuroFondo = glm::mat4(modelMatrixMuroFondo);
+	// Set the orientation of collider before doing the scale
+	muroFondoCollider.u = glm::quat_cast(modelmatrixColliderMuroFondo);
+	modelmatrixColliderMuroFondo = glm::translate(modelmatrixColliderMuroFondo,
+		glm::vec3(muroFondo.getObb().c.x,
+			muroFondo.getObb().c.y,
+			muroFondo.getObb().c.z));
+	muroFondoCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
+	muroFondoCollider.c = glm::vec3(modelmatrixColliderMuroFondo[3]);
+	addOrUpdateColliders(collidersOBB, "muroFondo", muroFondoCollider,
+		modelMatrixMuroFondo);
+
+	//Collider muro frontal
+	AbstractModel::OBB muroFrontalCollider;
+	glm::mat4 modelmatrixColliderMuroFrontal = glm::mat4(modelMatrixMuroFrontal);
+	// Set the orientation of collider before doing the scale
+	muroFrontalCollider.u = glm::quat_cast(modelmatrixColliderMuroFrontal);
+	modelmatrixColliderMuroFrontal = glm::translate(modelmatrixColliderMuroFrontal,
+		glm::vec3(muroFrontal.getObb().c.x,
+			muroFrontal.getObb().c.y,
+			muroFrontal.getObb().c.z));
+	muroFrontalCollider.e = glm::vec3(100.50f, 10.0f, 0.0f);
+	muroFrontalCollider.c = glm::vec3(modelmatrixColliderMuroFrontal[3]);
+	addOrUpdateColliders(collidersOBB, "muroFrontal", muroFrontalCollider,
+		modelMatrixMuroFrontal);
+
+	//Collider muro derecho
+	AbstractModel::OBB muroDerechoCollider;
+	glm::mat4 modelmatrixColliderMuroDerecho = glm::mat4(modelMatrixMuroDerecho);
+	// Set the orientation of collider before doing the scale
+	muroDerechoCollider.u = glm::quat_cast(modelmatrixColliderMuroDerecho);
+	modelmatrixColliderMuroDerecho = glm::translate(modelmatrixColliderMuroDerecho,
+		glm::vec3(muroDerecho.getObb().c.x,
+			muroDerecho.getObb().c.y,
+			muroDerecho.getObb().c.z));
+	muroDerechoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
+	muroDerechoCollider.c = glm::vec3(modelmatrixColliderMuroDerecho[3]);
+	addOrUpdateColliders(collidersOBB, "muroDerecho", muroDerechoCollider,
+		modelMatrixMuroDerecho);
+
+	//Collider muro izquierdo
+	AbstractModel::OBB muroIzquierdoCollider;
+	glm::mat4 modelmatrixColliderMuroIzquierdo = glm::mat4(modelMatrixMuroIzquierdo);
+	// Set the orientation of collider before doing the scale
+	muroIzquierdoCollider.u = glm::quat_cast(modelmatrixColliderMuroIzquierdo);
+	modelmatrixColliderMuroIzquierdo = glm::translate(modelmatrixColliderMuroIzquierdo,
+		glm::vec3(muroIzquierdo.getObb().c.x,
+			muroIzquierdo.getObb().c.y,
+			muroIzquierdo.getObb().c.z));
+	muroIzquierdoCollider.e = glm::vec3(0.0f, 10.0f, 35.0f);
+	muroIzquierdoCollider.c = glm::vec3(modelmatrixColliderMuroIzquierdo[3]);
+	addOrUpdateColliders(collidersOBB, "muroIzquierdo", muroIzquierdoCollider,
+		modelMatrixMuroIzquierdo);
+
+	/*******************************************
+	 * Render de colliders
+	 *******************************************/
+	for (std::map<std::string,
+		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersOBB.begin(); it != collidersOBB.end(); it++) {
+		glm::mat4 matrixCollider = glm::mat4(1.0);
+		matrixCollider = glm::translate(matrixCollider,
+			std::get<0>(it->second).c);
+		matrixCollider = matrixCollider
+			* glm::mat4(std::get<0>(it->second).u);
+		matrixCollider = glm::scale(matrixCollider,
+			std::get<0>(it->second).e * 2.0f);
+		boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+		boxCollider.enableWireMode();
+		boxCollider.render(matrixCollider);
+	}
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersSBB.begin(); it != collidersSBB.end(); it++) {
+		glm::mat4 matrixCollider = glm::mat4(1.0);
+		matrixCollider = glm::translate(matrixCollider,
+			std::get<0>(it->second).c);
+		matrixCollider = glm::scale(matrixCollider,
+			glm::vec3(std::get<0>(it->second).ratio * 2.0f));
+		sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+		sphereCollider.enableWireMode();
+		sphereCollider.render(matrixCollider);
+	}
+
+	/*******************************************
+	 * Test Colisions
+	 *******************************************/
+	bool isCollisionG = false;
+	bool isCollisionEnemy = false;
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersOBB.begin(); it != collidersOBB.end(); it++) {
+		bool isCollision = false;
+		for (std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
+			if (it != jt
+				&& testOBBOBB(std::get<0>(it->second),
+					std::get<0>(jt->second))) {
+				if (!(excepCollider(it->first, jt->first)))
+				{
+					std::cout << "Colision " << it->first << " with "
+						<< jt->first << std::endl;
+
+					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
+						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
+						isCollisionEnemy = true;
+
+					isCollision = true;
+					isCollisionG = true;
+				}
+			}
+		}
+		addOrUpdateCollisionDetection(collisionDetection, it->first,
+			isCollision);
+	}
+
+	if (isCollisionG && actionE && !enableEscotilla1) {
+		std::cout << "EntraISC " << std::endl;
+		updateBotonCollider(collisionDetection);
+		actionE = false;
+	}
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersSBB.begin(); it != collidersSBB.end(); it++) {
+		bool isCollision = false;
+		for (std::map<std::string,
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersSBB.begin(); jt != collidersSBB.end(); jt++) {
+			if (it != jt
+				&& testSphereSphereIntersection(std::get<0>(it->second),
+					std::get<0>(jt->second))) {
+				//std::cout << "Colision " << it->first << " with "
+				//		<< jt->first << std::endl;
+				isCollision = true;
+			}
+		}
+		addOrUpdateCollisionDetection(collisionDetection, it->first,
+			isCollision);
+	}
+
+	for (std::map<std::string,
+		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+		collidersSBB.begin(); it != collidersSBB.end(); it++) {
+		bool isCollision = false;
+		std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersOBB.begin();
+		for (; jt != collidersOBB.end(); jt++) {
+			if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
+				std::cout << "Colision " << it->first << " with "
+					<< jt->first << std::endl;
+
+				isCollision = true;
+				addOrUpdateCollisionDetection(collisionDetection, jt->first,
+					isCollision);
+			}
+		}
+		addOrUpdateCollisionDetection(collisionDetection, it->first,
+			isCollision);
+	}
+
+	std::map<std::string, bool>::iterator colIt;
+	for (colIt = collisionDetection.begin();
+		colIt != collisionDetection.end(); colIt++) {
+		std::map<std::string,
+			std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+			collidersSBB.find(colIt->first);
+		std::map<std::string,
+			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
+			collidersOBB.find(colIt->first);
+		if (it != collidersSBB.end()) {
+			if (!colIt->second)
+				addOrUpdateColliders(collidersSBB, it->first);
+		}
+		if (jt != collidersOBB.end()) {
+			if (!colIt->second) {
+				addOrUpdateColliders(collidersOBB, jt->first);
+			}
+			else {
+				if (jt->first.compare("mayow") == 0) {
+					if (isCollisionEnemy == true) {
+						enemigo1.respawn = true;
+						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+						playerRespawn = true;
+						isCollisionEnemy = false;
+					}
+				}
+				if (jt->first.compare("astroProta") == 0) {
+					modelMatrixAstroProta = std::get<1>(jt->second);
+				}
+			}
+		}
+	}
+}
+
+void soundEscene1() {
+	/****************************+
+		 * Open AL sound data
+		 */
+		 // Listener for the Thris person camera
+	listenerPos[0] = modelMatrixMayow[3].x;
+	listenerPos[1] = modelMatrixMayow[3].y;
+	listenerPos[2] = modelMatrixMayow[3].z;
+	alListenerfv(AL_POSITION, listenerPos);
+
+	glm::vec3 upModel = glm::normalize(modelMatrixMayow[1]);
+	glm::vec3 frontModel = glm::normalize(modelMatrixMayow[2]);
+
+	listenerOri[0] = frontModel.x;
+	listenerOri[1] = frontModel.y;
+	listenerOri[2] = frontModel.z;
+	listenerOri[3] = upModel.x;
+	listenerOri[4] = upModel.y;
+	listenerOri[5] = upModel.z;
+
+	// Listener for the First person camera
+	/*listenerPos[0] = camera->getPosition().x;
+	 listenerPos[1] = camera->getPosition().y;
+	 listenerPos[2] = camera->getPosition().z;
+	 alListenerfv(AL_POSITION, listenerPos);
+	 listenerOri[0] = camera->getFront().x;
+	 listenerOri[1] = camera->getFront().y;
+	 listenerOri[2] = camera->getFront().z;
+	 listenerOri[3] = camera->getUp().x;
+	 listenerOri[4] = camera->getUp().y;
+	 listenerOri[5] = camera->getUp().z;*/
+	alListenerfv(AL_ORIENTATION, listenerOri);
+
+	for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
+		if (sourcesPlay[i]) {
+			sourcesPlay[i] = false;
+			alSourcePlay(source[i]);
+		}
+	}
+}
+
+void prepareScene2() {
+
+}
+
+void prepareDepthScene2() {
+
+}
+
+void renderScene2(bool renderParticles) {
+
+}
+
+void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view) {
+
+}
+
+void preRender2() {
+
+}
+
+void collidersManagmentEs2() {
+
+}
+
+void soundEscene2() {
+
+}
+
 void cameraMove() {
 	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 	int camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
@@ -3006,6 +3022,10 @@ void updateEscenario1() {
 			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
 		}
 	}
+}
+
+void updateEscenario2() {
+
 }
 
 int main(int argc, char **argv) {
