@@ -190,10 +190,12 @@ glm::mat4 modelMatrixMuroFrontal = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho = glm::mat4(1.0f);
 glm::mat4 defaultMatrix = glm::mat4(1.0f);
+glm::mat4 defaultMatrix2 = glm::mat4(1.0f);
 
 //vectors
 glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 camPivOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
 glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
 glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
@@ -213,9 +215,11 @@ int pasado = 0;
 int posterior = 0;
 int cameraSelected = 0;
 int tiempoRespawnProta = 0;
+int tiempoOxigeno = 0;
 int situacion = 1;
 bool enableCameraSelected = true;
 bool playerRespawn = false;
+bool playerRespawn2 = false;
 bool enableAction = true;
 bool actionE = false;
 bool enableEscotilla1 = false;
@@ -223,7 +227,7 @@ bool cambianivel2 = false;
 bool cambianivel3 = false;
 bool empiezaJuego = false;
 bool pressEnter = false;
-bool pressOption = false;
+
 
 bool escenario1 = false;
 bool escenario2 = true;
@@ -1273,6 +1277,7 @@ void destroy() {
 	modelLuzBotones.destroy();
 	modelLuzGenerador.destroy();
 	boxReferencia.destroy();
+	boxMenu.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -1369,7 +1374,6 @@ bool processInput(bool continueApplication) {
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
 	}
-
 	if (!empiezaJuego) {
 		bool pressEnter = glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS;
 		if (textureActivaID == textureMenuID && pressEnter)
@@ -1536,7 +1540,7 @@ bool processInput(bool continueApplication) {
 				banderaCaminar = 10;
 			if (timer > 35.0f && banderaCaminar == 10)
 				banderaCaminar = 11;
-			std::cout << banderaCaminar << std::endl;
+			//std::cout << banderaCaminar << std::endl;
 			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
 			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 
@@ -1590,6 +1594,13 @@ bool processInput(bool continueApplication) {
 	if (playerRespawn == true) {
 		modelMatrixAstroProta = defaultMatrix;
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
+		modelMatrixAstroProta = defaultMatrix2;
+		modelMatrixPivoteCam = glm::translate(modelMatrixAstroProta, camPivOrigin);
+		modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+			glm::vec3(0.0f, 5.0f, 23.0f));
+		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+			glm::vec3(0, 0, 1));
+		empiezaJuego = false;
 		tiempoRespawnProta++;
 		if (tiempoRespawnProta > 50) {
 			playerRespawn = false;
@@ -1776,7 +1787,7 @@ void applicationLoop() {
 			 break;
 		 }*/
 
-		if (fontbandera == 1) {
+		if (fontbandera == true) {
 			modelText->render("Oxigeno", 0.7, 0.95, 15, 0.5, 1.0, 1.0, 1.0);
 			//std::cout << situacion << std::endl;
 			switch (situacion)
@@ -1804,11 +1815,38 @@ void applicationLoop() {
 					modelText2->render("10%", 0.7, 0.9, 12, 1.0, 0.0, 0.0, 1.0);
 				if (banderaCaminar == 11) {
 					modelText2->render("0%", 0.7, 0.9, 12, 1.0, 0.0, 0.0, 1.0);
-					situacion = 0;
+					situacion = 2;
 				}
 				break;
-			case 0:
-				modelText2->render("Te quedaste sin oxigeno!", -0.5, 0, 30, 1.0, 0.0, 0.0, 1.0);
+			case 2:
+				modelText2->render("Te quedaste sin oxigeno!", -0.5, 0, 30, 1.0, 0.0, 0.0, 1.0);			
+				tiempoOxigeno++;
+				if (tiempoOxigeno > 250){
+					situacion = 3;
+				}
+				break;
+			case 3:	
+				playerRespawn2 = true;
+				if (playerRespawn2 == true) {
+					modelMatrixAstroProta = defaultMatrix;
+					modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
+					modelMatrixPivoteCam = glm::translate(modelMatrixAstroProta, camPivOrigin);
+					modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+						glm::vec3(0.0f, 5.0f, 23.0f));
+					modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
+						glm::vec3(0, 0, 1));
+					//linea que genera problemas
+					//empiezaJuego = false; 
+					tiempoRespawnProta++;
+					if (tiempoRespawnProta > 50) {						
+						playerRespawn2 = false;
+						tiempoRespawnProta = 0;
+						timer = 0.0f;
+						banderaCaminar = 0;
+						tiempoOxigeno = 0;
+						situacion = 1;
+					}
+				}
 				break;
 			}
 		}
