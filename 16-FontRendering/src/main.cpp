@@ -146,6 +146,29 @@ Model modelCompu;
 Model modelCuerpo;
 Model modelEstanteria;
 
+//Scene 2
+Model modelEscenario2;
+Model modelCuerpoAmongus;
+Model modelCuerpoAmongus2;
+Model modelCompu1;
+Model modelCompu2;
+Model modelEstanteria2;
+Model modelCajaCuadrada;
+Model modelCajaCuadrada2;
+Model modelCajaCuadrada3;
+Model modelCajaCuadrada4;
+Model modelCajaCuadrada5;
+Model modelCajaLowPoly;
+Model modelCajaLowPoly2;
+Model modelCajaLowPoly3;
+Model modelCajaLowPoly4;
+Model modelCajaLowPoly5;
+Model modelBidones2;
+Model modelBidones3;
+Model modelBidones4;
+
+
+
 
 
 //Enemigos
@@ -209,6 +232,30 @@ glm::mat4 modelMatrixMuroIzquierdo2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho2 = glm::mat4(1.0f);
 glm::mat4 defaultMatrix = glm::mat4(1.0f);
 glm::mat4 defaultMatrix2 = glm::mat4(1.0f);
+
+//Matrix Definitios for Scene 2
+
+glm::mat4 modelEscenario2 = glm::mat4(1.0f);;
+glm::mat4 modelMatrixCuerpoAmongus = glm::mat4(1.0f);
+glm::mat4 modelMatrixCompu1 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCompu2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixEstanteria2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaCuadrada = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaCuadrada2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaCuadrada3 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaCuadrada4 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaCuadrada5 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaLowPoly = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaLowPoly2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaLowPoly3 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaLowPoly4 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCajaLowPoly5 = glm::mat4(1.0f);
+glm::mat4 modelMatrixPipe = glm::mat4(1.0f);
+glm::mat4 modelMatrixBidones = glm::mat4(1.0f);
+glm::mat4 modelMatrixBidones2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixBidones3 = glm::mat4(1.0f);
+glm::mat4 modelMatrixBidones4 = glm::mat4(1.0f);
+
 
 //vectors
 glm::vec3 astroPosition;
@@ -719,25 +766,50 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
 	modelBidones.setShader(&shaderMulLighting);
 
+	modelBidones2 = modelBidones;
+	modelBidones3 = modelBidones;
+	modelBidones4 = modelBidones;
+
 	//Caja1
 	modelCaja1.loadModel("../models/SegundoEscenario/Caja1.obj");
 	modelCaja1.setShader(&shaderMulLighting);
+
+	modelCajaCuadrada = modelCaja1;
+	modelCajaCuadrada2;
+	modelCajaCuadrada3;
+	modelCajaCuadrada4;
+	modelCajaCuadrada5;
 
 	//Caja2
 	modelCaja2.loadModel("../models/SegundoEscenario/Caja2.obj");
 	modelCaja2.setShader(&shaderMulLighting);
 
+	modelCajaLowPoly = modelCaja2;
+	modelCajaLowPoly2 = modelCaja2;
+	modelCajaLowPoly3 = modelCaja2;
+	modelCajaLowPoly4 = modelCaja2;
+	modelCajaLowPoly5 = modelCaja2;
+
 	//Compu
 	modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
 	modelCompu.setShader(&shaderMulLighting);
+
+	modelCompu1 = modelCompu;
+	modelCompu2 = modelCompu;
 
 	//Cuerpo
 	modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
 	modelCuerpo.setShader(&shaderMulLighting);
 
+	modelCuerpoAmongus = modelCuerpo;
+	modelCuerpoAmongus2 = modelCuerpo;
+
 	//Estanteria
 	modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
 	modelEstanteria.setShader(&shaderMulLighting);
+
+	modelEstanteria2 = modelEstanteria;
+
 
 	cameraFP->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
@@ -3350,6 +3422,7 @@ void prepareDepthScene2() {
 	modelCuerpo.setShader(&shaderDepth);
 
 	modelEstanteria.setShader(&shaderDepth);
+
 }
 
 void renderScene2(bool renderParticles) {
