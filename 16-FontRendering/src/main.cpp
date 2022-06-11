@@ -110,6 +110,10 @@ Box muroIzquierdo2;
 Box muroDerecho2;
 Box boxReferencia;
 Box boxMenu;
+Box boxCD;
+Box boxCIS;
+Box boxCII;
+Box boxCS;
 
 ShadowBox* shadowBox;
 
@@ -145,6 +149,10 @@ Model modelCaja2;
 Model modelCompu;
 Model modelCuerpo;
 Model modelEstanteria;
+Model modelPalanca;
+Model modelPuertaIzq;
+Model modelPuertaDer;
+Model modelMarcoPuerta;
 
 
 
@@ -207,6 +215,10 @@ glm::mat4 modelMatrixMuroFondo2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFrontal2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroIzquierdo2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroDerecho2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoxCD = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoxCIS = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoxCII = glm::mat4(1.0f);
+glm::mat4 modelMatrixBoxCS = glm::mat4(1.0f);
 glm::mat4 defaultMatrix = glm::mat4(1.0f);
 glm::mat4 defaultMatrix2 = glm::mat4(1.0f);
 
@@ -738,6 +750,32 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Estanteria
 	modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
 	modelEstanteria.setShader(&shaderMulLighting);
+
+	//Palanca
+	modelPalanca.loadModel("../models/SegundoEscenario/Palanca.fbx");
+	modelPalanca.setShader(&shaderMulLighting);
+
+	//PuertaIzquierda
+	modelPuertaIzq.loadModel("../models/SegundoEscenario/PuertaIzquierda.obj");
+	modelPuertaIzq.setShader(&shaderMulLighting);
+
+	//PuertaDerecha
+	modelPuertaDer.loadModel("../models/SegundoEscenario/PuertaDerecha.obj");
+	modelPuertaDer.setShader(&shaderMulLighting);
+
+	//MarcoPuerta
+	modelMarcoPuerta.loadModel("../models/SegundoEscenario/MarcoPuerta.obj");
+	modelMarcoPuerta.setShader(&shaderMulLighting);
+
+	//Box
+	boxCD.init();
+	boxCD.setShader(&shaderMulLighting);
+	boxCIS.init();
+	boxCIS.setShader(&shaderMulLighting);
+	boxCII.init();
+	boxCII.setShader(&shaderMulLighting);
+	boxCS.init();
+	boxCS.setShader(&shaderMulLighting);
 
 	cameraFP->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
@@ -1360,6 +1398,14 @@ void destroy() {
 	modelLuzGenerador.destroy();
 	boxReferencia.destroy();
 	boxMenu.destroy();
+	boxCD.destroy();
+	boxCII.destroy();
+	boxCIS.destroy();
+	boxCS.destroy();
+	modelPalanca.destroy();
+	modelPuertaIzq.destroy();
+	modelPuertaDer.destroy();
+	modelMarcoPuerta.destroy();
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
@@ -3295,6 +3341,14 @@ void prepareScene2() {
 	modelCuerpo.setShader(&shaderMulLighting);
 
 	modelEstanteria.setShader(&shaderMulLighting);
+
+	modelPalanca.setShader(&shaderMulLighting);
+
+	modelPuertaDer.setShader(&shaderMulLighting);
+
+	modelPuertaIzq.setShader(&shaderMulLighting);
+
+	modelMarcoPuerta.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene2() {
@@ -3350,6 +3404,14 @@ void prepareDepthScene2() {
 	modelCuerpo.setShader(&shaderDepth);
 
 	modelEstanteria.setShader(&shaderDepth);
+
+	modelPalanca.setShader(&shaderDepth);
+
+	modelPuertaDer.setShader(&shaderDepth);
+
+	modelPuertaIzq.setShader(&shaderDepth);
+
+	modelMarcoPuerta.setShader(&shaderDepth);
 }
 
 void renderScene2(bool renderParticles) {
@@ -3720,6 +3782,62 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "muroIzquierdo2", muroIzquierdoCollider,
 		modelMatrixMuroIzquierdo2);
 
+	//Collider boxCD
+	AbstractModel::OBB boxCDCollider;
+	glm::mat4 modelmatrixColliderBoxCD = glm::mat4(modelMatrixBoxCD);
+	// Set the orientation of collider before doing the scale
+	boxCDCollider.u = glm::quat_cast(modelmatrixColliderBoxCD);
+	modelmatrixColliderBoxCD = glm::translate(modelmatrixColliderBoxCD,
+		glm::vec3(boxCD.getObb().c.x + 33.5,
+			boxCD.getObb().c.y,
+			boxCD.getObb().c.z - 14.45));
+	boxCDCollider.e = glm::vec3(2.0f, 10.0f, 12.0f);
+	boxCDCollider.c = glm::vec3(modelmatrixColliderBoxCD[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCD", boxCDCollider,
+		modelMatrixBoxCD);
+
+	//Collider boxCIS
+	AbstractModel::OBB boxCISCollider;
+	glm::mat4 modelmatrixColliderboxCIS = glm::mat4(modelMatrixBoxCIS);
+	// Set the orientation of collider before doing the scale
+	boxCISCollider.u = glm::quat_cast(modelmatrixColliderboxCIS);
+	modelmatrixColliderboxCIS = glm::translate(modelmatrixColliderboxCIS,
+		glm::vec3(boxCIS.getObb().c.x + 19.7,
+			boxCIS.getObb().c.y,
+			boxCIS.getObb().c.z - 22.85));
+	boxCISCollider.e = glm::vec3(0.3f, 10.0f, 4.5f);
+	boxCISCollider.c = glm::vec3(modelmatrixColliderboxCIS[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCIS", boxCISCollider,
+		modelMatrixBoxCIS);
+
+	//Collider boxCII
+	AbstractModel::OBB boxCIICollider;
+	glm::mat4 modelmatrixColliderboxCII = glm::mat4(modelMatrixBoxCII);
+	// Set the orientation of collider before doing the scale
+	boxCIICollider.u = glm::quat_cast(modelmatrixColliderboxCII);
+	modelmatrixColliderboxCII = glm::translate(modelmatrixColliderboxCII,
+		glm::vec3(boxCII.getObb().c.x + 27.25,
+			boxCII.getObb().c.y,
+			boxCII.getObb().c.z - 6.4));
+	boxCIICollider.e = glm::vec3(8.1f, 10.0f, 4.0f);
+	boxCIICollider.c = glm::vec3(modelmatrixColliderboxCII[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCII", boxCIICollider,
+		modelMatrixBoxCII);
+
+	//Collider boxCS
+	AbstractModel::OBB boxCSCollider;
+	glm::mat4 modelmatrixColliderboxCS = glm::mat4(modelMatrixBoxCS);
+	// Set the orientation of collider before doing the scale
+	boxCSCollider.u = glm::quat_cast(modelmatrixColliderboxCS);
+	modelmatrixColliderboxCS = glm::translate(modelmatrixColliderboxCS,
+		glm::vec3(boxCS.getObb().c.x + 27.25,
+			boxCS.getObb().c.y,
+			boxCS.getObb().c.z - 27.55));
+	boxCSCollider.e = glm::vec3(8.1f, 10.0f, 0.3f);
+	boxCSCollider.c = glm::vec3(modelmatrixColliderboxCS[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCS", boxCSCollider,
+		modelMatrixBoxCS);
+
 	//Render colliders
 	for (std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
@@ -3926,12 +4044,28 @@ bool excepCollider(std::string string1, std::string string2) {
 }
 
 bool excepCollider2(std::string string1, std::string string2) {
+	
 	if ((string1.compare("muroFondo2") == 0 || string1.compare("muroFrontal2") == 0 ||
 		string1.compare("muroDerecho2") == 0 || string1.compare("muroIzquierdo2") == 0) &&
 		(string2.compare("muroFondo2") == 0 || string2.compare("muroFrontal2") == 0 ||
 			string2.compare("muroDerecho2") == 0 || string2.compare("muroIzquierdo2") == 0)) {
 		return true;
 	}
+	
+	if ((string1.compare("boxCII") == 0 || string1.compare("muroFrontal2") == 0 ||
+		string1.compare("boxCD") == 0) &&
+		(string2.compare("boxCII") == 0 || string2.compare("muroFrontal2") == 0 ||
+			string2.compare("boxCD") == 0)) {
+		return true;
+	}
+
+	if ((string1.compare("boxCIS") == 0 || string1.compare("boxCS") == 0 ||
+		string1.compare("boxCD") == 0) &&
+		(string2.compare("boxCIS") == 0 || string2.compare("boxCS") == 0 ||
+			string2.compare("boxCD") == 0)) {
+		return true;
+	}
+
 	for (int i = 0; i < botonesPos.size(); i++) {
 		if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
 			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
