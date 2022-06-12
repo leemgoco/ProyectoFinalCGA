@@ -136,6 +136,9 @@ Model modelEdCompuerta;
 Model modelPlataforma;
 Model modelPlaCompuerta;
 Model modelRokas;
+Model modelRokas2;
+Model modelMontana;
+Model modelMontana2;
 Model modelLuzGenerador;
 Model modelLuzBotones;
 Model modelEscenario2;
@@ -154,8 +157,8 @@ Enemy enemigo2(glm::vec3(13.0f, 0.05f, -5.0f), "enemy2");
 Enemy enemigo3(glm::vec3(13.0f, 0.05f, -5.0f), "enemy3");
 
 // Terrain model instance
-Terrain terrain(-1, -1, 200, 1, "../Textures/heightmap.png");
-Terrain terrain2(-1, -1, 200, 16, "../Textures/heightmap.png");
+Terrain terrain(-1, -1, 200, 14, "../Textures/AlturasMapa1.png");
+Terrain terrain2(-1, -1, 200, 1, "../Textures/AlturasMapa2.png");
 
 GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
 textureGreenID, texturePurpleID;
@@ -248,8 +251,8 @@ bool empiezaJuego = false;
 bool pressEnter = false;
 
 
-bool escenario1 = false;
-bool escenario2 = true;
+bool escenario1 = true;
+bool escenario2 = false;
 
 //bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
@@ -275,8 +278,13 @@ std::vector<float> lamp2Orientation = { 21.37 + 90, -65.0 + 90 };
 std::vector<glm::vec3> botonesPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
 		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12) };
 
-std::vector<glm::vec3> rokasPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
-		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12) };
+std::vector<glm::vec3> rokasPos = { glm::vec3(-64, 0, 18.75), glm::vec3(
+		-11.32, 0, -5.06), glm::vec3(23.43, 0, -20.50), glm::vec3(59.76, 0, 1.367) };
+
+std::vector<glm::vec3> rokas2Pos = { glm::vec3(89.25, 0, -0.39), glm::vec3(
+		73.242, 0, 21.875), glm::vec3(11.3281, 0, -3.51), glm::vec3(-3.71, 0, 27.929) };
+
+std::vector<glm::vec3> edificios = { glm::vec3(15.5, 7.2, 13.1), glm::vec3(1.2f, 9.5f, 4.8f)};
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = { { "aircraft", glm::vec3(
@@ -656,6 +664,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Rokas
 	modelRokas.loadModel("../models/rokas/Piedras2.obj");
 	modelRokas.setShader(&shaderMulLighting);
+	modelRokas2.loadModel("../models/rokas/Piedras.obj");
+	modelRokas2.setShader(&shaderMulLighting);
+
+	//Rokas
+	modelMontana.loadModel("../models/Montanas/Montana.obj");
+	modelMontana.setShader(&shaderMulLighting);
+	modelMontana2.loadModel("../models/Montanas/Montana2.obj");
+	modelMontana2.setShader(&shaderMulLighting);
 
 	//Generador
 	modelGenerador.loadModel("../models/generadorG/Generador.obj");
@@ -774,7 +790,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	}
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainBackground("../Textures/BlendMap/Tierra.png");
+	Texture textureTerrainBackground("../Textures/BlendMap/TierraColor.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBackground.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -871,7 +887,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureMenu1.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
-	Texture textureTerrainG("../Textures/BlendMap/Rocas.png");
+	Texture textureTerrainG("../Textures/BlendMap/RocasColor.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainG.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -1356,6 +1372,7 @@ void destroy() {
 	modelPlataforma.destroy();
 	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
+	modelRokas2.destroy();
 	modelLuzBotones.destroy();
 	modelLuzGenerador.destroy();
 	boxReferencia.destroy();
@@ -1976,6 +1993,12 @@ void prepareScene() {
 
 	modelRokas.setShader(&shaderMulLighting);
 
+	modelRokas2.setShader(&shaderMulLighting);
+
+	modelMontana.setShader(&shaderMulLighting);
+
+	modelMontana2.setShader(&shaderMulLighting);
+
 	boxReferencia.setShader(&shaderMulLighting);
 
 	modelLuzBotones.setShader(&shaderMulLighting);
@@ -2017,6 +2040,12 @@ void prepareDepthScene() {
 	modelPlaCompuerta.setShader(&shaderDepth);
 
 	modelRokas.setShader(&shaderDepth);
+
+	modelRokas2.setShader(&shaderDepth);
+
+	modelMontana.setShader(&shaderDepth);
+
+	modelMontana2.setShader(&shaderDepth);
 
 	boxReferencia.setShader(&shaderDepth);
 
@@ -2096,13 +2125,7 @@ void renderScene(bool renderParticles) {
 	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]);*/
 
 	//glDisable(GL_BLEND);
-	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-		modelMatrixCompuerta[3][2]) + 2.0f;
-	glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
-	modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-		glm::vec3(0.0021, 0.0021, 0.0021));
-	modelCompuerta.setAnimationIndex(1);
-	modelCompuerta.render(modelMatrixCompuertaBody);
+
 
 
 	//modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
@@ -2162,21 +2185,63 @@ void renderScene(bool renderParticles) {
 		modelLuzGenerador.render();
 	}
 
+	for (int i = 0; i < rokas2Pos.size(); i++) {
+		rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
+			rokas2Pos[i].z) - 0.5f;
+		modelRokas2.setPosition(rokas2Pos[i]);
+		modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
+		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+		modelRokas2.render();
+	}
 	for (int i = 0; i < rokasPos.size(); i++) {
 		rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
-			rokasPos[i].z) + 1.25f;
+			rokasPos[i].z) - 0.5f;
 		modelRokas.setPosition(rokasPos[i]);
-		modelRokas.setScale(glm::vec3(1.5, 1.0, 1.0));
-		modelRokas.setOrientation(glm::vec3(-90.0, -180.0, 0));
-		//modelBotones.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
-		//modelRokas.render();
+		modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
+		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+		modelRokas.render();
 	}
+	//Compuerta
+	//modelMatrixCompuerta = glm::translate(modelMatrixCompuerta, glm::vec3(10.445f, 0.0f, 13.789f));
+	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
+		//modelMatrixCompuerta[3][2]) - 2.0f;
+	//glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
+	//modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
+	//	glm::vec3(0.021, 0.021, 0.021));
+	modelCompuerta.setPosition(glm::vec3(3.3f, 2.8f, 19.1f));
+	modelCompuerta.setScale(glm::vec3(0.03, 0.03, 0.03));
+	modelCompuerta.setAnimationIndex(0);
+	modelCompuerta.render();
+	
+	//Plataforma
+	modelPlataforma.setPosition(glm::vec3(10.445, 3.5, 13.789));
+	modelPlataforma.setOrientation(glm::vec3(-90.0, 0.0, 0.0));
+	modelPlataforma.setScale(glm::vec3(3.3, 3.3, 3.3));
+	modelPlataforma.render();
 
-	modelPlataforma.render(modelMatrixPlataforma);
+	//Edificio Plataforma
+	modelEdCompuerta.setPosition(glm::vec3(2.0, 9.5, 4.8));
+	modelEdCompuerta.setOrientation(glm::vec3(-90.0, -90.0, 0.0));
+	modelEdCompuerta.setScale(glm::vec3(0.9, 0.9, 0.9));
+	modelEdCompuerta.render();
 
-	modelEdCompuerta.render(modelMatrixEdCompuerta);
+	modelEdCompuerta.setPosition(glm::vec3(13.9, 7.2, 13.1));
+	modelEdCompuerta.setOrientation(glm::vec3(-90.0, 180.0, 0.0));
+	modelEdCompuerta.setScale(glm::vec3(0.9, 0.9, 0.9));
+	modelEdCompuerta.render();
 
-	modelPlaCompuerta.render(modelMatrixPlaCompuerta);
+	//Montañas Fondo
+	modelMontana2.setPosition(glm::vec3(-80.03, 1.0, -4.0));
+	modelMontana2.setOrientation(glm::vec3(0.0, -90, 0.0));
+	modelMontana2.render();
+
+	modelMontana2.setPosition(glm::vec3(-15.0, 1.0, -19));
+	modelMontana2.setOrientation(glm::vec3(0.0, 180.0, 0.0));
+	modelMontana2.render();
+
+	modelMontana2.setPosition(glm::vec3(94.0, 1.0, 6.0));
+	modelMontana2.setOrientation(glm::vec3(0.0, 90.0, 0.0));
+	modelMontana2.render();
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
@@ -2400,9 +2465,6 @@ void inicialMatrixs() {
 		glm::vec3(-73.0f, 0.0f, 15.0f));
 	modelMatrixMuroIzquierdo = glm::scale(modelMatrixMuroIzquierdo,
 		glm::vec3(0.0f, 20.0f, 70.0f));
-
-	modelMatrixCompuerta = glm::translate(modelMatrixCompuerta,
-		glm::vec3(5.9f, 0.0f, 8.8f));
 
 	//Model escenario 2
 	modelMatrixEscenario2 = glm::translate(modelMatrixEscenario2,
@@ -2924,64 +2986,133 @@ void collidersManagmentEs1() {
 		std::get<0>(collidersOBB.find("geneLamp-" + std::to_string(i))->second) =
 			generadorLampCollider;
 	}
+	// Generadores rocas Rokas1
+	for (int i = 0; i < rokasPos.size(); i++) {
+		AbstractModel::OBB generadorRokas1;
+		glm::mat4 modelMatrixColliderRokas1 = glm::mat4(1.0);
+		modelMatrixColliderRokas1 = glm::translate(modelMatrixColliderRokas1,
+			glm::vec3(rokasPos[i].x, terrain.getHeightTerrain(rokasPos[i].x,
+				rokasPos[i].z) - 1.0f, rokasPos[i].z));
+		//modelMatrixColliderLampGenerador = glm::rotate(modelMatrixColliderLampGenerador,
+		//	glm::radians(140.0f), glm::vec3(0, 1, 0));
+		addOrUpdateColliders(collidersOBB, "geneRocks1-" + std::to_string(i),
+			generadorRokas1, modelMatrixColliderRokas1);
+		// Set the orientation of collider before doing the scale
+		generadorRokas1.u = glm::quat_cast(modelMatrixColliderRokas1);
+		modelMatrixColliderRokas1 = glm::scale(modelMatrixColliderRokas1,
+			glm::vec3(1.2, 2.0, 1.2));
+		modelMatrixColliderRokas1 = glm::translate(modelMatrixColliderRokas1,
+			modelRokas.getObb().c);
+		generadorRokas1.c = glm::vec3(modelMatrixColliderRokas1[3]);
+		generadorRokas1.e = modelRokas.getObb().e
+			* glm::vec3(1.2, 2.0, 1.2);
+		std::get<0>(collidersOBB.find("geneRocks1-" + std::to_string(i))->second) =
+			generadorRokas1;
+	}
+
+	// Generadores rocas Rokas2
+	for (int i = 0; i < rokas2Pos.size(); i++) {
+		AbstractModel::OBB generadorRokas2;
+		glm::mat4 modelMatrixColliderRokas2 = glm::mat4(1.0);
+		modelMatrixColliderRokas2 = glm::translate(modelMatrixColliderRokas2,
+			glm::vec3(rokas2Pos[i].x, terrain.getHeightTerrain(rokas2Pos[i].x,
+				rokas2Pos[i].z) - 1.0f, rokas2Pos[i].z));
+		modelMatrixColliderRokas2 = glm::rotate(modelMatrixColliderRokas2,
+			glm::radians(120.0f), glm::vec3(0, 1, 0));
+		addOrUpdateColliders(collidersOBB, "geneRocks2-" + std::to_string(i),
+			generadorRokas2, modelMatrixColliderRokas2);
+		// Set the orientation of collider before doing the scale
+		generadorRokas2.u = glm::quat_cast(modelMatrixColliderRokas2);
+		modelMatrixColliderRokas2 = glm::scale(modelMatrixColliderRokas2,
+			glm::vec3(1.6, 1.0, 1.0));
+		modelMatrixColliderRokas2 = glm::translate(modelMatrixColliderRokas2,
+			modelRokas.getObb().c);
+		generadorRokas2.c = glm::vec3(modelMatrixColliderRokas2[3]);
+		generadorRokas2.e = modelRokas2.getObb().e
+			* glm::vec3(1.6, 1.0, 1.0);
+		std::get<0>(collidersOBB.find("geneRocks2-" + std::to_string(i))->second) =
+			generadorRokas2;
+	}
 
 	// Collider de compuerta
 	AbstractModel::OBB compuertaCollider;
-	glm::mat4 modelmatrixColliderCompuerta = glm::mat4(modelMatrixCompuerta);
-	modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
-		glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	glm::mat4 modelmatrixColliderCompuerta = glm::mat4(1.0);
+	modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,glm::vec3(1.9f, terrain.getHeightTerrain(2.2f,
+		13.0f) + 1.0f , 12.7f));
+	//modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
+		//glm::radians(-90.0f), glm::vec3(1, 0, 0));
 	// Set the orientation of collider before doing the scale
 	compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
 	modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
-		glm::vec3(0.021, 0.021, 0.021));
+		glm::vec3(4.0, 4.0, 4.0));
 	modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,
 		glm::vec3(modelCompuerta.getObb().c.x,
 			modelCompuerta.getObb().c.y,
 			modelCompuerta.getObb().c.z));
 	compuertaCollider.e = modelCompuerta.getObb().e
-		* glm::vec3(0.021, 0.021, 0.021);
+		* glm::vec3(4.0, 4.0, 4.0);
 	compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
 	addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
 		modelMatrixCompuerta);
 
-	// Collider de edificio compuerta
-	AbstractModel::OBB edCompuertaCollider;
-	glm::mat4 modelmatrixColliderEdCompuerta = glm::mat4(modelMatrixEdCompuerta);
-	modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
-		glm::radians(-90.0f), glm::vec3(1, 0, 0));
-	// Set the orientation of collider before doing the scale
-	edCompuertaCollider.u = glm::quat_cast(modelmatrixColliderEdCompuerta);
-	modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
-		glm::vec3(0.021, 0.021, 0.021));
-	modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
-		glm::vec3(modelEdCompuerta.getObb().c.x,
-			modelEdCompuerta.getObb().c.y,
-			modelEdCompuerta.getObb().c.z));
-	edCompuertaCollider.e = modelEdCompuerta.getObb().e
-		* glm::vec3(0.021, 0.021, 0.021);
-	edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
-	addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider,
-		modelMatrixEdCompuerta);
 
-	// Collider de mayow
-	AbstractModel::OBB mayowCollider;
-	glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
-	modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
-		glm::radians(-90.0f), glm::vec3(1, 0, 0));
-	// Set the orientation of collider before doing the scale
-	mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
-	modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
-		glm::vec3(0.021, 0.021, 0.021));
-	modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
-		glm::vec3(mayowModelAnimate.getObb().c.x,
-			mayowModelAnimate.getObb().c.y,
-			mayowModelAnimate.getObb().c.z));
-	mayowCollider.e = mayowModelAnimate.getObb().e
-		* glm::vec3(0.021, 0.021, 0.021)
-		* glm::vec3(0.787401574, 0.787401574, 0.787401574);
-	mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
-	addOrUpdateColliders(collidersOBB, "mayow", mayowCollider,
-		modelMatrixMayow);
+	// Collider de edificio compuerta edificios
+	for (int i = 0; i < edificios.size(); i++) {
+		AbstractModel::OBB edCompuertaCollider;
+		glm::mat4 modelmatrixColliderEdCompuerta = glm::mat4(1.0);
+		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
+			glm::vec3(edificios[i].x, terrain.getHeightTerrain(edificios[i].x,
+				edificios[i].z) - 1.0f, edificios[i].z));
+		//modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
+		//	glm::radians(120.0f), glm::vec3(0, 1, 0));
+		addOrUpdateColliders(collidersOBB, "edificios-" + std::to_string(i),
+			edCompuertaCollider, modelmatrixColliderEdCompuerta);
+		// Set the orientation of collider before doing the scale
+		edCompuertaCollider.u = glm::quat_cast(modelmatrixColliderEdCompuerta);
+		if (i == 1) {
+			modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
+				glm::vec3(0.45, 2.0, 0.3));
+			modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
+				modelEdCompuerta.getObb().c);
+			edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
+			edCompuertaCollider.e = modelEdCompuerta.getObb().e
+				* glm::vec3(0.45, 2.0, 0.3);
+			std::get<0>(collidersOBB.find("edificios-" + std::to_string(i))->second) =
+				edCompuertaCollider;
+		}
+		else {
+					modelmatrixColliderEdCompuerta = glm::scale(modelmatrixColliderEdCompuerta,
+			glm::vec3(0.8, 2.0, 0.6));
+		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
+			modelEdCompuerta.getObb().c);
+		edCompuertaCollider.c = glm::vec3(modelmatrixColliderEdCompuerta[3]);
+		edCompuertaCollider.e = modelEdCompuerta.getObb().e
+			* glm::vec3(0.8, 2.0, 0.6);
+		std::get<0>(collidersOBB.find("edificios-" + std::to_string(i))->second) =
+			edCompuertaCollider;
+		}
+
+	}
+
+	//// Collider de edificio compuerta
+	//AbstractModel::OBB edCompuertaCollider2;
+	//glm::mat4 modelmatrixColliderEdCompuerta2 = glm::mat4(1.0);
+	//modelmatrixColliderEdCompuerta2 = glm::translate(modelmatrixColliderEdCompuerta2, glm::vec3(2.0f, 9.5f, 4.8f));
+	//modelmatrixColliderEdCompuerta2 = glm::rotate(modelmatrixColliderEdCompuerta2,
+	//	glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	//// Set the orientation of collider before doing the scale
+	//edCompuertaCollider2.u = glm::quat_cast(modelmatrixColliderEdCompuerta2);
+	//modelmatrixColliderEdCompuerta2 = glm::scale(modelmatrixColliderEdCompuerta2,
+	//	glm::vec3(0.5, 0.5, 1.0));
+	//modelmatrixColliderEdCompuerta2 = glm::translate(modelmatrixColliderEdCompuerta2,
+	//	glm::vec3(modelEdCompuerta.getObb().c.x,
+	//		modelEdCompuerta.getObb().c.y,
+	//		modelEdCompuerta.getObb().c.z));
+	//edCompuertaCollider2.e = modelEdCompuerta.getObb().e
+	//	* glm::vec3(0.5, 0.5, 1.0);
+	//edCompuertaCollider2.c = glm::vec3(modelmatrixColliderEdCompuerta2[3]);
+	//addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider2,
+	//	modelmatrixColliderEdCompuerta2);
 
 	//Collider de astroProta
 	AbstractModel::OBB astroProtaCollider;
@@ -3921,6 +4052,14 @@ bool excepCollider(std::string string1, std::string string2) {
 				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
 			return true;
 		}
+	}
+	if ((string1.compare("compuerta") == 0 || string1.compare("edCompuerta") == 0) &&
+		(string2.compare("compuerta") == 0 || string2.compare("edCompuerta") == 0)) {
+		return true;
+	}
+	if ((string1.compare("muroFrontal") == 0 || string1.compare("geneRocks2-3") == 0) &&
+		(string2.compare("muroFrontal") == 0 || string2.compare("geneRocks2-3") == 0)) {
+		return true;
 	}
 	return false;
 }

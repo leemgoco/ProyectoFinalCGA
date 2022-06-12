@@ -1,7 +1,7 @@
-# Blender 3.1.0 MTL File: 'Compuerta.blend'
+# Blender 3.1.0 MTL File: 'Escenario2.blend'
 # www.blender.org
 
-newmtl Material.010
+newmtl Material.006
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -10,9 +10,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd  CafePiedroso.png
+map_Kd CafePiedroso.png
 
-newmtl Material.011
+newmtl Material.007
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -21,4 +21,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd  AmarilloDesierto.png
+map_Kd AmarilloDesierto.png
