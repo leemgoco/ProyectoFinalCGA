@@ -221,6 +221,10 @@ glm::mat4 modelMatrixBoxCII = glm::mat4(1.0f);
 glm::mat4 modelMatrixBoxCS = glm::mat4(1.0f);
 glm::mat4 defaultMatrix = glm::mat4(1.0f);
 glm::mat4 defaultMatrix2 = glm::mat4(1.0f);
+//glm::mat4 modelMatrixPalanca = glm::mat4(1.0f);
+glm::mat4 modelMatrixMarcoPuerta = glm::mat4(1.0f);
+glm::mat4 modelMatrixPuertaDer = glm::mat4(1.0f);
+glm::mat4 modelMatrixPuertaIzq = glm::mat4(1.0f);
 
 //vectors
 glm::vec3 astroPosition;
@@ -267,6 +271,7 @@ bool escenario2 = true;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
 
+//Lógica primer escenario
 std::vector<std::vector<bool>> combBotones = {
 	{false, false, false},
 	{false, false, false},
@@ -274,6 +279,12 @@ std::vector<std::vector<bool>> combBotones = {
 	{false, false, false} };
 
 std::vector<bool> lucesBotones = { false, false, false, false };
+
+//Lógica segundo escenario
+int indPalanca = 0;
+std::vector<int> animaPalancas = { 0, 0, 0, 0 };
+std::vector<bool> lucesPalancas = { false, false, false, false };
+bool enablePuerta = false;
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -289,6 +300,11 @@ std::vector<glm::vec3> botonesPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
 
 std::vector<glm::vec3> rokasPos = { glm::vec3(-66.6, 0, -2), glm::vec3(
 		-39.5, 0, 14.6), glm::vec3(34.57, 0, -3), glm::vec3(78, 0, 12) };
+
+// Palancas positions
+std::vector<glm::vec3> palancaPos = { glm::vec3(-62.9, 1.5, -26.8), glm::vec3(
+		-35.4, 1.5, -38.3), glm::vec3(27.92, 1.5, -27.25), glm::vec3(54.5, 1.5, -18.9) };
+std::vector<float> palancaOrientation = { -90.0, 180.0, 180.0, 90.0};
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = { { "aircraft", glm::vec3(
@@ -393,7 +409,9 @@ void cameraMove();
 bool excepCollider(std::string string1, std::string string2);
 bool excepCollider2(std::string string1, std::string string2);
 void updateBotonCollider(std::map<std::string, bool> collisionDetection);
+void updatePalancaCollider(std::map<std::string, bool> collisionDetection);
 void updateEscenario1();
+void updateEscenario2();
 void preRender1();
 void collidersManagmentEs1();
 void soundEscene1();
@@ -1859,7 +1877,7 @@ void applicationLoop() {
 		}
 
 		if (escenario2) {
-			//updateEscenario2();
+			updateEscenario2();
 			lucesEscenari2(shadowBox, &view);
 			/*if (!empiezaJuego) {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -2460,7 +2478,7 @@ void inicialMatrixs() {
 
 	//Posicion de los muros escenario 2
 	modelMatrixMuroFondo2 = glm::translate(modelMatrixMuroFondo2,
-		glm::vec3(0.0f, 0.0f, -37.0f));
+		glm::vec3(0.0f, 0.0f, -38.0f));
 	modelMatrixMuroFondo2 = glm::scale(modelMatrixMuroFondo2,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 	modelMatrixMuroFrontal2 = glm::translate(modelMatrixMuroFrontal2,
@@ -2468,16 +2486,34 @@ void inicialMatrixs() {
 	modelMatrixMuroFrontal2 = glm::scale(modelMatrixMuroFrontal2,
 		glm::vec3(75.0f, 20.0f, 0.0f));
 	modelMatrixMuroDerecho2 = glm::translate(modelMatrixMuroDerecho2,
-		glm::vec3(53.5f, 0.0f, -10.0f));
+		glm::vec3(54.5f, 0.0f, -10.0f));
 	modelMatrixMuroDerecho2 = glm::scale(modelMatrixMuroDerecho2,
 		glm::vec3(0.0f, 20.0f, 70.0f));
 	modelMatrixMuroIzquierdo2 = glm::translate(modelMatrixMuroIzquierdo2,
-		glm::vec3(-62.0f, 0.0f, -10.0f));
+		glm::vec3(-63.0f, 0.0f, -10.0f));
 	modelMatrixMuroIzquierdo2 = glm::scale(modelMatrixMuroIzquierdo2,
 		glm::vec3(0.0f, 20.0f, 70.0f));
 
+	//Marco puerta
+	modelMatrixMarcoPuerta = translate(modelMatrixMarcoPuerta,
+		glm::vec3(7.5f, 0.0f, -36.5f));
+	modelMatrixPuertaDer = translate(modelMatrixMarcoPuerta,
+		glm::vec3(2.0f, 0.0f, 0.0f));
+	modelMatrixPuertaDer = glm::rotate(modelMatrixPuertaDer, glm::radians(-90.0f),
+		glm::vec3(0, 1, 0));
+	modelMatrixPuertaIzq = translate(modelMatrixMarcoPuerta,
+		glm::vec3(-2.0f, 0.0f, 0.0f));
+	modelMatrixPuertaIzq = glm::rotate(modelMatrixPuertaIzq, glm::radians(-90.0f),
+		glm::vec3(0, 1, 0));
+	modelMatrixMarcoPuerta = glm::rotate(modelMatrixMarcoPuerta, glm::radians(-90.0f),
+		glm::vec3(0, 1, 0));
+	modelMatrixMarcoPuerta = scale(modelMatrixMarcoPuerta,
+		glm::vec3(2.9f, 2.0f, 3.1f));
 
-	//
+	//Puerta derecha
+
+
+	//Puerta izquierda
 
 }
 
@@ -2930,8 +2966,6 @@ void collidersManagmentEs1() {
 		modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
 			glm::vec3(botonesPos[i].x + 2.65, terrain.getHeightTerrain(botonesPos[i].x + 2.65,
 					botonesPos[i].z) + 1.0f, botonesPos[i].z - 0.1));
-		/*modelMatrixColliderGenerador = glm::translate(modelMatrixColliderGenerador,
-			glm::vec3(1.0, 1.0, 1.0));*/
 		addOrUpdateColliders(collidersOBB, "gene-" + std::to_string(i),
 			generadorCollider, modelMatrixColliderGenerador);
 		// Set the orientation of collider before doing the scale
@@ -3044,6 +3078,24 @@ void collidersManagmentEs1() {
 		* glm::vec3(1.5, 4.0, 1.4);
 	astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
 	addOrUpdateColliders(collidersOBB, "astroProta", astroProtaCollider,
+		modelMatrixAstroProta);
+
+	//Collider de actionAstroProta
+	AbstractModel::OBB actionCollider;
+	glm::mat4 modelmatrixColliderAction = glm::mat4(modelMatrixAstroProta);
+	// Set the orientation of collider before doing the scale
+	actionCollider.u = glm::quat_cast(modelmatrixColliderAction);
+	modelmatrixColliderAction[3].z += -20.0;
+	modelmatrixColliderAction = glm::scale(modelmatrixColliderAction,
+		glm::vec3(1.5, 4.0, 1.4));
+	modelmatrixColliderAction = glm::translate(modelmatrixColliderAction,
+		glm::vec3(astroProta.getObb().c.x,
+			astroProta.getObb().c.y + 0.28,
+			astroProta.getObb().c.z + 0.28));
+	actionCollider.e = astroProta.getObb().e
+		* glm::vec3(2.0, 4.2, 2.8);
+	actionCollider.c = glm::vec3(modelmatrixColliderAction[3]);
+	addOrUpdateColliders(collidersOBB, "action", actionCollider,
 		modelMatrixAstroProta);
 
 	//Collider muro fondo
@@ -3522,6 +3574,36 @@ void renderScene2(bool renderParticles) {
 	modelEstanteria.setPosition(glm::vec3(15.0, 1.0, -20.0));
 	modelEstanteria.render();
 
+	//Marco puerta
+	modelMarcoPuerta.render(modelMatrixMarcoPuerta);
+
+	//Puerta Izquierda
+	glm::mat4 modelMatrixPuertaIzqAux = glm::mat4(modelMatrixPuertaIzq);
+	modelMatrixPuertaIzqAux = glm::scale(modelMatrixPuertaIzqAux,
+		glm::vec3(2.9f, 2.0f, 3.1f));
+	modelPuertaIzq.render(modelMatrixPuertaIzqAux);
+
+	//Puerta Derecha
+	glm::mat4 modelMatrixPuertaDerAux = glm::mat4(modelMatrixPuertaDer);
+	modelMatrixPuertaDerAux = glm::scale(modelMatrixPuertaDerAux,
+		glm::vec3(2.9f, 2.0f, 3.1f));
+	modelPuertaDer.render(modelMatrixPuertaDerAux);
+
+	//Palanca
+	for (int i = 0; i < palancaPos.size(); i++) {
+		modelPalanca.setPosition(glm::vec3(palancaPos[i].x,
+			palancaPos[i].y, palancaPos[i].z));
+		modelPalanca.setScale(glm::vec3(0.021, 0.021, 0.021));
+		modelPalanca.setOrientation(glm::vec3(0.0, palancaOrientation[i], 0.0));
+		modelPalanca.setAnimationIndex(animaPalancas[i]);
+		modelPalanca.render();
+	}
+	/*modelPalanca.setPosition(glm::vec3(0.0, 2.0, -20.0));
+	modelPalanca.setScale(glm::vec3(0.021, 0.021, 0.021));
+	modelPalanca.setOrientation(glm::vec3(0.0, 90.0, 0.0));
+	modelPalanca.setAnimationIndex(0);
+	modelPalanca.render();*/
+
 	glEnable(GL_CULL_FACE);
 
 }
@@ -3706,6 +3788,24 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "astroProta", astroProtaCollider,
 		modelMatrixAstroProta);
 
+	//Collider de actionAstroProta
+	AbstractModel::OBB actionCollider;
+	glm::mat4 modelmatrixColliderAction = glm::mat4(modelMatrixAstroProta);
+	// Set the orientation of collider before doing the scale
+	actionCollider.u = glm::quat_cast(modelmatrixColliderAction);
+	modelmatrixColliderAction[3].z += -20.0;
+	modelmatrixColliderAction = glm::scale(modelmatrixColliderAction,
+		glm::vec3(1.5, 4.0, 1.4));
+	modelmatrixColliderAction = glm::translate(modelmatrixColliderAction,
+		glm::vec3(astroProta.getObb().c.x,
+			astroProta.getObb().c.y + 0.28,
+			astroProta.getObb().c.z + 0.28));
+	actionCollider.e = astroProta.getObb().e
+		* glm::vec3(2.0, 4.2, 2.8);
+	actionCollider.c = glm::vec3(modelmatrixColliderAction[3]);
+	addOrUpdateColliders(collidersOBB2, "action", actionCollider,
+		modelMatrixAstroProta);
+
 	// Collider de mayow
 	AbstractModel::OBB mayowCollider;
 	glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
@@ -3838,6 +3938,29 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "boxCS", boxCSCollider,
 		modelMatrixBoxCS);
 
+
+	//Colliders Palancas
+	for (int i = 0; i < palancaPos.size(); i++) {
+		AbstractModel::OBB palancaCollider;
+		glm::mat4 modelMatrixColliderPalanca = glm::mat4(1.0);
+		modelMatrixColliderPalanca = glm::translate(modelMatrixColliderPalanca,
+			palancaPos[i]);
+		modelMatrixColliderPalanca = glm::rotate(modelMatrixColliderPalanca,
+			glm::radians(90.0f), glm::vec3(0, 0, 1));
+		addOrUpdateColliders(collidersOBB2, "palanca-" + std::to_string(i),
+			palancaCollider, modelMatrixColliderPalanca);
+		palancaCollider.u = glm::quat_cast(modelMatrixColliderPalanca);
+		modelMatrixColliderPalanca = glm::scale(modelMatrixColliderPalanca,
+			glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixColliderPalanca = glm::translate(modelMatrixColliderPalanca,
+			modelPalanca.getObb().c);
+		palancaCollider.c = glm::vec3(modelMatrixColliderPalanca[3]);
+		palancaCollider.e = modelGenerador.getObb().e
+		* glm::vec3(1.0, 1.0, 1.0);
+		std::get<0>(collidersOBB2.find("palanca-" + std::to_string(i))->second) =
+			palancaCollider;
+	}
+
 	//Render colliders
 	for (std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
@@ -3872,8 +3995,8 @@ void collidersManagmentEs2() {
 					std::get<0>(jt->second))) {
 				if (!(excepCollider2(it->first, jt->first)))
 				{
-					std::cout << "Colision " << it->first << " with "
-						<< jt->first << std::endl;
+					/*std::cout << "Colision " << it->first << " with "
+						<< jt->first << std::endl;*/
 
 					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
 						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
@@ -3888,9 +4011,9 @@ void collidersManagmentEs2() {
 			isCollision);
 	}
 
-	if (isCollisionG && actionE && !enableEscotilla1) {
-		std::cout << "EntraISC " << std::endl;
-		updateBotonCollider(collisionDetection);
+	if (isCollisionG && actionE && !enablePuerta) {
+		std::cout << "EntraPalancas " << std::endl;
+		updatePalancaCollider(collisionDetection);
 		actionE = false;
 	}
 
@@ -4040,6 +4163,10 @@ bool excepCollider(std::string string1, std::string string2) {
 			return true;
 		}
 	}
+	if ((string1.compare("astroProta") == 0 || string1.compare("action") == 0) &&
+		(string2.compare("astroProta") == 0 || string2.compare("action") == 0)) {
+		return true;
+	}
 	return false;
 }
 
@@ -4066,14 +4193,31 @@ bool excepCollider2(std::string string1, std::string string2) {
 		return true;
 	}
 
-	for (int i = 0; i < botonesPos.size(); i++) {
-		if ((string1.compare("botonBox-" + std::to_string(i)) == 0 || string1.compare("botonBox-Y" + std::to_string(i)) == 0 ||
-			string1.compare("botonBox-B" + std::to_string(i)) == 0 || string1.compare("botonBox-R" + std::to_string(i)) == 0) &&
-			(string2.compare("botonBox-" + std::to_string(i)) == 0 || string2.compare("botonBox-Y" + std::to_string(i)) == 0 ||
-				string2.compare("botonBox-B" + std::to_string(i)) == 0 || string2.compare("botonBox-R" + std::to_string(i)) == 0)) {
-			return true;
-		}
+	if ((string1.compare("palanca-0") == 0 || string1.compare("muroIzquierdo2") == 0 ) &&
+		(string2.compare("palanca-0") == 0 || string2.compare("muroIzquierdo2") == 0)) {
+		return true;
 	}
+
+	if ((string1.compare("palanca-1") == 0 || string1.compare("muroFondo2") == 0) &&
+		(string2.compare("palanca-1") == 0 || string2.compare("muroFondo2") == 0)) {
+		return true;
+	}
+
+	if ((string1.compare("palanca-2") == 0 || string1.compare("boxCS") == 0) &&
+		(string2.compare("palanca-2") == 0 || string2.compare("boxCS") == 0)) {
+		return true;
+	}
+
+	if ((string1.compare("palanca-3") == 0 || string1.compare("muroDerecho2") == 0) &&
+		(string2.compare("palanca-3") == 0 || string2.compare("muroDerecho2") == 0)) {
+		return true;
+	}
+
+	if ((string1.compare("astroProta") == 0 || string1.compare("action") == 0) &&
+		(string2.compare("astroProta") == 0 || string2.compare("action") == 0)) {
+		return true;
+	}
+	
 	return false;
 }
 
@@ -4095,6 +4239,19 @@ void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
 			std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
 				<< "botonBox-R" + std::to_string(i) << std::endl;
 			combBotones[i][2] = !combBotones[i][2];
+		}
+	}
+}
+
+void updatePalancaCollider(std::map<std::string, bool> collisionDetection) {
+	for (int i = 0; i < palancaPos.size(); i++) {
+		if (collisionDetection.find("palanca-" + std::to_string(i))->second && !(animaPalancas[i] == 1)) {
+			std::cout << "collisionDetection " << collisionDetection.find("palanca-" + std::to_string(i))->second << " de "
+				<< "palanca-" + std::to_string(i) << std::endl;
+			//std::cout << "previo a update " << combBotones[i][0] << std::endl;
+			animaPalancas[i] = 1;
+			indPalanca++;
+			//std::cout << "despues de update " << combBotones[i][0] << std::endl;
 		}
 	}
 }
@@ -4130,7 +4287,61 @@ void updateEscenario1() {
 }
 
 void updateEscenario2() {
+	if (!enablePuerta) {
+		if (!lucesPalancas[0] && indPalanca == 1) {
+			if ((animaPalancas[2] == 1)) {
+				lucesPalancas[0] = true;
+				std::cout << "lucesPalancas[0] " << lucesPalancas[0] << std::endl;
+			}
+			else {
+				for (int i = 0; i < lucesPalancas.size(); i++){
+					lucesPalancas[i] = false;
+				}
+				for (int i = 0; i < animaPalancas.size(); i++) {
+					animaPalancas[i] = 0;
+				}
+				indPalanca=0;
+				std::cout << "Combinación Incorrecta "<< std::endl;
+			}
+		}
+		if (!lucesPalancas[1] && indPalanca == 2) {
+			if ((animaPalancas[0] == 1)) {
+				lucesPalancas[1] = true;
+				std::cout << "lucesPalancas[1] " << lucesPalancas[1] << std::endl;
+			}
+			else {
+				for (int i = 0; i < lucesPalancas.size(); i++) {
+					lucesPalancas[i] = false;
+				}
+				for (int i = 0; i < animaPalancas.size(); i++) {
+					animaPalancas[i] = 0;
+				}
+				indPalanca = 0;
+				std::cout << "Combinación Incorrecta " << std::endl;
+			}
+		}
+		if (!lucesPalancas[2] && indPalanca == 3) {
+			if ((animaPalancas[3] == 1)) {
+				lucesPalancas[2] = true;
+				std::cout << "lucesPalancas[2] " << lucesPalancas[2] << std::endl;
+			}
+			else {
+				for (int i = 0; i < lucesPalancas.size(); i++) {
+					lucesPalancas[i] = false;
+				}
+				for (int i = 0; i < animaPalancas.size(); i++) {
+					animaPalancas[i] = 0;
+				}
+				indPalanca = 0;
+				std::cout << "Combinación Incorrecta " << std::endl;
+			}
+		}
+		if ((lucesPalancas[0] && lucesPalancas[1] && lucesPalancas[2])) {
+			enablePuerta = true;
+			std::cout << "Combinación Correcta " << std::endl;
+		}
 
+	}
 }
 
 int main(int argc, char** argv) {
