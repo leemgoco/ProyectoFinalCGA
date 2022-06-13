@@ -314,6 +314,7 @@ bool cambianivel2 = false;
 bool cambianivel3 = false;
 bool empiezaJuego = false;
 bool pressEnter = false;
+int animationIndexEscotilla = 0;
 
 
 bool escenario1 = true;
@@ -477,6 +478,7 @@ void updateEscenario2();
 void preRender2();
 void collidersManagmentEs2();
 void soundEscene2();
+glm::vec3 colorGenerador(std::vector<bool> combBotones);
 
 
 void initParticleBuffers() {
@@ -814,48 +816,48 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
 	modelBidones.setShader(&shaderMulLighting);
 
-	modelBidones2 = modelBidones;
-	modelBidones3 = modelBidones;
-	modelBidones4 = modelBidones;
+	//modelBidones2 = modelBidones;
+	//modelBidones3 = modelBidones;
+	//modelBidones4 = modelBidones;
 
 	//Caja1
 	modelCajaCuadrada.loadModel("../models/SegundoEscenario/Caja1.obj");
 	modelCajaCuadrada.setShader(&shaderMulLighting);
 
-	modelCajaCuadrada2 = modelCajaCuadrada;
-	modelCajaCuadrada3 = modelCajaCuadrada;
-	modelCajaCuadrada4 = modelCajaCuadrada;
-	modelCajaCuadrada5 = modelCajaCuadrada;
+	//modelCajaCuadrada2 = modelCajaCuadrada;
+	//modelCajaCuadrada3 = modelCajaCuadrada;
+	//modelCajaCuadrada4 = modelCajaCuadrada;
+	//modelCajaCuadrada5 = modelCajaCuadrada;
 
 	//Caja2
 	modelCajaLowPoly.loadModel("../models/SegundoEscenario/Caja2.obj");
 	modelCajaLowPoly.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly = modelCajaLowPoly;
-	modelCajaLowPoly2 = modelCajaLowPoly;
-	modelCajaLowPoly3 = modelCajaLowPoly;
-	modelCajaLowPoly4 = modelCajaLowPoly;
-	modelCajaLowPoly5 = modelCajaLowPoly;
-	modelCajaLowPoly6 = modelCajaLowPoly;
+	//modelCajaLowPoly = modelCajaLowPoly;
+	//modelCajaLowPoly2 = modelCajaLowPoly;
+	//modelCajaLowPoly3 = modelCajaLowPoly;
+	//modelCajaLowPoly4 = modelCajaLowPoly;
+	//modelCajaLowPoly5 = modelCajaLowPoly;
+	//modelCajaLowPoly6 = modelCajaLowPoly;
 
 	//Compu
 	modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
 	modelCompu.setShader(&shaderMulLighting);
 
-	modelCompu2 = modelCompu;
+	//modelCompu2 = modelCompu;
 
 	//Cuerpo
 	modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
 	modelCuerpo.setShader(&shaderMulLighting);
 
-	modelCuerpo2 = modelCuerpo;
-	modelCuerpo3 = modelCuerpo;
+	//modelCuerpo2 = modelCuerpo;
+	//modelCuerpo3 = modelCuerpo;
 
 	//Estanteria
 	modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
 	modelEstanteria.setShader(&shaderMulLighting);
 
-	modelEstanteria2 = modelEstanteria;
+	//modelEstanteria2 = modelEstanteria;
 
 
 	//Palanca
@@ -1465,8 +1467,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 void destroy() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
-	// --------- IMPORTANTE ----------
-	// Eliminar los shader y buffers creados.
+
+	 //--------- IMPORTANTE ----------
+	 //Eliminar los shader y buffers creados.
 
 	// Shaders Delete
 	shader.destroy();
@@ -1534,6 +1537,7 @@ void destroy() {
 	modelCajaLowPoly3.destroy();
 	modelCajaLowPoly4.destroy();
 	modelCajaLowPoly5.destroy();
+	modelCajaLowPoly6.destroy();
 	modelCompu.destroy();
 	modelCompu2.destroy();
 	modelCuerpo.destroy();
@@ -2282,13 +2286,13 @@ void renderScene(bool renderParticles) {
 	 modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]);*/
 
 	 //glDisable(GL_BLEND);
-	modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-		modelMatrixCompuerta[3][2]) + 2.0f;
-	glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
-	modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-		glm::vec3(0.0021, 0.0021, 0.0021));
-	modelCompuerta.setAnimationIndex(1);
-	modelCompuerta.render(modelMatrixCompuertaBody);
+	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
+	//	modelMatrixCompuerta[3][2]) + 2.0f;
+	//glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
+	//modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
+	//	glm::vec3(0.0021, 0.0021, 0.0021));
+	//modelCompuerta.setAnimationIndex(2);
+	//modelCompuerta.render(modelMatrixCompuertaBody);
 
 
 
@@ -2374,7 +2378,7 @@ void renderScene(bool renderParticles) {
 	//	glm::vec3(0.021, 0.021, 0.021));
 	modelCompuerta.setPosition(glm::vec3(3.3f, 2.8f, 19.1f));
 	modelCompuerta.setScale(glm::vec3(0.03, 0.03, 0.03));
-	modelCompuerta.setAnimationIndex(0);
+	modelCompuerta.setAnimationIndex(animationIndexEscotilla);
 	modelCompuerta.render();
 	
 	//Plataforma
@@ -2743,11 +2747,13 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 	 * Propiedades de neblina
 	 *******************************************/
 	shaderMulLighting.setVectorFloat3("fogColor",
-		glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+		glm::value_ptr(glm::vec3(0.3, 0.3, 0.5)));
+	shaderMulLighting.setFloat("density", 0.02);
 	shaderTerrain.setVectorFloat3("fogColor",
-		glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+		glm::value_ptr(glm::vec3(0.3, 0.3, 0.5)));
+	shaderTerrain.setFloat("density", 0.02);
 	shaderSkybox.setVectorFloat3("fogColor",
-		glm::value_ptr(glm::vec3(0.5, 0.5, 0.4)));
+		glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
 
 	/*******************************************
 	 * Propiedades Luz direccional
@@ -2757,11 +2763,11 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 	else
 		shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
 	shaderMulLighting.setVectorFloat3("directionalLight.light.ambient",
-		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+		glm::value_ptr(glm::vec3(0.14, 0.15, 0.31)));
 	shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse",
-		glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
-	shaderMulLighting.setVectorFloat3("directionalLight.light.specular",
 		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.specular",
+		glm::value_ptr(glm::vec3(0.9, 0.9, 0.9)));
 	shaderMulLighting.setVectorFloat3("directionalLight.direction",
 		glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
 
@@ -2773,9 +2779,9 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 	else
 		shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
 	shaderTerrain.setVectorFloat3("directionalLight.light.ambient",
-		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
+		glm::value_ptr(glm::vec3(0.14, 0.15, 0.31)));
 	shaderTerrain.setVectorFloat3("directionalLight.light.diffuse",
-		glm::value_ptr(glm::vec3(0.5, 0.5, 0.5)));
+		glm::value_ptr(glm::vec3(0.9, 0.9, 0.9)));
 	shaderTerrain.setVectorFloat3("directionalLight.light.specular",
 		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 	shaderTerrain.setVectorFloat3("directionalLight.direction",
@@ -2827,23 +2833,24 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 			  * Propiedades PointLights
 			  *******************************************/
 	shaderMulLighting.setInt("pointLightCount",
-		lamp1Position.size() + lamp2Orientation.size());
+		botonesPos.size()*2 );
 	shaderTerrain.setInt("pointLightCount",
-		lamp1Position.size() + lamp2Orientation.size());
-	for (int i = 0; i < lamp1Position.size(); i++) {
-		glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
-		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-			lamp1Position[i]);
-		matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
-			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
-		matrixAdjustLamp = glm::scale(matrixAdjustLamp,
-			glm::vec3(0.5, 0.5, 0.5));
-		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-			glm::vec3(0, 10.3585, 0));
-		glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
+		botonesPos.size()*2 );
+	//Luces sobre generadores
+	for (int i = 0; i < botonesPos.size(); i++) {
+		glm::mat4 matrixLuzPuzzle = glm::mat4(1.0f);
+		matrixLuzPuzzle = glm::translate(matrixLuzPuzzle,
+			glm::vec3(botonesPos[i].x,
+				botonesPos[i].y + 0.6, botonesPos[i].z + 1.15));
+		glm::vec3 lampPosition = glm::vec3(matrixLuzPuzzle[3]);
+		//std::cout << "combBotones= " << i << std::endl;
+		glm::vec3 color = colorGenerador(combBotones[i]);
+		if (i == 1) {
+			color = glm::vec3(0.0, 0.0, 0.0);
+		}
 		shaderMulLighting.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.ambient",
-			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+			glm::value_ptr(color));
 		shaderMulLighting.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.diffuse",
 			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
@@ -2854,14 +2861,14 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 			"pointLights[" + std::to_string(i) + "].position",
 			glm::value_ptr(lampPosition));
 		shaderMulLighting.setFloat(
-			"pointLights[" + std::to_string(i) + "].constant", 1.0);
+			"pointLights[" + std::to_string(i) + "].constant", 0.5);
 		shaderMulLighting.setFloat(
 			"pointLights[" + std::to_string(i) + "].linear", 0.09);
 		shaderMulLighting.setFloat(
 			"pointLights[" + std::to_string(i) + "].quadratic", 0.01);
 		shaderTerrain.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.ambient",
-			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+			glm::value_ptr(color));
 		shaderTerrain.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.diffuse",
 			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
@@ -2878,64 +2885,90 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 		shaderTerrain.setFloat(
 			"pointLights[" + std::to_string(i) + "].quadratic", 0.02);
 	}
-	for (int i = 0; i < lamp2Position.size(); i++) {
-		glm::mat4 matrixAdjustLamp = glm::mat4(1.0f);
-		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-			lamp2Position[i]);
-		matrixAdjustLamp = glm::rotate(matrixAdjustLamp,
-			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-		matrixAdjustLamp = glm::scale(matrixAdjustLamp,
-			glm::vec3(1.0, 1.0, 1.0));
-		matrixAdjustLamp = glm::translate(matrixAdjustLamp,
-			glm::vec3(0.759521, 5.00174, 0));
-		glm::vec3 lampPosition = glm::vec3(matrixAdjustLamp[3]);
+
+	//Lamparas generadores
+	for (int i = 0; i < botonesPos.size(); i++) {
+		glm::mat4 matrixLuzGen = glm::mat4(1.0f);
+		matrixLuzGen = glm::translate(matrixLuzGen,
+			glm::vec3(botonesPos[i].x + 3.9,
+				terrain.getHeightTerrain(botonesPos[i].x + 3.9,
+					botonesPos[i].z + 1.4), botonesPos[i].z + 1.4));
+		glm::vec3 lampPosition = glm::vec3(matrixLuzGen[3]);
+		if (lucesBotones[i]) {
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.ambient",
+				glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.specular",
+				glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		}
+		else {
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.specular",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+		}
+		//shaderMulLighting.setVectorFloat3(
+		//	"pointLights[" + std::to_string(botonesPos.size() + i)
+		//	+ "].light.ambient",
+		//	glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+		//shaderMulLighting.setVectorFloat3(
+		//	"pointLights[" + std::to_string(botonesPos.size() + i)
+		//	+ "].light.diffuse",
+		//	glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+		//shaderMulLighting.setVectorFloat3(
+		//	"pointLights[" + std::to_string(botonesPos.size() + i)
+		//	+ "].light.specular",
+		//	glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
 		shaderMulLighting.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
-			+ "].light.ambient",
-			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
-		shaderMulLighting.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
-			+ "].light.diffuse",
-			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
-		shaderMulLighting.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
-			+ "].light.specular",
-			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
-		shaderMulLighting.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].position", glm::value_ptr(lampPosition));
 		shaderMulLighting.setFloat(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].constant", 1.0);
 		shaderMulLighting.setFloat(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].linear", 0.09);
 		shaderMulLighting.setFloat(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].quadratic", 0.01);
 		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].light.ambient",
 			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
 		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].light.diffuse",
 			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
 		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].light.specular",
 			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
 		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].position", glm::value_ptr(lampPosition));
 		shaderTerrain.setFloat(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].constant", 1.0);
 		shaderTerrain.setFloat(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].linear", 0.09);
 		shaderTerrain.setFloat(
-			"pointLights[" + std::to_string(lamp1Position.size() + i)
+			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].quadratic", 0.02);
 	}
 }
@@ -3003,52 +3036,6 @@ void collidersManagmentEs1() {
 		 * Creacion de colliders
 		 * IMPORTANT do this before interpolations
 		 *******************************************/
-
-		 // Lamps1 colliders
-		 //for (int i = 0; i < lamp1Position.size(); i++) {
-		 //	AbstractModel::OBB lampCollider;
-		 //	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		 //			lamp1Position[i]);
-		 //	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
-		 //			glm::radians(lamp1Orientation[i]), glm::vec3(0, 1, 0));
-		 //	addOrUpdateColliders(collidersOBB, "lamp1-" + std::to_string(i),
-		 //			lampCollider, modelMatrixColliderLamp);
-		 //	// Set the orientation of collider before doing the scale
-		 //	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-		 //	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
-		 //			glm::vec3(0.5, 0.5, 0.5));
-		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		 //			modelLamp1.getObb().c);
-		 //	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-		 //	lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.5, 0.5, 0.5);
-		 //	std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) =
-		 //			lampCollider;
-		 //}
-
-		 // Lamps2 colliders
-		 //for (int i = 0; i < lamp2Position.size(); i++) {
-		 //	AbstractModel::OBB lampCollider;
-		 //	glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		 //			lamp2Position[i]);
-		 //	modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp,
-		 //			glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-		 //	addOrUpdateColliders(collidersOBB, "lamp2-" + std::to_string(i),
-		 //			lampCollider, modelMatrixColliderLamp);
-		 //	// Set the orientation of collider before doing the scale
-		 //	lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-		 //	modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp,
-		 //			glm::vec3(1.0, 1.0, 1.0));
-		 //	modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp,
-		 //			modelLampPost2.getObb().c);
-		 //	lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-		 //	lampCollider.e = modelLampPost2.getObb().e
-		 //			* glm::vec3(1.0, 1.0, 1.0);
-		 //	std::get<0>(collidersOBB.find("lamp2-" + std::to_string(i))->second) =
-		 //			lampCollider;
-		 //}
-
 		 //Botones colliders
 	for (int i = 0; i < botonesPos.size(); i++) {
 		AbstractModel::OBB botonCollider;
@@ -3098,19 +3085,19 @@ void collidersManagmentEs1() {
 		modelMatrixColliderBotonY = glm::scale(modelMatrixColliderBotonY,
 			glm::vec3(0.3, 0.5, 0.3));
 		botonColliderY.c = glm::vec3(modelMatrixColliderBotonY[3]);
-		botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+		botonColliderY.e = modelBotones.getObb().e * glm::vec3(0.15, 0.5, 0.6);
 		//B boton
 		botonColliderB.u = glm::quat_cast(modelMatrixColliderBotonB);
 		modelMatrixColliderBotonB = glm::scale(modelMatrixColliderBotonB,
 			glm::vec3(0.3, 0.5, 0.3));
 		botonColliderB.c = glm::vec3(modelMatrixColliderBotonB[3]);
-		botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+		botonColliderB.e = modelBotones.getObb().e * glm::vec3(0.15, 0.5, 0.6);
 		//R boton
 		botonColliderR.u = glm::quat_cast(modelMatrixColliderBotonR);
 		modelMatrixColliderBotonR = glm::scale(modelMatrixColliderBotonR,
 			glm::vec3(0.3, 0.5, 0.3));
 		botonColliderR.c = glm::vec3(modelMatrixColliderBotonR[3]);
-		botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.3, 0.5, 0.3);
+		botonColliderR.e = modelBotones.getObb().e * glm::vec3(0.15, 0.5, 0.6);
 		std::get<0>(collidersOBB.find("botonBox-" + std::to_string(i))->second) =
 			botonCollider;
 		std::get<0>(collidersOBB.find("botonBox-Y" + std::to_string(i))->second) =
@@ -3316,15 +3303,15 @@ void collidersManagmentEs1() {
 	glm::mat4 modelmatrixColliderAction = glm::mat4(modelMatrixAstroProta);
 	// Set the orientation of collider before doing the scale
 	actionCollider.u = glm::quat_cast(modelmatrixColliderAction);
-	modelmatrixColliderAction[3].z += -20.0;
+	//modelmatrixColliderAction[3].z += -20.0;
 	modelmatrixColliderAction = glm::scale(modelmatrixColliderAction,
-		glm::vec3(1.5, 4.0, 1.4));
+		glm::vec3(0.8, 4.2, 2.0));
 	modelmatrixColliderAction = glm::translate(modelmatrixColliderAction,
 		glm::vec3(astroProta.getObb().c.x,
 			astroProta.getObb().c.y + 0.28,
 			astroProta.getObb().c.z + 0.28));
 	actionCollider.e = astroProta.getObb().e
-		* glm::vec3(2.0, 4.2, 2.8);
+		* glm::vec3(0.7, 4.2, 2.1);
 	actionCollider.c = glm::vec3(modelmatrixColliderAction[3]);
 	addOrUpdateColliders(collidersOBB, "action", actionCollider,
 		modelMatrixAstroProta);
@@ -3615,47 +3602,47 @@ void prepareScene2() {
 
 	modelBidones.setShader(&shaderMulLighting);
 
-	modelBidones2.setShader(&shaderMulLighting);
+	//modelBidones2.setShader(&shaderMulLighting);
 
-	modelBidones3.setShader(&shaderMulLighting);
+	//modelBidones3.setShader(&shaderMulLighting);
 
-	modelBidones4.setShader(&shaderMulLighting);
+	//modelBidones4.setShader(&shaderMulLighting);
 
 	modelCompu.setShader(&shaderMulLighting);
 
-	modelCompu2.setShader(&shaderMulLighting);
+	//modelCompu2.setShader(&shaderMulLighting);
 
 	modelCuerpo.setShader(&shaderMulLighting);
 
-	modelCuerpo2.setShader(&shaderMulLighting);
+	//modelCuerpo2.setShader(&shaderMulLighting);
 
-	modelCuerpo3.setShader(&shaderMulLighting);
+	//modelCuerpo3.setShader(&shaderMulLighting);
 
 	modelEstanteria.setShader(&shaderMulLighting);
 
-	modelEstanteria2.setShader(&shaderMulLighting);
+	//modelEstanteria2.setShader(&shaderMulLighting);
 
 	modelCajaCuadrada.setShader(&shaderMulLighting);
 
-	modelCajaCuadrada2.setShader(&shaderMulLighting);
+	//modelCajaCuadrada2.setShader(&shaderMulLighting);
 
-	modelCajaCuadrada3.setShader(&shaderMulLighting);
+	//modelCajaCuadrada3.setShader(&shaderMulLighting);
 
-	modelCajaCuadrada4.setShader(&shaderMulLighting);
+	//modelCajaCuadrada4.setShader(&shaderMulLighting);
 
-	modelCajaCuadrada5.setShader(&shaderMulLighting);
+	//modelCajaCuadrada5.setShader(&shaderMulLighting);
 
 	modelCajaLowPoly.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly2.setShader(&shaderMulLighting);
+	//modelCajaLowPoly2.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly3.setShader(&shaderMulLighting);
+	//modelCajaLowPoly3.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly4.setShader(&shaderMulLighting);
+	//modelCajaLowPoly4.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly5.setShader(&shaderMulLighting);
+	//modelCajaLowPoly5.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly6.setShader(&shaderMulLighting);
+	//modelCajaLowPoly6.setShader(&shaderMulLighting);
 
 	modelPalanca.setShader(&shaderMulLighting);
 
@@ -3710,47 +3697,47 @@ void prepareDepthScene2() {
 
 	modelBidones.setShader(&shaderDepth);
 
-	modelBidones2.setShader(&shaderDepth);
+	//modelBidones2.setShader(&shaderDepth);
 
-	modelBidones3.setShader(&shaderDepth);
+	//modelBidones3.setShader(&shaderDepth);
 
-	modelBidones4.setShader(&shaderDepth);
+	//modelBidones4.setShader(&shaderDepth);
 
 	modelCompu.setShader(&shaderDepth);
 
-	modelCompu2.setShader(&shaderDepth);
+	//modelCompu2.setShader(&shaderDepth);
 
 	modelCuerpo.setShader(&shaderDepth);
 
-	modelCuerpo2.setShader(&shaderDepth);
+	//modelCuerpo2.setShader(&shaderDepth);
 
-	modelCuerpo3.setShader(&shaderDepth);
+	//modelCuerpo3.setShader(&shaderDepth);
 
 	modelEstanteria.setShader(&shaderDepth);
 
-	modelEstanteria2.setShader(&shaderDepth);
+	//modelEstanteria2.setShader(&shaderDepth);
 
 	modelCajaCuadrada.setShader(&shaderDepth);
 
-	modelCajaCuadrada2.setShader(&shaderDepth);
+	//modelCajaCuadrada2.setShader(&shaderDepth);
 
-	modelCajaCuadrada3.setShader(&shaderDepth);
+	//modelCajaCuadrada3.setShader(&shaderDepth);
 
-	modelCajaCuadrada4.setShader(&shaderDepth);
+	//modelCajaCuadrada4.setShader(&shaderDepth);
 
-	modelCajaCuadrada5.setShader(&shaderDepth);
+	//modelCajaCuadrada5.setShader(&shaderDepth);
 
 	modelCajaLowPoly.setShader(&shaderDepth);
 
-	modelCajaLowPoly2.setShader(&shaderDepth);
+	//modelCajaLowPoly2.setShader(&shaderDepth);
 
-	modelCajaLowPoly3.setShader(&shaderDepth);
+	//modelCajaLowPoly3.setShader(&shaderDepth);
 
-	modelCajaLowPoly4.setShader(&shaderDepth);
+	//modelCajaLowPoly4.setShader(&shaderDepth);
 
-	modelCajaLowPoly5.setShader(&shaderDepth);
+	//modelCajaLowPoly5.setShader(&shaderDepth);
 
-	modelCajaLowPoly6.setShader(&shaderDepth);
+	//modelCajaLowPoly6.setShader(&shaderDepth);
 
 
 	modelPalanca.setShader(&shaderDepth);
@@ -3854,20 +3841,20 @@ void renderScene2(bool renderParticles) {
 	modelMatrixBidones = glm::scale(modelMatrixBidones, glm::vec3(2.0, 2.0, 2.0));
 	modelBidones.render(modelMatrixBidones);
 
-	modelMatrixBidones2 = glm::mat4(1.0);
-	modelMatrixBidones2 = glm::translate(modelMatrixBidones2, glm::vec3(-31.6, 0.2, -18.1));
-	modelMatrixBidones2 = glm::scale(modelMatrixBidones2, glm::vec3(2.0, 2.0, 2.0));
-	modelBidones2.render(modelMatrixBidones2);
+	//modelMatrixBidones2 = glm::mat4(1.0);
+	//modelMatrixBidones2 = glm::translate(modelMatrixBidones2, glm::vec3(-31.6, 0.2, -18.1));
+	//modelMatrixBidones2 = glm::scale(modelMatrixBidones2, glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones2.render(modelMatrixBidones2);
 
-	modelMatrixBidones3 = glm::mat4(1.0);
-	modelMatrixBidones3 = glm::translate(modelMatrixBidones3, glm::vec3(-28.7, 0.2, -15.0));
-	modelMatrixBidones3 = glm::scale(modelMatrixBidones3, glm::vec3(2.0, 2.0, 2.0));
-	modelBidones3.render(modelMatrixBidones3);
+	//modelMatrixBidones3 = glm::mat4(1.0);
+	//modelMatrixBidones3 = glm::translate(modelMatrixBidones3, glm::vec3(-28.7, 0.2, -15.0));
+	//modelMatrixBidones3 = glm::scale(modelMatrixBidones3, glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones3.render(modelMatrixBidones3);
 
-	modelMatrixBidones4 = glm::mat4(1.0);
-	modelMatrixBidones4 = glm::translate(modelMatrixBidones4, glm::vec3(38.0, 0.2, -12.3));
-	modelMatrixBidones4 = glm::scale(modelMatrixBidones4, glm::vec3(2.0, 2.0, 2.0));
-	modelBidones4.render(modelMatrixBidones4);
+	//modelMatrixBidones4 = glm::mat4(1.0);
+	//modelMatrixBidones4 = glm::translate(modelMatrixBidones4, glm::vec3(38.0, 0.2, -12.3));
+	//modelMatrixBidones4 = glm::scale(modelMatrixBidones4, glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones4.render(modelMatrixBidones4);
 
 	//Caja1 (Cuadradas)
 	//modelCajaCuadrada.setPosition(glm::vec3(-7.0, 0.2, -20.0));
@@ -3877,31 +3864,31 @@ void renderScene2(bool renderParticles) {
 	modelMatrixCajaCuadrada = glm::scale(modelMatrixCajaCuadrada, glm::vec3(2.0, 2.0, 2.0));
 	modelCajaCuadrada.render(modelMatrixCajaCuadrada);
 
-	modelMatrixCajaCuadrada2 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada2 = glm::translate(modelMatrixCajaCuadrada2, glm::vec3(-47, 0.2, -7.0));
-	modelMatrixCajaCuadrada2 = glm::scale(modelMatrixCajaCuadrada2, glm::vec3(2.0, 2.0, 2.0));
-	modelCajaCuadrada2.render(modelMatrixCajaCuadrada2);
+	//modelMatrixCajaCuadrada2 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada2 = glm::translate(modelMatrixCajaCuadrada2, glm::vec3(-47, 0.2, -7.0));
+	//modelMatrixCajaCuadrada2 = glm::scale(modelMatrixCajaCuadrada2, glm::vec3(2.0, 2.0, 2.0));
+	//modelCajaCuadrada2.render(modelMatrixCajaCuadrada2);
 
-	modelCajaCuadrada3.setOrientation(glm::vec3(0.0, 30.0, 0.0));
-	modelMatrixCajaCuadrada3 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada3 = glm::translate(modelMatrixCajaCuadrada3, glm::vec3(-17.0, 0.2, -6.25));
-	modelMatrixCajaCuadrada3 = glm::scale(modelMatrixCajaCuadrada3, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaCuadrada3 = glm::rotate(modelMatrixCajaCuadrada3, glm::radians(30.0f), glm::vec3(0, 1, 0));
-	modelCajaCuadrada3.render(modelMatrixCajaCuadrada3);
+	//modelCajaCuadrada3.setOrientation(glm::vec3(0.0, 30.0, 0.0));
+	//modelMatrixCajaCuadrada3 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada3 = glm::translate(modelMatrixCajaCuadrada3, glm::vec3(-17.0, 0.2, -6.25));
+	//modelMatrixCajaCuadrada3 = glm::scale(modelMatrixCajaCuadrada3, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaCuadrada3 = glm::rotate(modelMatrixCajaCuadrada3, glm::radians(30.0f), glm::vec3(0, 1, 0));
+	//modelCajaCuadrada3.render(modelMatrixCajaCuadrada3);
 
-	modelCajaCuadrada4.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaCuadrada4 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada4 = glm::translate(modelMatrixCajaCuadrada4, glm::vec3(-12.3, 0.2, -6.2));
-	modelMatrixCajaCuadrada4 = glm::scale(modelMatrixCajaCuadrada4, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaCuadrada4 = glm::rotate(modelMatrixCajaCuadrada4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaCuadrada4.render(modelMatrixCajaCuadrada4);
+	//modelCajaCuadrada4.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaCuadrada4 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada4 = glm::translate(modelMatrixCajaCuadrada4, glm::vec3(-12.3, 0.2, -6.2));
+	//modelMatrixCajaCuadrada4 = glm::scale(modelMatrixCajaCuadrada4, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaCuadrada4 = glm::rotate(modelMatrixCajaCuadrada4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaCuadrada4.render(modelMatrixCajaCuadrada4);
 
-	modelCajaCuadrada5.setOrientation(glm::vec3(0.0, 30.0, 0.0));
-	modelMatrixCajaCuadrada5 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada5 = glm::translate(modelMatrixCajaCuadrada5, glm::vec3(17.0, 0.2, -25.5));
-	modelMatrixCajaCuadrada5 = glm::scale(modelMatrixCajaCuadrada5, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaCuadrada5 = glm::rotate(modelMatrixCajaCuadrada5, glm::radians(30.0f), glm::vec3(0, 1, 0));
-	modelCajaCuadrada5.render(modelMatrixCajaCuadrada5);
+	//modelCajaCuadrada5.setOrientation(glm::vec3(0.0, 30.0, 0.0));
+	//modelMatrixCajaCuadrada5 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada5 = glm::translate(modelMatrixCajaCuadrada5, glm::vec3(17.0, 0.2, -25.5));
+	//modelMatrixCajaCuadrada5 = glm::scale(modelMatrixCajaCuadrada5, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaCuadrada5 = glm::rotate(modelMatrixCajaCuadrada5, glm::radians(30.0f), glm::vec3(0, 1, 0));
+	//modelCajaCuadrada5.render(modelMatrixCajaCuadrada5);
 
 	//Caja2 (Low Poly)
 
@@ -3914,40 +3901,40 @@ void renderScene2(bool renderParticles) {
 	modelMatrixCajaLowPoly = glm::rotate(modelMatrixCajaLowPoly, glm::radians(-30.0f), glm::vec3(0, 1, 0));
 	modelCajaLowPoly.render(modelMatrixCajaLowPoly);
 
-	modelCajaLowPoly2.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly2 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly2 = glm::translate(modelMatrixCajaLowPoly2, glm::vec3(-18.0, 0.2, -23.0));
-	modelMatrixCajaLowPoly2 = glm::scale(modelMatrixCajaLowPoly2, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly2 = glm::rotate(modelMatrixCajaLowPoly2, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly2.render(modelMatrixCajaLowPoly2);
+	//modelCajaLowPoly2.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly2 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly2 = glm::translate(modelMatrixCajaLowPoly2, glm::vec3(-18.0, 0.2, -23.0));
+	//modelMatrixCajaLowPoly2 = glm::scale(modelMatrixCajaLowPoly2, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly2 = glm::rotate(modelMatrixCajaLowPoly2, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly2.render(modelMatrixCajaLowPoly2);
 
-	modelCajaLowPoly3.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly3 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly3 = glm::translate(modelMatrixCajaLowPoly3, glm::vec3(-22.6, 0.2, -28.9));
-	modelMatrixCajaLowPoly3 = glm::scale(modelMatrixCajaLowPoly3, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly3 = glm::rotate(modelMatrixCajaLowPoly3, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly3.render(modelMatrixCajaLowPoly3);
+	//modelCajaLowPoly3.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly3 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly3 = glm::translate(modelMatrixCajaLowPoly3, glm::vec3(-22.6, 0.2, -28.9));
+	//modelMatrixCajaLowPoly3 = glm::scale(modelMatrixCajaLowPoly3, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly3 = glm::rotate(modelMatrixCajaLowPoly3, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly3.render(modelMatrixCajaLowPoly3);
 
-	modelCajaLowPoly4.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly4 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly4 = glm::translate(modelMatrixCajaLowPoly4, glm::vec3(-23.6, 0.2, -34.2));
-	modelMatrixCajaLowPoly4 = glm::scale(modelMatrixCajaLowPoly4, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly4 = glm::rotate(modelMatrixCajaLowPoly4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly4.render(modelMatrixCajaLowPoly4);
+	//modelCajaLowPoly4.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly4 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly4 = glm::translate(modelMatrixCajaLowPoly4, glm::vec3(-23.6, 0.2, -34.2));
+	//modelMatrixCajaLowPoly4 = glm::scale(modelMatrixCajaLowPoly4, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly4 = glm::rotate(modelMatrixCajaLowPoly4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly4.render(modelMatrixCajaLowPoly4);
 
-	modelCajaLowPoly5.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly5 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly5 = glm::translate(modelMatrixCajaLowPoly5, glm::vec3(12.3, 0.2, -20.5));
-	modelMatrixCajaLowPoly5 = glm::scale(modelMatrixCajaLowPoly5, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly5 = glm::rotate(modelMatrixCajaLowPoly5, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly5.render(modelMatrixCajaLowPoly5);
+	//modelCajaLowPoly5.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly5 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly5 = glm::translate(modelMatrixCajaLowPoly5, glm::vec3(12.3, 0.2, -20.5));
+	//modelMatrixCajaLowPoly5 = glm::scale(modelMatrixCajaLowPoly5, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly5 = glm::rotate(modelMatrixCajaLowPoly5, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly5.render(modelMatrixCajaLowPoly5);
 
-	modelCajaLowPoly6.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly6 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly6 = glm::translate(modelMatrixCajaLowPoly6, glm::vec3(50.6, 0.2, -34.5));
-	modelMatrixCajaLowPoly6 = glm::scale(modelMatrixCajaLowPoly6, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly6 = glm::rotate(modelMatrixCajaLowPoly6, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly5.render(modelMatrixCajaLowPoly6);
+	//modelCajaLowPoly6.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly6 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly6 = glm::translate(modelMatrixCajaLowPoly6, glm::vec3(50.6, 0.2, -34.5));
+	//modelMatrixCajaLowPoly6 = glm::scale(modelMatrixCajaLowPoly6, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly6 = glm::rotate(modelMatrixCajaLowPoly6, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly5.render(modelMatrixCajaLowPoly6);
 
 	//Compus
 	modelCompu.setPosition(glm::vec3(17.0, 2.8, -25.5));
@@ -3955,10 +3942,10 @@ void renderScene2(bool renderParticles) {
 	modelCompu.setOrientation(glm::vec3(0.0, -90.0, 0.0));
 	modelCompu.render();
 
-	modelCompu2.setPosition(glm::vec3(-17.77, 3.3, -22.65));
-	modelCompu2.setScale(glm::vec3(2.0, 2.0, 2.0));
-	modelCompu2.setOrientation(glm::vec3(0.0, -90.0, 0.0));
-	modelCompu2.render();
+	//modelCompu2.setPosition(glm::vec3(-17.77, 3.3, -22.65));
+	//modelCompu2.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelCompu2.setOrientation(glm::vec3(0.0, -90.0, 0.0));
+	//modelCompu2.render();
 
 	//Cuerpos
 	modelCuerpo.setPosition(glm::vec3(-31.71, 0.0, -15.03));
@@ -3966,15 +3953,15 @@ void renderScene2(bool renderParticles) {
 	modelCuerpo.setOrientation(glm::vec3(0.0, -90.0, 0.0));
 	modelCuerpo.render();
 
-	modelCuerpo2.setPosition(glm::vec3(50.58, 3.3, -34.5));
-	modelCuerpo2.setScale(glm::vec3(2.0, 2.0, 2.0));
-	modelCuerpo2.setOrientation(glm::vec3(0.0, -45.0, 0.0));
-	modelCuerpo2.render();
+	//modelCuerpo2.setPosition(glm::vec3(50.58, 3.3, -34.5));
+	//modelCuerpo2.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelCuerpo2.setOrientation(glm::vec3(0.0, -45.0, 0.0));
+	//modelCuerpo2.render();
 
-	modelCuerpo3.setPosition(glm::vec3(-21.0, 0.0, -25.0));
-	modelCuerpo3.setScale(glm::vec3(2.0, 2.0, 2.0));
-	modelCuerpo3.setOrientation(glm::vec3(0.0, -45.0, 0.0));
-	modelCuerpo3.render();
+	//modelCuerpo3.setPosition(glm::vec3(-21.0, 0.0, -25.0));
+	//modelCuerpo3.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelCuerpo3.setOrientation(glm::vec3(0.0, -45.0, 0.0));
+	//modelCuerpo3.render();
 
 	//Estanteria
 	//modelEstanteria.setPosition(glm::vec3(15.0, 1.0, -20.0));
@@ -3986,12 +3973,12 @@ void renderScene2(bool renderParticles) {
 	modelMatrixEstanteria1 = glm::rotate(modelMatrixEstanteria1, glm::radians(30.0f), glm::vec3(0, 1, 0));
 	modelEstanteria.render(modelMatrixEstanteria1);
 
-	modelEstanteria2.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixEstanteria2 = glm::mat4(1.0);
-	modelMatrixEstanteria2 = glm::translate(modelMatrixEstanteria2, glm::vec3(-7.03, 0.2, -7.22));
-	modelMatrixEstanteria2 = glm::scale(modelMatrixEstanteria2, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixEstanteria2 = glm::rotate(modelMatrixEstanteria2, glm::radians(-45.0f), glm::vec3(0, 1, 0));
-	modelEstanteria2.render(modelMatrixEstanteria2);
+	//modelEstanteria2.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixEstanteria2 = glm::mat4(1.0);
+	//modelMatrixEstanteria2 = glm::translate(modelMatrixEstanteria2, glm::vec3(-7.03, 0.2, -7.22));
+	//modelMatrixEstanteria2 = glm::scale(modelMatrixEstanteria2, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixEstanteria2 = glm::rotate(modelMatrixEstanteria2, glm::radians(-45.0f), glm::vec3(0, 1, 0));
+	//modelEstanteria2.render(modelMatrixEstanteria2);
 
 	//Marco puerta
 	modelMarcoPuerta.render(modelMatrixMarcoPuerta);
@@ -4301,261 +4288,261 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "muroIzquierdo2", muroIzquierdoCollider,
 		modelMatrixMuroIzquierdo2);
 
-	//Collider Estanteria
-	AbstractModel::OBB modelEstanteriaCollider1;
-	glm::mat4 modelMatrixEstanteriaCollider1 = glm::mat4(modelMatrixEstanteria1);
-	// Set the orientation of collider before doing the scale
-	modelEstanteriaCollider1.u = glm::quat_cast(modelMatrixEstanteriaCollider1);
-	modelMatrixEstanteriaCollider1 = glm::translate(modelMatrixEstanteriaCollider1,
-		glm::vec3(modelEstanteria.getObb().c.x,
-			modelEstanteria.getObb().c.y,
-			modelEstanteria.getObb().c.z));
-	modelEstanteriaCollider1.e = modelEstanteria.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelEstanteriaCollider1.c = glm::vec3(modelMatrixEstanteriaCollider1[3]);
-	addOrUpdateColliders(collidersOBB2, "Estanteria1", modelEstanteriaCollider1,
-		modelMatrixEstanteriaCollider1);
+	////Collider Estanteria
+	//AbstractModel::OBB modelEstanteriaCollider1;
+	//glm::mat4 modelMatrixEstanteriaCollider1 = glm::mat4(modelMatrixEstanteria1);
+	//// Set the orientation of collider before doing the scale
+	//modelEstanteriaCollider1.u = glm::quat_cast(modelMatrixEstanteriaCollider1);
+	//modelMatrixEstanteriaCollider1 = glm::translate(modelMatrixEstanteriaCollider1,
+	//	glm::vec3(modelEstanteria.getObb().c.x,
+	//		modelEstanteria.getObb().c.y,
+	//		modelEstanteria.getObb().c.z));
+	//modelEstanteriaCollider1.e = modelEstanteria.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelEstanteriaCollider1.c = glm::vec3(modelMatrixEstanteriaCollider1[3]);
+	//addOrUpdateColliders(collidersOBB2, "Estanteria1", modelEstanteriaCollider1,
+	//	modelMatrixEstanteriaCollider1);
 
-	//Collider Estanteria2
-	AbstractModel::OBB modelEstanteriaCollider2;
-	glm::mat4 modelMatrixEstanteriaCollider2 = glm::mat4(modelMatrixEstanteria2);
-	// Set the orientation of collider before doing the scale
-	modelEstanteriaCollider2.u = glm::quat_cast(modelMatrixEstanteriaCollider2);
-	modelMatrixEstanteriaCollider2 = glm::translate(modelMatrixEstanteriaCollider2,
-		glm::vec3(modelEstanteria2.getObb().c.x,
-			modelEstanteria2.getObb().c.y,
-			modelEstanteria2.getObb().c.z));
-	modelEstanteriaCollider2.e = modelEstanteria2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelEstanteriaCollider2.c = glm::vec3(modelMatrixEstanteriaCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "Estanteria2", modelEstanteriaCollider2,
-		modelMatrixEstanteriaCollider2);
+	////Collider Estanteria2
+	//AbstractModel::OBB modelEstanteriaCollider2;
+	//glm::mat4 modelMatrixEstanteriaCollider2 = glm::mat4(modelMatrixEstanteria2);
+	//// Set the orientation of collider before doing the scale
+	//modelEstanteriaCollider2.u = glm::quat_cast(modelMatrixEstanteriaCollider2);
+	//modelMatrixEstanteriaCollider2 = glm::translate(modelMatrixEstanteriaCollider2,
+	//	glm::vec3(modelEstanteria2.getObb().c.x,
+	//		modelEstanteria2.getObb().c.y,
+	//		modelEstanteria2.getObb().c.z));
+	//modelEstanteriaCollider2.e = modelEstanteria2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelEstanteriaCollider2.c = glm::vec3(modelMatrixEstanteriaCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "Estanteria2", modelEstanteriaCollider2,
+	//	modelMatrixEstanteriaCollider2);
 
-	//Collider modelCajaCuadrada
-	AbstractModel::OBB modelCajaCuadradaCollider;
-	glm::mat4 modelMatrixCajaCuadradaCollider = glm::mat4(modelMatrixCajaCuadrada);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider.u = glm::quat_cast(modelMatrixCajaCuadradaCollider);
-	modelMatrixCajaCuadradaCollider = glm::translate(modelMatrixCajaCuadradaCollider,
-		glm::vec3(modelCajaCuadrada.getObb().c.x,
-			modelCajaCuadrada.getObb().c.y,
-			modelCajaCuadrada.getObb().c.z));
-	modelCajaCuadradaCollider.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(1.0, 1.0, 1.0);
-	modelCajaCuadradaCollider.c = glm::vec3(modelMatrixCajaCuadradaCollider[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada1", modelCajaCuadradaCollider,
-		modelMatrixCajaCuadradaCollider);
+	////Collider modelCajaCuadrada
+	//AbstractModel::OBB modelCajaCuadradaCollider;
+	//glm::mat4 modelMatrixCajaCuadradaCollider = glm::mat4(modelMatrixCajaCuadrada);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider.u = glm::quat_cast(modelMatrixCajaCuadradaCollider);
+	//modelMatrixCajaCuadradaCollider = glm::translate(modelMatrixCajaCuadradaCollider,
+	//	glm::vec3(modelCajaCuadrada.getObb().c.x,
+	//		modelCajaCuadrada.getObb().c.y,
+	//		modelCajaCuadrada.getObb().c.z));
+	//modelCajaCuadradaCollider.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(1.0, 1.0, 1.0);
+	//modelCajaCuadradaCollider.c = glm::vec3(modelMatrixCajaCuadradaCollider[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada1", modelCajaCuadradaCollider,
+	//	modelMatrixCajaCuadradaCollider);
 
-	//Collider modelCajaCuadrada2
-	AbstractModel::OBB modelCajaCuadradaCollider2;
-	glm::mat4 modelMatrixCajaCuadradaCollider2 = glm::mat4(modelMatrixCajaCuadrada2);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider2.u = glm::quat_cast(modelMatrixCajaCuadradaCollider2);
-	modelMatrixCajaCuadradaCollider2 = glm::translate(modelMatrixCajaCuadradaCollider2,
-		glm::vec3(modelCajaCuadrada2.getObb().c.x,
-			modelCajaCuadrada2.getObb().c.y,
-			modelCajaCuadrada2.getObb().c.z));
-	modelCajaCuadradaCollider2.e = modelCajaCuadrada2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(1.0, 1.0, 1.0);
-	modelCajaCuadradaCollider2.c = glm::vec3(modelMatrixCajaCuadradaCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada2", modelCajaCuadradaCollider2,
-		modelMatrixCajaCuadradaCollider2);
+	////Collider modelCajaCuadrada2
+	//AbstractModel::OBB modelCajaCuadradaCollider2;
+	//glm::mat4 modelMatrixCajaCuadradaCollider2 = glm::mat4(modelMatrixCajaCuadrada2);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider2.u = glm::quat_cast(modelMatrixCajaCuadradaCollider2);
+	//modelMatrixCajaCuadradaCollider2 = glm::translate(modelMatrixCajaCuadradaCollider2,
+	//	glm::vec3(modelCajaCuadrada2.getObb().c.x,
+	//		modelCajaCuadrada2.getObb().c.y,
+	//		modelCajaCuadrada2.getObb().c.z));
+	//modelCajaCuadradaCollider2.e = modelCajaCuadrada2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(1.0, 1.0, 1.0);
+	//modelCajaCuadradaCollider2.c = glm::vec3(modelMatrixCajaCuadradaCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada2", modelCajaCuadradaCollider2,
+	//	modelMatrixCajaCuadradaCollider2);
 
-	//Collider modelCajaCuadrada3
-	AbstractModel::OBB modelCajaCuadradaCollider3;
-	glm::mat4 modelMatrixCajaCuadradaCollider3 = glm::mat4(modelMatrixCajaCuadrada3);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider3.u = glm::quat_cast(modelMatrixCajaCuadradaCollider3);
-	modelMatrixCajaCuadradaCollider3 = glm::translate(modelMatrixCajaCuadradaCollider3,
-		glm::vec3(modelCajaCuadrada3.getObb().c.x,
-			modelCajaCuadrada3.getObb().c.y,
-			modelCajaCuadrada3.getObb().c.z));
-	modelCajaCuadradaCollider3.e = modelCajaCuadrada3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaCuadradaCollider3.c = glm::vec3(modelMatrixCajaCuadradaCollider3[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada3", modelCajaCuadradaCollider3,
-		modelMatrixCajaCuadradaCollider3);
+	////Collider modelCajaCuadrada3
+	//AbstractModel::OBB modelCajaCuadradaCollider3;
+	//glm::mat4 modelMatrixCajaCuadradaCollider3 = glm::mat4(modelMatrixCajaCuadrada3);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider3.u = glm::quat_cast(modelMatrixCajaCuadradaCollider3);
+	//modelMatrixCajaCuadradaCollider3 = glm::translate(modelMatrixCajaCuadradaCollider3,
+	//	glm::vec3(modelCajaCuadrada3.getObb().c.x,
+	//		modelCajaCuadrada3.getObb().c.y,
+	//		modelCajaCuadrada3.getObb().c.z));
+	//modelCajaCuadradaCollider3.e = modelCajaCuadrada3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaCuadradaCollider3.c = glm::vec3(modelMatrixCajaCuadradaCollider3[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada3", modelCajaCuadradaCollider3,
+	//	modelMatrixCajaCuadradaCollider3);
 
-	//Collider modelCajaCuadrada4
-	AbstractModel::OBB modelCajaCuadradaCollider4;
-	glm::mat4 modelMatrixCajaCuadradaCollider4 = glm::mat4(modelMatrixCajaCuadrada4);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider4.u = glm::quat_cast(modelMatrixCajaCuadradaCollider4);
-	modelMatrixCajaCuadradaCollider4 = glm::translate(modelMatrixCajaCuadradaCollider4,
-		glm::vec3(modelCajaCuadrada4.getObb().c.x,
-			modelCajaCuadrada4.getObb().c.y,
-			modelCajaCuadrada4.getObb().c.z));
-	modelCajaCuadradaCollider4.e = modelCajaCuadrada4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaCuadradaCollider4.c = glm::vec3(modelMatrixCajaCuadradaCollider4[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada4", modelCajaCuadradaCollider4,
-		modelMatrixCajaCuadradaCollider4);
+	////Collider modelCajaCuadrada4
+	//AbstractModel::OBB modelCajaCuadradaCollider4;
+	//glm::mat4 modelMatrixCajaCuadradaCollider4 = glm::mat4(modelMatrixCajaCuadrada4);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider4.u = glm::quat_cast(modelMatrixCajaCuadradaCollider4);
+	//modelMatrixCajaCuadradaCollider4 = glm::translate(modelMatrixCajaCuadradaCollider4,
+	//	glm::vec3(modelCajaCuadrada4.getObb().c.x,
+	//		modelCajaCuadrada4.getObb().c.y,
+	//		modelCajaCuadrada4.getObb().c.z));
+	//modelCajaCuadradaCollider4.e = modelCajaCuadrada4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaCuadradaCollider4.c = glm::vec3(modelMatrixCajaCuadradaCollider4[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada4", modelCajaCuadradaCollider4,
+	//	modelMatrixCajaCuadradaCollider4);
 
 
-	//Collider modelCajaCuadrada5
-	AbstractModel::OBB modelCajaCuadradaCollider5;
-	glm::mat4 modelMatrixCajaCuadradaCollider5 = glm::mat4(modelMatrixCajaCuadrada5);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider5.u = glm::quat_cast(modelMatrixCajaCuadradaCollider5);
-	modelMatrixCajaCuadradaCollider5 = glm::translate(modelMatrixCajaCuadradaCollider5,
-		glm::vec3(modelCajaCuadrada5.getObb().c.x,
-			modelCajaCuadrada5.getObb().c.y,
-			modelCajaCuadrada5.getObb().c.z));
-	modelCajaCuadradaCollider5.e = modelCajaCuadrada5.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaCuadradaCollider5.c = glm::vec3(modelMatrixCajaCuadradaCollider5[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada5", modelCajaCuadradaCollider5,
-		modelMatrixCajaCuadradaCollider5);
+	////Collider modelCajaCuadrada5
+	//AbstractModel::OBB modelCajaCuadradaCollider5;
+	//glm::mat4 modelMatrixCajaCuadradaCollider5 = glm::mat4(modelMatrixCajaCuadrada5);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider5.u = glm::quat_cast(modelMatrixCajaCuadradaCollider5);
+	//modelMatrixCajaCuadradaCollider5 = glm::translate(modelMatrixCajaCuadradaCollider5,
+	//	glm::vec3(modelCajaCuadrada5.getObb().c.x,
+	//		modelCajaCuadrada5.getObb().c.y,
+	//		modelCajaCuadrada5.getObb().c.z));
+	//modelCajaCuadradaCollider5.e = modelCajaCuadrada5.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaCuadradaCollider5.c = glm::vec3(modelMatrixCajaCuadradaCollider5[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada5", modelCajaCuadradaCollider5,
+	//	modelMatrixCajaCuadradaCollider5);
 
-	//Collider modelCajaLowPoly
-	AbstractModel::OBB modelCajaLowPolyCollider;
-	glm::mat4 modelMatrixCajaLowPolyCollider = glm::mat4(modelMatrixCajaLowPoly);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider.u = glm::quat_cast(modelMatrixCajaLowPolyCollider);
-	modelMatrixCajaLowPolyCollider = glm::translate(modelMatrixCajaLowPolyCollider,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider.c = glm::vec3(modelMatrixCajaLowPolyCollider[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly1", modelCajaLowPolyCollider,
-		modelMatrixCajaLowPolyCollider);
+	////Collider modelCajaLowPoly
+	//AbstractModel::OBB modelCajaLowPolyCollider;
+	//glm::mat4 modelMatrixCajaLowPolyCollider = glm::mat4(modelMatrixCajaLowPoly);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider.u = glm::quat_cast(modelMatrixCajaLowPolyCollider);
+	//modelMatrixCajaLowPolyCollider = glm::translate(modelMatrixCajaLowPolyCollider,
+	//	glm::vec3(modelCajaLowPoly.getObb().c.x,
+	//		modelCajaLowPoly.getObb().c.y,
+	//		modelCajaLowPoly.getObb().c.z));
+	//modelCajaLowPolyCollider.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider.c = glm::vec3(modelMatrixCajaLowPolyCollider[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly1", modelCajaLowPolyCollider,
+	//	modelMatrixCajaLowPolyCollider);
 
-	//Collider modelCajaLowPoly2
-	AbstractModel::OBB modelCajaLowPolyCollider2;
-	glm::mat4 modelMatrixCajaLowPolyCollider2 = glm::mat4(modelMatrixCajaLowPoly2);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider2.u = glm::quat_cast(modelMatrixCajaLowPolyCollider2);
-	modelMatrixCajaLowPolyCollider2 = glm::translate(modelMatrixCajaLowPolyCollider2,
-		glm::vec3(modelCajaLowPoly2.getObb().c.x,
-			modelCajaLowPoly2.getObb().c.y,
-			modelCajaLowPoly2.getObb().c.z));
-	modelCajaLowPolyCollider2.e = modelCajaLowPoly2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider2.c = glm::vec3(modelMatrixCajaLowPolyCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly2", modelCajaLowPolyCollider2,
-		modelMatrixCajaLowPolyCollider2);
+	////Collider modelCajaLowPoly2
+	//AbstractModel::OBB modelCajaLowPolyCollider2;
+	//glm::mat4 modelMatrixCajaLowPolyCollider2 = glm::mat4(modelMatrixCajaLowPoly2);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider2.u = glm::quat_cast(modelMatrixCajaLowPolyCollider2);
+	//modelMatrixCajaLowPolyCollider2 = glm::translate(modelMatrixCajaLowPolyCollider2,
+	//	glm::vec3(modelCajaLowPoly2.getObb().c.x,
+	//		modelCajaLowPoly2.getObb().c.y,
+	//		modelCajaLowPoly2.getObb().c.z));
+	//modelCajaLowPolyCollider2.e = modelCajaLowPoly2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider2.c = glm::vec3(modelMatrixCajaLowPolyCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly2", modelCajaLowPolyCollider2,
+	//	modelMatrixCajaLowPolyCollider2);
 
-	//Collider modelCajaLowPoly3
-	AbstractModel::OBB modelCajaLowPolyCollider3;
-	glm::mat4 modelMatrixCajaLowPolyCollider3 = glm::mat4(modelMatrixCajaLowPoly3);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider3.u = glm::quat_cast(modelMatrixCajaLowPolyCollider3);
-	modelMatrixCajaLowPolyCollider3 = glm::translate(modelMatrixCajaLowPolyCollider3,
-		glm::vec3(modelCajaLowPoly3.getObb().c.x,
-			modelCajaLowPoly3.getObb().c.y,
-			modelCajaLowPoly3.getObb().c.z));
-	modelCajaLowPolyCollider3.e = modelCajaLowPoly3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider3.c = glm::vec3(modelMatrixCajaLowPolyCollider3[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly3", modelCajaLowPolyCollider3,
-		modelMatrixCajaLowPolyCollider3);
+	////Collider modelCajaLowPoly3
+	//AbstractModel::OBB modelCajaLowPolyCollider3;
+	//glm::mat4 modelMatrixCajaLowPolyCollider3 = glm::mat4(modelMatrixCajaLowPoly3);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider3.u = glm::quat_cast(modelMatrixCajaLowPolyCollider3);
+	//modelMatrixCajaLowPolyCollider3 = glm::translate(modelMatrixCajaLowPolyCollider3,
+	//	glm::vec3(modelCajaLowPoly3.getObb().c.x,
+	//		modelCajaLowPoly3.getObb().c.y,
+	//		modelCajaLowPoly3.getObb().c.z));
+	//modelCajaLowPolyCollider3.e = modelCajaLowPoly3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider3.c = glm::vec3(modelMatrixCajaLowPolyCollider3[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly3", modelCajaLowPolyCollider3,
+	//	modelMatrixCajaLowPolyCollider3);
 
-	//Collider modelCajaLowPoly4
-	AbstractModel::OBB modelCajaLowPolyCollider4;
-	glm::mat4 modelMatrixCajaLowPolyCollider4 = glm::mat4(modelMatrixCajaLowPoly4);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider4.u = glm::quat_cast(modelMatrixCajaLowPolyCollider4);
-	modelMatrixCajaLowPolyCollider4 = glm::translate(modelMatrixCajaLowPolyCollider4,
-		glm::vec3(modelCajaLowPoly4.getObb().c.x,
-			modelCajaLowPoly4.getObb().c.y,
-			modelCajaLowPoly4.getObb().c.z));
-	modelCajaLowPolyCollider4.e = modelCajaLowPoly4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider4.c = glm::vec3(modelMatrixCajaLowPolyCollider4[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly4", modelCajaLowPolyCollider4,
-		modelMatrixCajaLowPolyCollider4);
+	////Collider modelCajaLowPoly4
+	//AbstractModel::OBB modelCajaLowPolyCollider4;
+	//glm::mat4 modelMatrixCajaLowPolyCollider4 = glm::mat4(modelMatrixCajaLowPoly4);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider4.u = glm::quat_cast(modelMatrixCajaLowPolyCollider4);
+	//modelMatrixCajaLowPolyCollider4 = glm::translate(modelMatrixCajaLowPolyCollider4,
+	//	glm::vec3(modelCajaLowPoly4.getObb().c.x,
+	//		modelCajaLowPoly4.getObb().c.y,
+	//		modelCajaLowPoly4.getObb().c.z));
+	//modelCajaLowPolyCollider4.e = modelCajaLowPoly4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider4.c = glm::vec3(modelMatrixCajaLowPolyCollider4[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly4", modelCajaLowPolyCollider4,
+	//	modelMatrixCajaLowPolyCollider4);
 
-	//Collider modelCajaLowPoly5
-	AbstractModel::OBB modelCajaLowPolyCollider5;
-	glm::mat4 modelMatrixCajaLowPolyCollider5 = glm::mat4(modelMatrixCajaLowPoly5);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider5.u = glm::quat_cast(modelMatrixCajaLowPolyCollider5);
-	modelMatrixCajaLowPolyCollider5 = glm::translate(modelMatrixCajaLowPolyCollider5,
-		glm::vec3(modelCajaLowPoly5.getObb().c.x,
-			modelCajaLowPoly5.getObb().c.y,
-			modelCajaLowPoly5.getObb().c.z));
-	modelCajaLowPolyCollider5.e = modelCajaLowPoly5.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider5.c = glm::vec3(modelMatrixCajaLowPolyCollider5[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly5", modelCajaLowPolyCollider5,
-		modelMatrixCajaLowPolyCollider5);
+	////Collider modelCajaLowPoly5
+	//AbstractModel::OBB modelCajaLowPolyCollider5;
+	//glm::mat4 modelMatrixCajaLowPolyCollider5 = glm::mat4(modelMatrixCajaLowPoly5);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider5.u = glm::quat_cast(modelMatrixCajaLowPolyCollider5);
+	//modelMatrixCajaLowPolyCollider5 = glm::translate(modelMatrixCajaLowPolyCollider5,
+	//	glm::vec3(modelCajaLowPoly5.getObb().c.x,
+	//		modelCajaLowPoly5.getObb().c.y,
+	//		modelCajaLowPoly5.getObb().c.z));
+	//modelCajaLowPolyCollider5.e = modelCajaLowPoly5.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider5.c = glm::vec3(modelMatrixCajaLowPolyCollider5[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly5", modelCajaLowPolyCollider5,
+	//	modelMatrixCajaLowPolyCollider5);
 
-	//Collider modelCajaLowPoly6
-	AbstractModel::OBB modelCajaLowPolyCollider6;
-	glm::mat4 modelMatrixCajaLowPolyCollider6 = glm::mat4(modelMatrixCajaLowPoly6);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider6.u = glm::quat_cast(modelMatrixCajaLowPolyCollider6);
-	modelMatrixCajaLowPolyCollider6 = glm::translate(modelMatrixCajaLowPolyCollider6,
-		glm::vec3(modelCajaLowPoly6.getObb().c.x,
-			modelCajaLowPoly6.getObb().c.y,
-			modelCajaLowPoly6.getObb().c.z));
-	modelCajaLowPolyCollider6.e = modelCajaLowPoly6.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider6.c = glm::vec3(modelMatrixCajaLowPolyCollider6[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly6", modelCajaLowPolyCollider6,
-		modelMatrixCajaLowPolyCollider6);
+	////Collider modelCajaLowPoly6
+	//AbstractModel::OBB modelCajaLowPolyCollider6;
+	//glm::mat4 modelMatrixCajaLowPolyCollider6 = glm::mat4(modelMatrixCajaLowPoly6);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider6.u = glm::quat_cast(modelMatrixCajaLowPolyCollider6);
+	//modelMatrixCajaLowPolyCollider6 = glm::translate(modelMatrixCajaLowPolyCollider6,
+	//	glm::vec3(modelCajaLowPoly6.getObb().c.x,
+	//		modelCajaLowPoly6.getObb().c.y,
+	//		modelCajaLowPoly6.getObb().c.z));
+	//modelCajaLowPolyCollider6.e = modelCajaLowPoly6.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider6.c = glm::vec3(modelMatrixCajaLowPolyCollider6[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly6", modelCajaLowPolyCollider6,
+	//	modelMatrixCajaLowPolyCollider6);
 
-	//Collider modelBidones
-	AbstractModel::OBB modelBidonesCollider;
-	glm::mat4 modelMatrixBidonesCollider = glm::mat4(modelMatrixBidones);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider.u = glm::quat_cast(modelMatrixBidonesCollider);
-	modelMatrixBidonesCollider = glm::translate(modelMatrixBidonesCollider,
-		glm::vec3(modelBidones.getObb().c.x,
-			modelBidones.getObb().c.y,
-			modelBidones.getObb().c.z));
-	modelBidonesCollider.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider.c = glm::vec3(modelMatrixBidonesCollider[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones1", modelBidonesCollider,
-		modelMatrixBidonesCollider);
+	////Collider modelBidones
+	//AbstractModel::OBB modelBidonesCollider;
+	//glm::mat4 modelMatrixBidonesCollider = glm::mat4(modelMatrixBidones);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider.u = glm::quat_cast(modelMatrixBidonesCollider);
+	//modelMatrixBidonesCollider = glm::translate(modelMatrixBidonesCollider,
+	//	glm::vec3(modelBidones.getObb().c.x,
+	//		modelBidones.getObb().c.y,
+	//		modelBidones.getObb().c.z));
+	//modelBidonesCollider.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider.c = glm::vec3(modelMatrixBidonesCollider[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones1", modelBidonesCollider,
+	//	modelMatrixBidonesCollider);
 
-	//Collider modelBidones2
-	AbstractModel::OBB modelBidonesCollider2;
-	glm::mat4 modelMatrixBidonesCollider2 = glm::mat4(modelMatrixBidones2);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider2.u = glm::quat_cast(modelMatrixBidonesCollider2);
-	modelMatrixBidonesCollider2 = glm::translate(modelMatrixBidonesCollider2,
-		glm::vec3(modelBidones2.getObb().c.x,
-			modelBidones2.getObb().c.y,
-			modelBidones2.getObb().c.z));
-	modelBidonesCollider2.e = modelBidones2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider2.c = glm::vec3(modelMatrixBidonesCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones2", modelBidonesCollider2,
-		modelMatrixBidonesCollider2);
+	////Collider modelBidones2
+	//AbstractModel::OBB modelBidonesCollider2;
+	//glm::mat4 modelMatrixBidonesCollider2 = glm::mat4(modelMatrixBidones2);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider2.u = glm::quat_cast(modelMatrixBidonesCollider2);
+	//modelMatrixBidonesCollider2 = glm::translate(modelMatrixBidonesCollider2,
+	//	glm::vec3(modelBidones2.getObb().c.x,
+	//		modelBidones2.getObb().c.y,
+	//		modelBidones2.getObb().c.z));
+	//modelBidonesCollider2.e = modelBidones2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider2.c = glm::vec3(modelMatrixBidonesCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones2", modelBidonesCollider2,
+	//	modelMatrixBidonesCollider2);
 
-	//Collider modelBidones3
-	AbstractModel::OBB modelBidonesCollider3;
-	glm::mat4 modelMatrixBidonesCollider3 = glm::mat4(modelMatrixBidones3);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider3.u = glm::quat_cast(modelMatrixBidonesCollider3);
-	modelMatrixBidonesCollider3 = glm::translate(modelMatrixBidonesCollider3,
-		glm::vec3(modelBidones3.getObb().c.x,
-			modelBidones3.getObb().c.y,
-			modelBidones3.getObb().c.z));
-	modelBidonesCollider3.e = modelBidones3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider3.c = glm::vec3(modelMatrixBidonesCollider3[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones3", modelBidonesCollider3,
-		modelMatrixBidonesCollider3);
+	////Collider modelBidones3
+	//AbstractModel::OBB modelBidonesCollider3;
+	//glm::mat4 modelMatrixBidonesCollider3 = glm::mat4(modelMatrixBidones3);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider3.u = glm::quat_cast(modelMatrixBidonesCollider3);
+	//modelMatrixBidonesCollider3 = glm::translate(modelMatrixBidonesCollider3,
+	//	glm::vec3(modelBidones3.getObb().c.x,
+	//		modelBidones3.getObb().c.y,
+	//		modelBidones3.getObb().c.z));
+	//modelBidonesCollider3.e = modelBidones3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider3.c = glm::vec3(modelMatrixBidonesCollider3[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones3", modelBidonesCollider3,
+	//	modelMatrixBidonesCollider3);
 
-	//Collider modelBidones4
-	AbstractModel::OBB modelBidonesCollider4;
-	glm::mat4 modelMatrixBidonesCollider4 = glm::mat4(modelMatrixBidones4);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider4.u = glm::quat_cast(modelMatrixBidonesCollider4);
-	modelMatrixBidonesCollider4 = glm::translate(modelMatrixBidonesCollider4,
-		glm::vec3(modelBidones4.getObb().c.x,
-			modelBidones4.getObb().c.y,
-			modelBidones4.getObb().c.z));
-	modelBidonesCollider4.e = modelBidones4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider4.c = glm::vec3(modelMatrixBidonesCollider4[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones4", modelBidonesCollider4,
-		modelMatrixBidonesCollider4);
+	////Collider modelBidones4
+	//AbstractModel::OBB modelBidonesCollider4;
+	//glm::mat4 modelMatrixBidonesCollider4 = glm::mat4(modelMatrixBidones4);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider4.u = glm::quat_cast(modelMatrixBidonesCollider4);
+	//modelMatrixBidonesCollider4 = glm::translate(modelMatrixBidonesCollider4,
+	//	glm::vec3(modelBidones4.getObb().c.x,
+	//		modelBidones4.getObb().c.y,
+	//		modelBidones4.getObb().c.z));
+	//modelBidonesCollider4.e = modelBidones4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider4.c = glm::vec3(modelMatrixBidonesCollider4[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones4", modelBidonesCollider4,
+	//	modelMatrixBidonesCollider4);
 
 	//Render colliders
 	for (std::map<std::string,
@@ -4885,9 +4872,82 @@ void updateEscenario1() {
 		}
 		if (lucesBotones[0] && lucesBotones[2] && lucesBotones[3]) {
 			enableEscotilla1 = true;
+			animationIndexEscotilla = 2;
 			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
 		}
 	}
+}
+
+glm::vec3 colorGenerador(std::vector<bool> combBotones) {
+	glm::vec3 color;
+	//Blanco
+	if (!combBotones[0] && !combBotones[1] && !combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		color = glm::vec3(0.0, 0.0, 0.0);
+		return color;
+	}
+	//Amarillo
+	if (combBotones[0] && !combBotones[1] && !combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		color = glm::vec3(1.2, 1.2, 0.0);
+		//std::cout << "Amarillo " << std::endl;
+		return color;
+	}
+	//Azul
+	if (!combBotones[0] && combBotones[1] && !combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		//std::cout << "Azul "<< std::endl;
+		color = glm::vec3(0.0, 0.0, 0.9);
+		return color;
+	}
+	//Rojo
+	if (!combBotones[0] && !combBotones[1] && combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		std::cout << "Rojo " << std::endl;
+		color = glm::vec3(0.9, 0.0, 0.0);
+		return color;
+	}
+	//Verde
+	if (combBotones[0] && combBotones[1] && !combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		color = glm::vec3(0.0, 0.9, 0.0);
+		return color;
+	}
+	//Naranja
+	if (combBotones[0] && !combBotones[1] && combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		color = glm::vec3(1.3, 0.5, 0.0);
+		return color;
+	}
+	//Morado
+	if (!combBotones[0] && combBotones[1] && combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		color = glm::vec3(0.3, 0.0, 0.7);
+		return color;
+	}
+	//Cafe
+	if (combBotones[0] && combBotones[1] && combBotones[2]) {
+		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
+		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
+		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+		color = glm::vec3(0.5, 0.25, 0.0);
+		return color;
+	}
+
 }
 
 void updateEscenario2() {
