@@ -317,8 +317,8 @@ bool pressEnter = false;
 bool musicaIntro = true;
 int animationIndexEscotilla = 0;
 
-bool escenario1 = true;
-bool escenario2 = false;
+bool escenario1 = false;
+bool escenario2 = true;
 
 //bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
@@ -767,6 +767,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	terrain.init();
 	terrain.setShader(&shaderTerrain);
 	terrain.setPosition(glm::vec3(100, 0, 100));
+
+	terrain2.init();
+	terrain2.setShader(&shaderTerrain);
+	terrain2.setPosition(glm::vec3(100, 0, 100));
 
 	pivoteCam.init();
 	pivoteCam.setShader(&shaderMulLighting);
@@ -1635,6 +1639,7 @@ void destroy() {
 
 	// Terrains objects Delete
 	terrain.destroy();
+	terrain.destroy();
 
 	// Custom objects Delete
 	modelFountain.destroy();
@@ -1930,7 +1935,12 @@ bool processInput(bool continueApplication) {
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 		}
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			if (escenario1) {
+				pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			}
+			if (escenario2) {
+				pasado = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			}
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
 			animationIndex = 0;
@@ -1979,7 +1989,13 @@ bool processInput(bool continueApplication) {
 		}
 		else if (modelSelected
 			== 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			if (escenario1) {
+				pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			}
+			if (escenario2) {
+				pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+			}
+			
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
 			animationIndex = 0;
@@ -3775,7 +3791,7 @@ void soundEscene1() {
 void prepareScene2() {
 	skyboxSphere.setShader(&shaderSkybox);
 
-	terrain.setShader(&shaderTerrain);
+	terrain2.setShader(&shaderTerrain);
 
 	//Mayow
 	mayowModelAnimate.setShader(&shaderMulLighting);
@@ -3870,7 +3886,7 @@ void prepareScene2() {
 void prepareDepthScene2() {
 	skyboxSphere.setShader(&shaderDepth);
 
-	terrain.setShader(&shaderDepth);
+	terrain2.setShader(&shaderDepth);
 
 	//Mayow
 	mayowModelAnimate.setShader(&shaderDepth);
@@ -3985,7 +4001,7 @@ void renderScene2(bool renderParticles) {
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID2);
 	shaderTerrain.setInt("blendMapTexture", 4);
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(40, 40)));
-	terrain.render();
+	terrain2.render();
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -4015,7 +4031,7 @@ void renderScene2(bool renderParticles) {
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
-	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
+	modelMatrixAstroProta[3][1] = terrain2.getHeightTerrain(modelMatrixAstroProta[3][0],
 		modelMatrixAstroProta[3][2] - 20.0);
 	glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
 	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 10.0;
@@ -4029,14 +4045,14 @@ void renderScene2(bool renderParticles) {
 	astroOrigin = modelMatrixAstroProta[3];
 
 	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
-		+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
+		+ terrain2.getHeightTerrain(modelMatrixMayow[3][0],
 			modelMatrixMayow[3][2]);
 	tmv = currTime - startTimeJump;
 	if (modelMatrixMayow[3][1]
-		< terrain.getHeightTerrain(modelMatrixMayow[3][0],
+		< terrain2.getHeightTerrain(modelMatrixMayow[3][0],
 			modelMatrixMayow[3][2])) {
 		isJump = false;
-		modelMatrixMayow[3][1] = terrain.getHeightTerrain(
+		modelMatrixMayow[3][1] = terrain2.getHeightTerrain(
 			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	}
 
@@ -4411,7 +4427,7 @@ void collidersManagmentEs2() {
 	astroProtaCollider.e = astroProta.getObb().e
 		* glm::vec3(1.5, 4.0, 1.4);
 	astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
-	addOrUpdateColliders(collidersOBB2, "astroProta2", astroProtaCollider,
+	addOrUpdateColliders(collidersOBB2, "astroProta", astroProtaCollider,
 		modelMatrixAstroProta);
 
 	//Collider de actionAstroProta
@@ -4801,7 +4817,6 @@ void collidersManagmentEs2() {
 				{
 					/*std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;*/
-
 					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
 						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
 							isCollisionEnemy = true;
@@ -4849,8 +4864,8 @@ void collidersManagmentEs2() {
 			collidersOBB2.begin();
 		for (; jt != collidersOBB2.end(); jt++) {
 			if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
-				std::cout << "Colision " << it->first << " with "
-					<< jt->first << std::endl;
+				//std::cout << "Colision " << it->first << " with "
+				//	<< jt->first << std::endl;
 
 				isCollision = true;
 				addOrUpdateCollisionDetection(collisionDetection, jt->first,
@@ -4870,15 +4885,19 @@ void collidersManagmentEs2() {
 		std::map<std::string,
 			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
 			collidersOBB2.find(colIt->first);
+		/*std::cout << "Primero" << std::endl;*/
 		if (it != collidersSBB2.end()) {
+			/*std::cout << "Segundo " << std::endl;*/
 			if (!colIt->second)
 				addOrUpdateColliders(collidersSBB2, it->first);
 		}
 		if (jt != collidersOBB2.end()) {
+			/*std::cout << "Tercero " << std::endl;*/
 			if (!colIt->second) {
 				addOrUpdateColliders(collidersOBB2, jt->first);
 			}
 			else {
+				//std::cout << "Cuarto " << jt->first << std::endl;
 				if (jt->first.compare("mayow") == 0) {
 					if (isCollisionEnemy == true) {
 						enemigo1.respawn = true;
@@ -4888,6 +4907,7 @@ void collidersManagmentEs2() {
 					}
 				}
 				if (jt->first.compare("astroProta") == 0) {
+					/*std::cout << "Entra astroProta " << std::endl;*/
 					modelMatrixAstroProta = std::get<1>(jt->second);
 				}
 			}
@@ -4938,17 +4958,38 @@ void soundEscene2() {
 }
 
 void cameraMove() {
-	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-	int camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
+	int camaraXcoord = 0;
+	if (escenario1) {
+		posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+		camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
+	}
+	if (escenario2) {
+		posterior = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+		camaraXcoord = terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
+	}
 	if (camaraXcoord < posterior) {
-		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
-			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(-0.1, 0, 0.0));
+		if (escenario1) {
+			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
+				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+					glm::vec3(-0.1, 0, 0.0));
+		}
+		if (escenario2) {
+			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
+				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+					glm::vec3(-0.1, 0, 0.0));
+		}
 	}
 	if (camaraXcoord > posterior) {
-		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
-			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(0.1, 0, 0.0));
+		if (escenario1) {
+			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
+				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+					glm::vec3(0.1, 0, 0.0));
+		}
+		if (escenario2) {
+			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
+				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+					glm::vec3(0.1, 0, 0.0));
+		}
 	}
 }
 
