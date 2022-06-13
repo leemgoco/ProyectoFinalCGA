@@ -478,7 +478,9 @@ ALenum format;
 ALvoid* data;
 int ch;
 ALboolean loop;
-std::vector<bool> sourcesPlay = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
+std::vector<bool> sourcesPlay = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
+std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
+
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes);
@@ -778,17 +780,17 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxMenu.setScale(glm::vec3(38.0, 33.0, 1.0));
 	boxMenu.setOrientation(glm::vec3(-25.0, 0.0, 0.0));
 
-	//Rokas
-	modelRokas.loadModel("../models/rokas/Piedras2.obj");
-	modelRokas.setShader(&shaderMulLighting);
-	modelRokas2.loadModel("../models/rokas/Piedras.obj");
-	modelRokas2.setShader(&shaderMulLighting);
+	////Rokas
+	//modelRokas.loadModel("../models/rokas/Piedras2.obj");
+	//modelRokas.setShader(&shaderMulLighting);
+	//modelRokas2.loadModel("../models/rokas/Piedras.obj");
+	//modelRokas2.setShader(&shaderMulLighting);
 
-	//Rokas
-	modelMontana.loadModel("../models/Montanas/Montana.obj");
-	modelMontana.setShader(&shaderMulLighting);
-	modelMontana2.loadModel("../models/Montanas/Montana2.obj");
-	modelMontana2.setShader(&shaderMulLighting);
+	////Rokas
+	//modelMontana.loadModel("../models/Montanas/Montana.obj");
+	//modelMontana.setShader(&shaderMulLighting);
+	//modelMontana2.loadModel("../models/Montanas/Montana2.obj");
+	//modelMontana2.setShader(&shaderMulLighting);
 
 	//Generador
 	modelGenerador.loadModel("../models/generadorG/Generador.obj");
@@ -844,73 +846,73 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	muroIzquierdo.init();
 	muroIzquierdo.setShader(&shaderMulLighting);
 
-	//Escenario2
-	modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
-	modelEscenario2.setShader(&shaderMulLighting);
+	////Escenario2
+	//modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
+	//modelEscenario2.setShader(&shaderMulLighting);
 
-	//Bidones
-	modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
-	modelBidones.setShader(&shaderMulLighting);
+	////Bidones
+	//modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
+	//modelBidones.setShader(&shaderMulLighting);
 
-	//modelBidones2 = modelBidones;
-	//modelBidones3 = modelBidones;
-	//modelBidones4 = modelBidones;
+	////modelBidones2 = modelBidones;
+	////modelBidones3 = modelBidones;
+	////modelBidones4 = modelBidones;
 
-	//Caja1
-	modelCajaCuadrada.loadModel("../models/SegundoEscenario/Caja1.obj");
-	modelCajaCuadrada.setShader(&shaderMulLighting);
+	////Caja1
+	//modelCajaCuadrada.loadModel("../models/SegundoEscenario/Caja1.obj");
+	//modelCajaCuadrada.setShader(&shaderMulLighting);
 
-	//modelCajaCuadrada2 = modelCajaCuadrada;
-	//modelCajaCuadrada3 = modelCajaCuadrada;
-	//modelCajaCuadrada4 = modelCajaCuadrada;
-	//modelCajaCuadrada5 = modelCajaCuadrada;
+	////modelCajaCuadrada2 = modelCajaCuadrada;
+	////modelCajaCuadrada3 = modelCajaCuadrada;
+	////modelCajaCuadrada4 = modelCajaCuadrada;
+	////modelCajaCuadrada5 = modelCajaCuadrada;
 
-	//Caja2
-	modelCajaLowPoly.loadModel("../models/SegundoEscenario/Caja2.obj");
-	modelCajaLowPoly.setShader(&shaderMulLighting);
+	////Caja2
+	//modelCajaLowPoly.loadModel("../models/SegundoEscenario/Caja2.obj");
+	//modelCajaLowPoly.setShader(&shaderMulLighting);
 
-	//modelCajaLowPoly = modelCajaLowPoly;
-	//modelCajaLowPoly2 = modelCajaLowPoly;
-	//modelCajaLowPoly3 = modelCajaLowPoly;
-	//modelCajaLowPoly4 = modelCajaLowPoly;
-	//modelCajaLowPoly5 = modelCajaLowPoly;
-	//modelCajaLowPoly6 = modelCajaLowPoly;
+	////modelCajaLowPoly = modelCajaLowPoly;
+	////modelCajaLowPoly2 = modelCajaLowPoly;
+	////modelCajaLowPoly3 = modelCajaLowPoly;
+	////modelCajaLowPoly4 = modelCajaLowPoly;
+	////modelCajaLowPoly5 = modelCajaLowPoly;
+	////modelCajaLowPoly6 = modelCajaLowPoly;
 
-	//Compu
-	modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
-	modelCompu.setShader(&shaderMulLighting);
+	////Compu
+	//modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
+	//modelCompu.setShader(&shaderMulLighting);
 
-	//modelCompu2 = modelCompu;
+	////modelCompu2 = modelCompu;
 
-	//Cuerpo
-	modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
-	modelCuerpo.setShader(&shaderMulLighting);
+	////Cuerpo
+	//modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
+	//modelCuerpo.setShader(&shaderMulLighting);
 
-	//modelCuerpo2 = modelCuerpo;
-	//modelCuerpo3 = modelCuerpo;
+	////modelCuerpo2 = modelCuerpo;
+	////modelCuerpo3 = modelCuerpo;
 
-	//Estanteria
-	modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
-	modelEstanteria.setShader(&shaderMulLighting);
+	////Estanteria
+	//modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
+	//modelEstanteria.setShader(&shaderMulLighting);
 
-	//modelEstanteria2 = modelEstanteria;
+	////modelEstanteria2 = modelEstanteria;
 
 
-	//Palanca
-	modelPalanca.loadModel("../models/SegundoEscenario/Palanca.fbx");
-	modelPalanca.setShader(&shaderMulLighting);
+	////Palanca
+	//modelPalanca.loadModel("../models/SegundoEscenario/Palanca.fbx");
+	//modelPalanca.setShader(&shaderMulLighting);
 
-	//PuertaIzquierda
-	modelPuertaIzq.loadModel("../models/SegundoEscenario/PuertaIzquierda.obj");
-	modelPuertaIzq.setShader(&shaderMulLighting);
+	////PuertaIzquierda
+	//modelPuertaIzq.loadModel("../models/SegundoEscenario/PuertaIzquierda.obj");
+	//modelPuertaIzq.setShader(&shaderMulLighting);
 
-	//PuertaDerecha
-	modelPuertaDer.loadModel("../models/SegundoEscenario/PuertaDerecha.obj");
-	modelPuertaDer.setShader(&shaderMulLighting);
+	////PuertaDerecha
+	//modelPuertaDer.loadModel("../models/SegundoEscenario/PuertaDerecha.obj");
+	//modelPuertaDer.setShader(&shaderMulLighting);
 
-	//MarcoPuerta
-	modelMarcoPuerta.loadModel("../models/SegundoEscenario/MarcoPuerta.obj");
-	modelMarcoPuerta.setShader(&shaderMulLighting);
+	////MarcoPuerta
+	//modelMarcoPuerta.loadModel("../models/SegundoEscenario/MarcoPuerta.obj");
+	//modelMarcoPuerta.setShader(&shaderMulLighting);
 
 	//Box
 	boxCD.init();
@@ -1523,7 +1525,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcefv(source[5], AL_POSITION, source5Pos);
 	 alSourcefv(source[5], AL_VELOCITY, source5Vel);
 	 alSourcei(source[5], AL_BUFFER, buffer[4]);
-	 alSourcei(source[5], AL_LOOPING, AL_FALSE);
+	 alSourcei(source[5], AL_LOOPING, AL_TRUE);
 	 alSourcef(source[5], AL_MAX_DISTANCE, 1000);
 
 	 alSourcef(source[6], AL_PITCH, 1.0f);
@@ -2144,16 +2146,23 @@ void applicationLoop() {
 		listenerOri[5] = upModel.z;
 		alListenerfv(AL_ORIENTATION, listenerOri);
 		for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
-			if (sourcesPlay[i]) {
-				//sourcesPlay[i] = false;
+			if (!sourcesPlay[i] && sourcesPlaying[i]) {
+				std::cout << "Apagando Source: " << i << std::endl;
+				sourcesPlaying[i] = false;
+				alSourceStop(source[i]);
+			}
+			if (sourcesPlay[i] && !sourcesPlaying[i]) {
+				std::cout << "Reproduciendo Source: " << i << std::endl;
+				sourcesPlaying[i] = true;
 				alSourcePlay(source[i]);
 			}
 		}
 
 		//Carga de escenarios
-		if (musicaIntro) {
-			sourcesPlay[0] = true;
-		}
+		//if (!musicaIntro) {
+		//	sourcesPlay[0] = false;
+		//	alSourceStop(source[0]);
+		//}
 		if (escenario1) {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
@@ -2169,6 +2178,7 @@ void applicationLoop() {
 				glfwSwapBuffers(window);
 				continue;
 			}
+			std::cout << "Entra linea renderizados" << std::endl;
 			empiezaJuego = true;
 			musicaIntro = false;
 			sourcesPlay[0] = false;
@@ -2540,22 +2550,22 @@ void renderScene(bool renderParticles) {
 		modelLuzGenerador.render();
 	}
 
-	for (int i = 0; i < rokas2Pos.size(); i++) {
-		rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
-			rokas2Pos[i].z) - 0.5f;
-		modelRokas2.setPosition(rokas2Pos[i]);
-		modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
-		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
-		modelRokas2.render();
-	}
-	for (int i = 0; i < rokasPos.size(); i++) {
-		rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
-			rokasPos[i].z) - 0.5f;
-		modelRokas.setPosition(rokasPos[i]);
-		modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
-		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
-		modelRokas.render();
-	}
+	//for (int i = 0; i < rokas2Pos.size(); i++) {
+	//	rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
+	//		rokas2Pos[i].z) - 0.5f;
+	//	modelRokas2.setPosition(rokas2Pos[i]);
+	//	modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
+	//	//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+	//	modelRokas2.render();
+	//}
+	//for (int i = 0; i < rokasPos.size(); i++) {
+	//	rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
+	//		rokasPos[i].z) - 0.5f;
+	//	modelRokas.setPosition(rokasPos[i]);
+	//	modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
+	//	//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+	//	modelRokas.render();
+	//}
 	//Compuerta
 	//modelMatrixCompuerta = glm::translate(modelMatrixCompuerta, glm::vec3(10.445f, 0.0f, 13.789f));
 	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
@@ -2585,18 +2595,18 @@ void renderScene(bool renderParticles) {
 	modelEdCompuerta.setScale(glm::vec3(0.9, 0.9, 0.9));
 	modelEdCompuerta.render();
 
-	//Montañas Fondo
-	modelMontana2.setPosition(glm::vec3(-80.03, 1.0, -4.0));
-	modelMontana2.setOrientation(glm::vec3(0.0, -90, 0.0));
-	modelMontana2.render();
+	////Montañas Fondo
+	//modelMontana2.setPosition(glm::vec3(-80.03, 1.0, -4.0));
+	//modelMontana2.setOrientation(glm::vec3(0.0, -90, 0.0));
+	//modelMontana2.render();
 
-	modelMontana2.setPosition(glm::vec3(-15.0, 1.0, -19));
-	modelMontana2.setOrientation(glm::vec3(0.0, 180.0, 0.0));
-	modelMontana2.render();
+	//modelMontana2.setPosition(glm::vec3(-15.0, 1.0, -19));
+	//modelMontana2.setOrientation(glm::vec3(0.0, 180.0, 0.0));
+	//modelMontana2.render();
 
-	modelMontana2.setPosition(glm::vec3(94.0, 1.0, 6.0));
-	modelMontana2.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-	modelMontana2.render();
+	//modelMontana2.setPosition(glm::vec3(94.0, 1.0, 6.0));
+	//modelMontana2.setOrientation(glm::vec3(0.0, 90.0, 0.0));
+	//modelMontana2.render();
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
@@ -2611,9 +2621,14 @@ void renderScene(bool renderParticles) {
 	source1Pos[1] = modelMatrixAstroProta[3].y+7;
 	source1Pos[2] = modelMatrixAstroProta[3].z;
 	alSourcefv(source[1], AL_POSITION, source1Pos);
-	if (animationIndex != 0) {
+	if (animationIndex != 1) {
+		std::cout << "Cambia sourcesPlay[1] "  << std::endl;
 		sourcesPlay[1] = true;
 	}
+	else {
+		sourcesPlay[1] = false;
+	}
+	
 	glEnable(GL_CULL_FACE);
 
 	///**********
