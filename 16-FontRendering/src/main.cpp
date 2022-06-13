@@ -479,7 +479,7 @@ ALvoid* data;
 int ch;
 ALboolean loop;
 std::vector<bool> sourcesPlay = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
-std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
+std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Ejecutandose
 
 
 // Se definen todos las funciones.
@@ -851,12 +851,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	muroIzquierdo.setShader(&shaderMulLighting);
 
 	////Escenario2
-	//modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
-	//modelEscenario2.setShader(&shaderMulLighting);
+	modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
+	modelEscenario2.setShader(&shaderMulLighting);
 
-	////Bidones
-	//modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
-	//modelBidones.setShader(&shaderMulLighting);
+	//Bidones
+	modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
+	modelBidones.setShader(&shaderMulLighting);
 
 	////modelBidones2 = modelBidones;
 	////modelBidones3 = modelBidones;
@@ -3979,6 +3979,7 @@ void prepareDepthScene2() {
 	modelMarcoPuerta.setShader(&shaderDepth);
 }
 
+//Descomentar los modelos en el init
 void renderScene2(bool renderParticles) {
 	// Se activa la textura del background
 	glActiveTexture(GL_TEXTURE0);
@@ -4070,16 +4071,17 @@ void renderScene2(bool renderParticles) {
 	//Bidones
 	//modelBidones.setPosition(glm::vec3(-59.0, 0.2, -34.0));
 	//modelBidones.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones.render();
 
 	modelMatrixBidones = glm::mat4(1.0);
 	modelMatrixBidones = glm::translate(modelMatrixBidones, glm::vec3(-59.0, 0.2, -34.0));
 	modelMatrixBidones = glm::scale(modelMatrixBidones, glm::vec3(2.0, 2.0, 2.0));
 	modelBidones.render(modelMatrixBidones);
 
-	//modelMatrixBidones2 = glm::mat4(1.0);
-	//modelMatrixBidones2 = glm::translate(modelMatrixBidones2, glm::vec3(-31.6, 0.2, -18.1));
-	//modelMatrixBidones2 = glm::scale(modelMatrixBidones2, glm::vec3(2.0, 2.0, 2.0));
-	//modelBidones2.render(modelMatrixBidones2);
+	modelMatrixBidones2 = glm::mat4(1.0);
+	modelMatrixBidones2 = glm::translate(modelMatrixBidones2, glm::vec3(-31.6, 0.2, -18.1));
+	modelMatrixBidones2 = glm::scale(modelMatrixBidones2, glm::vec3(2.0, 2.0, 2.0));
+	modelBidones.render(modelMatrixBidones2);
 
 	//modelMatrixBidones3 = glm::mat4(1.0);
 	//modelMatrixBidones3 = glm::translate(modelMatrixBidones3, glm::vec3(-28.7, 0.2, -15.0));
@@ -4094,6 +4096,7 @@ void renderScene2(bool renderParticles) {
 	//Caja1 (Cuadradas)
 	//modelCajaCuadrada.setPosition(glm::vec3(-7.0, 0.2, -20.0));
 	//modelCajaCuadrada.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//Descomentar los modelos en el init
 	modelMatrixCajaCuadrada = glm::mat4(1.0);
 	modelMatrixCajaCuadrada = glm::translate(modelMatrixCajaCuadrada, glm::vec3(-60.3, 0.2, -17.3));
 	modelMatrixCajaCuadrada = glm::scale(modelMatrixCajaCuadrada, glm::vec3(2.0, 2.0, 2.0));
@@ -4129,6 +4132,7 @@ void renderScene2(bool renderParticles) {
 
 	//modelCajaLowPoly.setPosition(glm::vec3(0.0, 0.2, -20.0));
 	//modelCajaLowPoly.setScale(glm::vec3(2.0, 1.5, 2.0));
+	//Descomentar los modelos en el init
 	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
 	modelMatrixCajaLowPoly = glm::mat4(1.0);
 	modelMatrixCajaLowPoly = glm::translate(modelMatrixCajaLowPoly, glm::vec3(-42.0, 0.2, -7.0));
