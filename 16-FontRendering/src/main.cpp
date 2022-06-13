@@ -314,7 +314,7 @@ bool cambianivel2 = false;
 bool cambianivel3 = false;
 bool empiezaJuego = false;
 bool pressEnter = false;
-
+bool musicaIntro = true;
 
 bool escenario1 = true;
 bool escenario2 = false;
@@ -415,8 +415,8 @@ GLuint depthMap, depthMapFBO;
  */
 
  // OpenAL Defines
-#define NUM_BUFFERS 3
-#define NUM_SOURCES 3
+#define NUM_BUFFERS 12
+#define NUM_SOURCES 15
 #define NUM_ENVIRONMENTS 1
 // Listener
 ALfloat listenerPos[] = { 0.0, 0.0, 4.0 };
@@ -431,6 +431,42 @@ ALfloat source1Vel[] = { 0.0, 0.0, 0.0 };
 // Source 2
 ALfloat source2Pos[] = { 2.0, 0.0, 0.0 };
 ALfloat source2Vel[] = { 0.0, 0.0, 0.0 };
+// Source 3
+ALfloat source3Pos[] = { -2.0, 0.0, 0.0 };
+ALfloat source3Vel[] = { 0.0, 0.0, 0.0 };
+// Source 4
+ALfloat source4Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source4Vel[] = { 0.0, 0.0, 0.0 };
+// Source 5
+ALfloat source5Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source5Vel[] = { 0.0, 0.0, 0.0 };
+// Source 6
+ALfloat source6Pos[] = { -2.0, 0.0, 0.0 };
+ALfloat source6Vel[] = { 0.0, 0.0, 0.0 };
+// Source 7
+ALfloat source7Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source7Vel[] = { 0.0, 0.0, 0.0 };
+// Source 8
+ALfloat source8Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source8Vel[] = { 0.0, 0.0, 0.0 };
+// Source 9
+ALfloat source9Pos[] = { -2.0, 0.0, 0.0 };
+ALfloat source9Vel[] = { 0.0, 0.0, 0.0 };
+// Source 10
+ALfloat source10Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source10Vel[] = { 0.0, 0.0, 0.0 };
+// Source 11
+ALfloat source11Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source11Vel[] = { 0.0, 0.0, 0.0 };
+// Source 12
+ALfloat source12Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source12Vel[] = { 0.0, 0.0, 0.0 };
+// Source 13
+ALfloat source13Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source13Vel[] = { 0.0, 0.0, 0.0 };
+// Source 14
+ALfloat source14Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source14Vel[] = { 0.0, 0.0, 0.0 };
 // Buffers
 ALuint buffer[NUM_BUFFERS];
 ALuint source[NUM_SOURCES];
@@ -441,7 +477,7 @@ ALenum format;
 ALvoid* data;
 int ch;
 ALboolean loop;
-std::vector<bool> sourcesPlay = { true, true, true };
+std::vector<bool> sourcesPlay = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes);
@@ -1396,62 +1432,171 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	/*******************************************
 	 * OpenAL init
 	 *******************************************/
-	 //alutInit(0, nullptr);
-	 //alListenerfv(AL_POSITION, listenerPos);
-	 //alListenerfv(AL_VELOCITY, listenerVel);
-	 //alListenerfv(AL_ORIENTATION, listenerOri);
-	 //alGetError(); // clear any error messages
-	 //if (alGetError() != AL_NO_ERROR) {
-	 //	printf("- Error creating buffers !!\n");
-	 //	exit(1);
-	 //} else {
-	 //	printf("init() - No errors yet.");
-	 //}
-	 //// Config source 0
-	 //// Generate buffers, or else no sound will happen!
-	 //alGenBuffers(NUM_BUFFERS, buffer);
-	 //buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
-	 //buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
-	 //buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
-	 //int errorAlut = alutGetError();
-	 //if (errorAlut != ALUT_ERROR_NO_ERROR) {
-	 //	printf("- Error open files with alut %d !!\n", errorAlut);
-	 //	exit(2);
-	 //}
+	 alutInit(0, nullptr);
+	 alListenerfv(AL_POSITION, listenerPos);
+	 alListenerfv(AL_VELOCITY, listenerVel);
+	 alListenerfv(AL_ORIENTATION, listenerOri);
+	 alGetError(); // clear any error messages
+	 if (alGetError() != AL_NO_ERROR) {
+	 	printf("- Error creating buffers !!\n");
+	 	exit(1);
+	 } else {
+	 	printf("init() - No errors yet.");
+	 }
+	 // Config source 0
+	 // Generate buffers, or else no sound will happen!
+	 alGenBuffers(NUM_BUFFERS, buffer);
+	 buffer[0] = alutCreateBufferFromFile("../sounds/SpaceMision.wav");
+	 buffer[1] = alutCreateBufferFromFile("../sounds/PisadaExterior.wav");
+	 buffer[2] = alutCreateBufferFromFile("../sounds/PisadasInterior.wav");
+	 buffer[3] = alutCreateBufferFromFile("../sounds/Puerta.wav");
+	 buffer[4] = alutCreateBufferFromFile("../sounds/Generador.wav");
+	 buffer[5] = alutCreateBufferFromFile("../sounds/Interruptor.wav");
+	 buffer[6] = alutCreateBufferFromFile("../sounds/MovimientoAlien.wav");
+	 buffer[7] = alutCreateBufferFromFile("../sounds/AtaqueAlien.wav");
+	 buffer[8] = alutCreateBufferFromFile("../sounds/AmbientalExterior.wav");
+	 buffer[9] = alutCreateBufferFromFile("../sounds/AmbientalInterior.wav");
+	 buffer[10] = alutCreateBufferFromFile("../sounds/ErrorCodigo.wav");
+	 buffer[11] = alutCreateBufferFromFile("../sounds/GameOver.wav");
 
-	 //alGetError(); /* clear error */
-	 //alGenSources(NUM_SOURCES, source);
+	 int errorAlut = alutGetError();
+	 if (errorAlut != ALUT_ERROR_NO_ERROR) {
+	 	printf("- Error open files with alut %d !!\n", errorAlut);
+	 	exit(2);
+	 }
 
-	 //if (alGetError() != AL_NO_ERROR) {
-	 //	printf("- Error creating sources !!\n");
-	 //	exit(2);
-	 //} else {
-	 //	printf("init - no errors after alGenSources\n");
-	 //}
-	 //alSourcef(source[0], AL_PITCH, 1.0f);
-	 //alSourcef(source[0], AL_GAIN, 3.0f);
-	 //alSourcefv(source[0], AL_POSITION, source0Pos);
-	 //alSourcefv(source[0], AL_VELOCITY, source0Vel);
-	 //alSourcei(source[0], AL_BUFFER, buffer[0]);
-	 //alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	 //alSourcef(source[0], AL_MAX_DISTANCE, 2000);
+	 alGetError(); /* clear error */
+	 alGenSources(NUM_SOURCES, source);
 
-	 //alSourcef(source[1], AL_PITCH, 1.0f);
-	 //alSourcef(source[1], AL_GAIN, 3.0f);
-	 //alSourcefv(source[1], AL_POSITION, source1Pos);
-	 //alSourcefv(source[1], AL_VELOCITY, source1Vel);
-	 //alSourcei(source[1], AL_BUFFER, buffer[1]);
-	 //alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	 //alSourcef(source[1], AL_MAX_DISTANCE, 2000);
+	 if (alGetError() != AL_NO_ERROR) {
+	 	printf("- Error creating sources !!\n");
+	 	exit(2);
+	 } else {
+	 	printf("init - no errors after alGenSources\n");
+	 }
+	 // Musica Intro
+	 alSourcef(source[0], AL_PITCH, 1.0f);//PITCH
+	 alSourcef(source[0], AL_GAIN, 1.0f);//GANANCIA
+	 alSourcefv(source[0], AL_POSITION, source0Pos);//Posición
+	 alSourcefv(source[0], AL_VELOCITY, source0Vel);//Velocidad
+	 alSourcei(source[0], AL_BUFFER, buffer[0]);//De donde va a tomar el sonido
+	 alSourcei(source[0], AL_LOOPING, AL_TRUE);//Loop
+	 alSourcef(source[0], AL_MAX_DISTANCE, 2000);//DISTANCIA A LA QUE SE ESCUCHA
+	 // Pisadas exterior
+	 alSourcef(source[1], AL_PITCH, 1.0f);
+	 alSourcef(source[1], AL_GAIN, 0.3f);
+	 alSourcefv(source[1], AL_POSITION, source1Pos);
+	 alSourcefv(source[1], AL_VELOCITY, source1Vel);
+	 alSourcei(source[1], AL_BUFFER, buffer[1]);
+	 alSourcei(source[1], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[1], AL_MAX_DISTANCE, 500);
+	 //Pisadas interior
+	 alSourcef(source[2], AL_PITCH, 1.0f);
+	 alSourcef(source[2], AL_GAIN, 1.0f);
+	 alSourcefv(source[2], AL_POSITION, source2Pos);
+	 alSourcefv(source[2], AL_VELOCITY, source2Vel);
+	 alSourcei(source[2], AL_BUFFER, buffer[2]);
+	 alSourcei(source[2], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[2], AL_MAX_DISTANCE, 1000);
+	 //Puerta y compuerta
+	 alSourcef(source[3], AL_PITCH, 1.0f);
+	 alSourcef(source[3], AL_GAIN, 1.0f);
+	 alSourcefv(source[3], AL_POSITION, source3Pos);
+	 alSourcefv(source[3], AL_VELOCITY, source3Vel);
+	 alSourcei(source[3], AL_BUFFER, buffer[3]);
+	 alSourcei(source[3], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[3], AL_MAX_DISTANCE, 2000);
 
-	 //alSourcef(source[2], AL_PITCH, 1.0f);
-	 //alSourcef(source[2], AL_GAIN, 0.3f);
-	 //alSourcefv(source[2], AL_POSITION, source2Pos);
-	 //alSourcefv(source[2], AL_VELOCITY, source2Vel);
-	 //alSourcei(source[2], AL_BUFFER, buffer[2]);
-	 //alSourcei(source[2], AL_LOOPING, AL_TRUE);
-	 //alSourcef(source[2], AL_MAX_DISTANCE, 500);
+	 alSourcef(source[4], AL_PITCH, 1.0f);
+	 alSourcef(source[4], AL_GAIN, 1.0f);
+	 alSourcefv(source[4], AL_POSITION, source4Pos);
+	 alSourcefv(source[4], AL_VELOCITY, source4Vel);
+	 alSourcei(source[4], AL_BUFFER, buffer[3]);
+	 alSourcei(source[4], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[4], AL_MAX_DISTANCE, 2000);
 
+	 //Generadores
+	 alSourcef(source[5], AL_PITCH, 1.0f);
+	 alSourcef(source[5], AL_GAIN, 2.0f);
+	 alSourcefv(source[5], AL_POSITION, source5Pos);
+	 alSourcefv(source[5], AL_VELOCITY, source5Vel);
+	 alSourcei(source[5], AL_BUFFER, buffer[4]);
+	 alSourcei(source[5], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[5], AL_MAX_DISTANCE, 1000);
+
+	 alSourcef(source[6], AL_PITCH, 1.0f);
+	 alSourcef(source[6], AL_GAIN, 2.0f);
+	 alSourcefv(source[6], AL_POSITION, source6Pos);
+	 alSourcefv(source[6], AL_VELOCITY, source6Vel);
+	 alSourcei(source[6], AL_BUFFER, buffer[4]);
+	 alSourcei(source[6], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[6], AL_MAX_DISTANCE, 1000);
+
+	 alSourcef(source[7], AL_PITCH, 1.0f);
+	 alSourcef(source[7], AL_GAIN, 2.0f);
+	 alSourcefv(source[7], AL_POSITION, source7Pos);
+	 alSourcefv(source[7], AL_VELOCITY, source7Vel);
+	 alSourcei(source[7], AL_BUFFER, buffer[4]);
+	 alSourcei(source[7], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[7], AL_MAX_DISTANCE, 1000);
+
+	 //Interruptores
+	 alSourcef(source[8], AL_PITCH, 1.0f);
+	 alSourcef(source[8], AL_GAIN, 1.5f);
+	 alSourcefv(source[8], AL_POSITION, source2Pos);
+	 alSourcefv(source[8], AL_VELOCITY, source2Vel);
+	 alSourcei(source[8], AL_BUFFER, buffer[5]);
+	 alSourcei(source[8], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[8], AL_MAX_DISTANCE, 1000);
+	 //MovimientoAlien
+	 alSourcef(source[9], AL_PITCH, 1.0f);
+	 alSourcef(source[9], AL_GAIN, 1.5f);
+	 alSourcefv(source[9], AL_POSITION, source2Pos);
+	 alSourcefv(source[9], AL_VELOCITY, source2Vel);
+	 alSourcei(source[9], AL_BUFFER, buffer[6]);
+	 alSourcei(source[9], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[9], AL_MAX_DISTANCE, 700);
+	//Ataque Alien
+	 alSourcef(source[10], AL_PITCH, 1.0f);
+	 alSourcef(source[10], AL_GAIN, 1.5f);
+	 alSourcefv(source[10], AL_POSITION, source2Pos);
+	 alSourcefv(source[10], AL_VELOCITY, source2Vel);
+	 alSourcei(source[10], AL_BUFFER, buffer[7]);
+	 alSourcei(source[10], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[10], AL_MAX_DISTANCE, 700);
+	 //AmbientalExterior
+	 alSourcef(source[11], AL_PITCH, 1.0f);
+	 alSourcef(source[11], AL_GAIN, 1.5f);
+	 alSourcefv(source[11], AL_POSITION, source2Pos);
+	 alSourcefv(source[11], AL_VELOCITY, source2Vel);
+	 alSourcei(source[11], AL_BUFFER, buffer[8]);
+	 alSourcei(source[11], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[11], AL_MAX_DISTANCE, 1000);
+	 //AmbientalInterior
+	 alSourcef(source[12], AL_PITCH, 1.0f);
+	 alSourcef(source[12], AL_GAIN, 1.5f);
+	 alSourcefv(source[12], AL_POSITION, source2Pos);
+	 alSourcefv(source[12], AL_VELOCITY, source2Vel);
+	 alSourcei(source[12], AL_BUFFER, buffer[9]);
+	 alSourcei(source[12], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[12], AL_MAX_DISTANCE, 1000);
+	 //ErrorCódigo
+	 alSourcef(source[13], AL_PITCH, 1.0f);
+	 alSourcef(source[13], AL_GAIN, 1.5f);
+	 alSourcefv(source[13], AL_POSITION, source2Pos);
+	 alSourcefv(source[13], AL_VELOCITY, source2Vel);
+	 alSourcei(source[13], AL_BUFFER, buffer[10]);
+	 alSourcei(source[13], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[13], AL_MAX_DISTANCE, 1000);
+	 //GameOver
+	 alSourcef(source[14], AL_PITCH, 1.0f);
+	 alSourcef(source[14], AL_GAIN, 1.5f);
+	 alSourcefv(source[14], AL_POSITION, source2Pos);
+	 alSourcefv(source[14], AL_VELOCITY, source2Vel);
+	 alSourcei(source[14], AL_BUFFER, buffer[11]);
+	 alSourcei(source[14], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[14], AL_MAX_DISTANCE, 1000);
+	 
 	 // Se inicializa el modelo de texeles.
 	modelText = new FontTypeRendering::FontTypeRendering(screenWidth,
 		screenHeight);
@@ -1637,8 +1782,10 @@ bool processInput(bool continueApplication) {
 	}
 	if (!empiezaJuego) {
 		bool pressEnter = glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS;
-		if (textureActivaID == textureMenuID && pressEnter)
+		if (textureActivaID == textureMenuID && pressEnter) {
 			empiezaJuego = true;
+			//sourcesPlay[0] = false;
+		}
 		fontbandera = true;
 	}
 
@@ -1965,10 +2112,41 @@ void applicationLoop() {
 			view = cameraFP->getViewMatrix();
 		}
 
+		// Listener de Sonido
+			/****************************+
+		 * Open AL sound data
+		 */
+		 // Listener for the Thris person camera
+		listenerPos[0] = modelMatrixAstroProta[3].x;
+		listenerPos[1] = modelMatrixAstroProta[3].y;
+		listenerPos[2] = modelMatrixAstroProta[3].z;
+		alListenerfv(AL_POSITION, listenerPos);
+
+		glm::vec3 upModel = glm::normalize(modelMatrixAstroProta[1]);
+		glm::vec3 frontModel = glm::normalize(modelMatrixAstroProta[2]);
+
+		listenerOri[0] = frontModel.x;
+		listenerOri[1] = frontModel.y;
+		listenerOri[2] = frontModel.z;
+		listenerOri[3] = upModel.x;
+		listenerOri[4] = upModel.y;
+		listenerOri[5] = upModel.z;
+		alListenerfv(AL_ORIENTATION, listenerOri);
+		for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
+			if (sourcesPlay[i]) {
+				//sourcesPlay[i] = false;
+				alSourcePlay(source[i]);
+			}
+		}
+
+		//Carga de escenarios
+		if (musicaIntro) {
+			sourcesPlay[0] = true;
+		}
 		if (escenario1) {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
-			/*if (!empiezaJuego) {
+			if (!empiezaJuego) {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				glViewport(0, 0, screenWidth, screenHeight);
 				shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
@@ -1979,8 +2157,10 @@ void applicationLoop() {
 				boxMenu.render();
 				glfwSwapBuffers(window);
 				continue;
-			}*/
+			}
 			empiezaJuego = true;
+			musicaIntro = false;
+			sourcesPlay[0] = false;
 			preRender1();
 			renderScene();
 			collidersManagmentEs1();
@@ -2416,6 +2596,13 @@ void renderScene(bool renderParticles) {
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
 	astroProta.render(modelMatrixAstroBody);
+	source1Pos[0] = modelMatrixAstroProta[3].x;
+	source1Pos[1] = modelMatrixAstroProta[3].y+7;
+	source1Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[1], AL_POSITION, source1Pos);
+	if (animationIndex != 0) {
+		sourcesPlay[1] = true;
+	}
 	glEnable(GL_CULL_FACE);
 
 	///**********
@@ -2577,10 +2764,7 @@ void renderScene(bool renderParticles) {
 	//		/****************************+
 	//		 * Open AL sound data
 	//		 */
-	//		source1Pos[0] = modelFireParticles[3].x;
-	//		source1Pos[1] = modelFireParticles[3].y;
-	//		source1Pos[2] = modelFireParticles[3].z;
-	//		alSourcefv(source[1], AL_POSITION, source1Pos);
+
 
 	//		/**********
 	//		 * End Render particles systems
@@ -3531,44 +3715,45 @@ void collidersManagmentEs1() {
 }
 
 void soundEscene1() {
-	/****************************+
-		 * Open AL sound data
-		 */
-		 // Listener for the Thris person camera
-	listenerPos[0] = modelMatrixMayow[3].x;
-	listenerPos[1] = modelMatrixMayow[3].y;
-	listenerPos[2] = modelMatrixMayow[3].z;
-	alListenerfv(AL_POSITION, listenerPos);
 
-	glm::vec3 upModel = glm::normalize(modelMatrixMayow[1]);
-	glm::vec3 frontModel = glm::normalize(modelMatrixMayow[2]);
+	//Musica Intro
+	source0Pos[0] = modelMatrixAstroProta[3].x;
+	source0Pos[1] = modelMatrixAstroProta[3].y;
+	source0Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[0], AL_POSITION, source0Pos);
 
-	listenerOri[0] = frontModel.x;
-	listenerOri[1] = frontModel.y;
-	listenerOri[2] = frontModel.z;
-	listenerOri[3] = upModel.x;
-	listenerOri[4] = upModel.y;
-	listenerOri[5] = upModel.z;
+	//Pasos
+	//source1Pos[0] = modelMatrixAstroProta[3].x;
+	//source1Pos[1] = modelMatrixAstroProta[3].y + 10.0f;
+	//source1Pos[2] = modelMatrixAstroProta[3].z;
+	//alSourcefv(source[1], AL_POSITION, source1Pos);
+	//sourcesPlay[1] = true;
 
-	// Listener for the First person camera
-	/*listenerPos[0] = camera->getPosition().x;
-	 listenerPos[1] = camera->getPosition().y;
-	 listenerPos[2] = camera->getPosition().z;
-	 alListenerfv(AL_POSITION, listenerPos);
-	 listenerOri[0] = camera->getFront().x;
-	 listenerOri[1] = camera->getFront().y;
-	 listenerOri[2] = camera->getFront().z;
-	 listenerOri[3] = camera->getUp().x;
-	 listenerOri[4] = camera->getUp().y;
-	 listenerOri[5] = camera->getUp().z;*/
-	alListenerfv(AL_ORIENTATION, listenerOri);
+	//Generadores
+	sourcesPlay[5] = true;
+	source5Pos[0] = modelMatrixAstroProta[3].x;
+	source5Pos[1] = modelMatrixAstroProta[3].y;
+	source5Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[5], AL_POSITION, source5Pos);
+	//sourcesPlay[5] = true;
+	//source5Pos[0] = -66.6;
+	//source5Pos[1] = terrain.getHeightTerrain(-66.6, -2) +1.0;
+	//source5Pos[2] = -2;
+	//alSourcefv(source[5], AL_POSITION, source5Pos);
+	//sourcesPlay[5] = true;
 
-	for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
-		if (sourcesPlay[i]) {
-			sourcesPlay[i] = false;
-			alSourcePlay(source[i]);
-		}
-	}
+	source6Pos[0] = 78;
+	source6Pos[1] = terrain.getHeightTerrain(78, 12) + 1.0;
+	source6Pos[2] = 12;
+	alSourcefv(source[6], AL_POSITION, source6Pos);
+	sourcesPlay[6] = true;
+
+	source7Pos[0] = 34.57;
+	source7Pos[1] = terrain.getHeightTerrain(34.57, -3) + 1.0;
+	source7Pos[2] = -3;
+	alSourcefv(source[7], AL_POSITION, source7Pos);
+	sourcesPlay[7] = true;
+
 }
 
 void prepareScene2() {
