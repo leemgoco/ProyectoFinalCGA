@@ -3648,6 +3648,14 @@ void collidersManagmentEs1() {
 		actionE = false;
 	}
 
+
+	//std::cout << "Colision escotilla " << collisionDetection.find("escotilla")->second << std::endl;
+	if (isCollisionG && enableEscotilla1 && collisionDetection.find("compuerta")->second) {
+		cambianivel2 = true;
+		escenario1 = false;
+		escenario2 = true;
+	}
+
 	for (std::map<std::string,
 		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
 		collidersSBB.begin(); it != collidersSBB.end(); it++) {
