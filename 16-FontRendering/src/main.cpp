@@ -773,7 +773,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelFountain.setShader(&shaderMulLighting);
 
 	//Mayow
-	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
+	mayowModelAnimate.loadModel("../models/Enemigo/Enemy.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
 	//astroProta
@@ -1744,6 +1744,8 @@ bool processInput(bool continueApplication) {
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			astroPosition.x += -58.0f;
+			astroPosition.z += -10.0f;
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 		}
@@ -1753,6 +1755,8 @@ bool processInput(bool continueApplication) {
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			astroPosition.x += -58.0f;
+			astroPosition.z += -10.0f;
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 		}
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -1792,6 +1796,8 @@ bool processInput(bool continueApplication) {
 			cameraMove();
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			astroPosition.x += -58.0f;
+			astroPosition.z += -10.0f;
 
 			animationIndex = 0;
 
@@ -1820,6 +1826,8 @@ bool processInput(bool continueApplication) {
 			cameraMove();
 			astroPosition = modelMatrixAstroProta[3];
 			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			astroPosition.x += -58.0f;
+			astroPosition.z += -10.0f;
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 
 				//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
@@ -1833,12 +1841,11 @@ bool processInput(bool continueApplication) {
 
 	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixMayow[3]);
 
-
-
 	if (playerRespawn == true) {
+
 		modelMatrixAstroProta = defaultMatrix;
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
-		modelMatrixAstroProta = defaultMatrix2;
+		modelMatrixAstroProta2 = defaultMatrix2;
 		modelMatrixPivoteCam = glm::translate(modelMatrixAstroProta, camPivOrigin);
 		modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
 			glm::vec3(0.0f, 5.0f, 23.0f));
@@ -1859,8 +1866,8 @@ bool processInput(bool continueApplication) {
 		enemigo1.velocidad = 0.05 * 1.5f;
 
 	if (enemigo1.respawn == true) {
-		/*modelMatrixMayow = glm::translate(modelMatrixMayow,
-			glm::vec3(0.0f, 0.0f, 0.0f));*/
+		modelMatrixMayow = glm::translate(modelMatrixMayow,
+			glm::vec3(0.0f, 0.0f, 0.0f));
 		tiempo += 1;
 
 
@@ -1871,7 +1878,7 @@ bool processInput(bool continueApplication) {
 
 	}
 	else if (enemigo1.respawn == false) {
-		//modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
+		modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
 		//modelMatrixMayow = glm::rotate(modelMatrixMayow, enemigo1.faceDirection(vectorDireccionEnemigo), glm::vec3(0,1,0));
 	}
 
@@ -2525,10 +2532,9 @@ void inicialMatrixs() {
 		glm::vec3(0.0f, 5.0f, 23.0f));
 	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 		glm::vec3(0, 0, 1));
-
-	//Enemigo
-	modelMatrixMayow = glm::translate(modelMatrixMayow,
-		glm::vec3(13.0f, 0.05f, -5.0f));
+	
+	modelMatrixMayow = glm::mat4(1.0f);
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 3.0f, -5.0f));
 
 	//Matriz
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
@@ -3298,9 +3304,9 @@ void collidersManagmentEs1() {
 					std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;
 
-					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
-						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
-						isCollisionEnemy = true;
+					//if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
+					//	&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
+					//	isCollisionEnemy = true;
 
 					isCollision = true;
 					isCollisionG = true;
@@ -3378,7 +3384,7 @@ void collidersManagmentEs1() {
 				if (jt->first.compare("mayow") == 0) {
 					if (isCollisionEnemy == true) {
 						enemigo1.respawn = true;
-						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+						//modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
 						playerRespawn = true;
 						isCollisionEnemy = false;
 					}
@@ -3678,12 +3684,15 @@ void renderScene2(bool renderParticles) {
 	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
 		modelMatrixAstroProta[3][2] - 20.0);
 	glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
-	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 20.0;
+	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 10.0;
+	modelMatrixAstroBody[3].x = modelMatrixAstroBody[3].x - 58.0;
 	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
 	astroProta.render(modelMatrixAstroBody);
 	glEnable(GL_CULL_FACE);
+
+	astroOrigin = modelMatrixAstroProta[3];
 
 	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
 		+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
@@ -3696,6 +3705,7 @@ void renderScene2(bool renderParticles) {
 		modelMatrixMayow[3][1] = terrain.getHeightTerrain(
 			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	}
+
 	//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody,
@@ -3710,6 +3720,7 @@ void renderScene2(bool renderParticles) {
 	//Bidones
 	//modelBidones.setPosition(glm::vec3(-59.0, 0.2, -34.0));
 	//modelBidones.setScale(glm::vec3(2.0, 2.0, 2.0));
+
 	modelMatrixBidones = glm::mat4(1.0);
 	modelMatrixBidones = glm::translate(modelMatrixBidones, glm::vec3(-59.0, 0.2, -34.0));
 	modelMatrixBidones = glm::scale(modelMatrixBidones, glm::vec3(2.0, 2.0, 2.0));
@@ -4055,7 +4066,8 @@ void collidersManagmentEs2() {
 	glm::mat4 modelmatrixColliderAstroProta = glm::mat4(modelMatrixAstroProta);
 	// Set the orientation of collider before doing the scale
 	astroProtaCollider.u = glm::quat_cast(modelmatrixColliderAstroProta);
-	modelmatrixColliderAstroProta[3].z += -20.0;
+	modelmatrixColliderAstroProta[3].z += - 10.0;
+	modelmatrixColliderAstroProta[3].x += - 58.0;
 	modelmatrixColliderAstroProta = glm::scale(modelmatrixColliderAstroProta,
 		glm::vec3(1.5, 4.0, 1.4));
 	modelmatrixColliderAstroProta = glm::translate(modelmatrixColliderAstroProta,
@@ -4065,7 +4077,7 @@ void collidersManagmentEs2() {
 	astroProtaCollider.e = astroProta.getObb().e
 		* glm::vec3(1.5, 4.0, 1.4);
 	astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
-	addOrUpdateColliders(collidersOBB2, "astroProta", astroProtaCollider,
+	addOrUpdateColliders(collidersOBB2, "astroProta2", astroProtaCollider,
 		modelMatrixAstroProta);
 
 	//Collider de actionAstroProta
@@ -4073,7 +4085,8 @@ void collidersManagmentEs2() {
 	glm::mat4 modelmatrixColliderAction = glm::mat4(modelMatrixAstroProta);
 	// Set the orientation of collider before doing the scale
 	actionCollider.u = glm::quat_cast(modelmatrixColliderAction);
-	modelmatrixColliderAction[3].z += -20.0;
+	modelmatrixColliderAction[3].z += -10.0;
+	modelmatrixColliderAction[3].x += -58.0;
 	modelmatrixColliderAction = glm::scale(modelmatrixColliderAction,
 		glm::vec3(1.5, 4.0, 1.4));
 	modelmatrixColliderAction = glm::translate(modelmatrixColliderAction,
@@ -4097,11 +4110,11 @@ void collidersManagmentEs2() {
 		glm::vec3(0.021, 0.021, 0.021));
 	modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
 		glm::vec3(mayowModelAnimate.getObb().c.x,
-			mayowModelAnimate.getObb().c.y,
+			mayowModelAnimate.getObb().c.y + 10.0f,
 			mayowModelAnimate.getObb().c.z));
 	mayowCollider.e = mayowModelAnimate.getObb().e
-		* glm::vec3(0.021, 0.021, 0.021)
-		* glm::vec3(0.787401574, 0.787401574, 0.787401574);
+		* glm::vec3(3.0, 3.0, 3.0)
+		* glm::vec3(1.0f, 1.0f, 1.0f);
 	mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
 	addOrUpdateColliders(collidersOBB2, "mayow", mayowCollider,
 		modelMatrixMayow);
@@ -4457,7 +4470,7 @@ void collidersManagmentEs2() {
 
 					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
 						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
-						isCollisionEnemy = true;
+							isCollisionEnemy = true;
 
 					isCollision = true;
 					isCollisionG = true;
