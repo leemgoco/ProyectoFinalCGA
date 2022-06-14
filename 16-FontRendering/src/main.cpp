@@ -293,8 +293,8 @@ bool pressEnter = false;
 bool musicaIntro = true;
 int animationIndexEscotilla = 0;
 
-bool escenario1 = true;
-bool escenario2 = false;
+bool escenario1 = false;
+bool escenario2 = true;
 
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
@@ -738,6 +738,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	terrain.init();
 	terrain.setShader(&shaderTerrain);
 	terrain.setPosition(glm::vec3(100, 0, 100));
+
+	terrain2.init();
+	terrain2.setShader(&shaderTerrain);
+	terrain2.setPosition(glm::vec3(100, 0, 100));
 
 	pivoteCam.init();
 	pivoteCam.setShader(&shaderMulLighting);
