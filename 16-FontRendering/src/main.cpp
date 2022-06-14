@@ -293,8 +293,8 @@ bool pressEnter = false;
 bool musicaIntro = true;
 int animationIndexEscotilla = 0;
 
-bool escenario1 = false;
-bool escenario2 = true;
+bool escenario1 = true;
+bool escenario2 = false;
 
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
 float anguloEntreDosVectores;
@@ -488,6 +488,7 @@ void preRender2();
 void collidersManagmentEs2();
 void soundEscene2();
 glm::vec3 colorGenerador(std::vector<bool> combBotones);
+void luzMenus();
 
 
 void initParticleBuffers() {
@@ -2264,6 +2265,7 @@ void applicationLoop() {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
 			if (!empiezaJuego) {
+				luzMenus();
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				glViewport(0, 0, screenWidth, screenHeight);
 				shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
@@ -2293,6 +2295,7 @@ void applicationLoop() {
 			updateEscenario2();
 			lucesEscenari2(shadowBox, &view);
 			if (cambianivel2) {
+				luzMenus();
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				glViewport(0, 0, screenWidth, screenHeight);
 				shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
@@ -2300,9 +2303,10 @@ void applicationLoop() {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textureTranID);
 				shaderTexture.setInt("outTexture", 0);
-				boxMenu.setPosition(modelMatrixPivoteCam2[3]);
-				boxMenu.setScale(glm::vec3(100.0, 100.0, 1.0));
-				boxMenu.setOrientation(glm::vec3(-25.0, 0.0, 0.0));
+				boxMenu.setPosition(glm::vec3(modelMatrixPivoteCam2[3].x, modelMatrixPivoteCam2[3].y - 6.0, modelMatrixPivoteCam2[3].z - 10.0));
+				boxMenu.setScale(glm::vec3(45.0, 33.0, 1.0));
+				boxMenu.setOrientation(glm::vec3(25.0, 0.0, 180.0));
+				//boxMenu.setOrientation(glm::vec3(0.0, 180.0, 0.0));
 				boxMenu.render();
 				glfwSwapBuffers(window);
 				continue;
@@ -2318,6 +2322,7 @@ void applicationLoop() {
 			updateEscenario2();
 			lucesEscenari2(shadowBox, &view);
 			if (cambianivel3) {
+				luzMenus();
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				glViewport(0, 0, screenWidth, screenHeight);
 				shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
@@ -2325,9 +2330,9 @@ void applicationLoop() {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textureEndID);
 				shaderTexture.setInt("outTexture", 0);
-				boxMenu.setPosition(modelMatrixPivoteCam2[3]);
-				boxMenu.setScale(glm::vec3(100.0, 100.0, 1.0));
-				boxMenu.setOrientation(glm::vec3(-25.0, 0.0, 0.0));
+				boxMenu.setPosition(glm::vec3(modelMatrixPivoteCam2[3].x, modelMatrixPivoteCam2[3].y - 6.0, modelMatrixPivoteCam2[3].z - 10.0));
+				boxMenu.setScale(glm::vec3(45.0, 33.0, 1.0));
+				boxMenu.setOrientation(glm::vec3(25.0, 0.0, 180.0));
 				boxMenu.render();
 				glfwSwapBuffers(window);
 				continue;
@@ -2408,6 +2413,18 @@ void applicationLoop() {
 				modelText2->render("Te quedaste sin oxigeno!", -0.5, 0, 30, 1.0, 0.0, 0.0, 1.0);
 				sourcesPlay[5] = true;//Game Over
 				tiempoOxigeno++;
+				combBotones = {
+					{false, false, false},
+					{false, false, false},
+					{false, false, false},
+					{false, false, false} };
+				lucesBotones = { false, false, false, false };
+				indPalanca = 0;
+				animaPalancas = { 0, 0, 0, 0 };
+				lucesPalancas = { false, false, false, false };
+				enablePuerta = false;
+				enableEscotilla1 = false;
+				movimientoPuerta = 0.0f;
 				if (tiempoOxigeno > 250) {
 					situacion = 3;
 				}
@@ -5179,6 +5196,7 @@ void collidersManagmentEs2() {
 						modelMatrixEnemigo = glm::translate(modelMatrixEnemigo, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixEnemigo[3]));
 						playerRespawn = true;
 						isCollisionEnemy = false;
+						timer += (0.0075f * 20);
 					}
 				}
 				if (jt->first.compare("astroProta") == 0) {
@@ -5617,6 +5635,39 @@ void updateEscenario2() {
 		}
 
 	}
+}
+
+void luzMenus() {
+	shaderMulLighting.setVectorFloat3("fogColor",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.0)));
+	shaderMulLighting.setFloat("density", 0.00);
+	shaderTerrain.setVectorFloat3("fogColor",
+		glm::value_ptr(glm::vec3(0.5, 0.5, 0.0)));
+	shaderTerrain.setFloat("density", 0.00);
+	shaderSkybox.setVectorFloat3("fogColor",
+		glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+	if (cameraSelected == 0)
+		shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
+	else
+		shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.4, 0.4, 0.4)));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.7, 0.7, 0.7)));
+	shaderMulLighting.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.9, 0.9, 0.9)));
+	shaderMulLighting.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-1.0, 0.0, 0.0)));
+	//shaderMulLighting.setVectorFloat3("directionalLight.direction",
+	//	glm::value_ptr(glm::vec3(modelMatrixPivoteCam2[3])));
+	//if (cameraSelected == 0)
+	//	shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
+	//else
+	//	shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
+	//shaderTerrain.setVectorFloat3("directionalLight.light.ambient",
+	//	glm::value_ptr(glm::vec3(0.14, 0.15, 0.0)));
+	//shaderTerrain.setVectorFloat3("directionalLight.light.diffuse",
+	//	glm::value_ptr(glm::vec3(0.5, 0.5, 0.0)));
+	//shaderTerrain.setVectorFloat3("directionalLight.light.specular",
+	//	glm::value_ptr(glm::vec3(0.5, 0.5, 0.0)));
+	//shaderTerrain.setVectorFloat3("directionalLight.direction",
+	//	glm::value_ptr(glm::vec3(modelMatrixPivoteCam2[3])));
 }
 
 int main(int argc, char** argv) {
