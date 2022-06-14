@@ -130,8 +130,7 @@ Model modelGrass;
 // Fountain
 Model modelFountain;
 // Model animate instance
-// Mayow
-Model mayowModelAnimate;
+Model enemyModelAnimate;
 Model astroProta;
 Model modelBotones;
 Model modelGenerador;
@@ -160,10 +159,6 @@ Model modelPuertaIzq;
 Model modelPuertaDer;
 Model modelMarcoPuerta;
 
-
-
-
-
 //Enemigos
 Enemy enemigo1(glm::vec3(13.0f, 0.05f, -5.0f), "enemy1");
 Enemy enemigo2(glm::vec3(13.0f, 0.05f, -5.0f), "enemy2");
@@ -180,8 +175,6 @@ textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
 GLuint skyboxTextureID;
 GLuint textureMenuID, textureMenu2ID, textureActivaID;
-
-
 
 // Modelo para el redener de texto
 FontTypeRendering::FontTypeRendering* modelText;
@@ -211,7 +204,8 @@ int lastMousePosY, offsetY = 0;
 
 // Model matrix definitions
 glm::mat4 modelMatrixPivoteCam = glm::mat4(1.0f);
-glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixPivoteCam2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixEnemigo = glm::mat4(1.0f);
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
 glm::mat4 modelMatrixAstroProta = glm::mat4(1.0f);
 glm::mat4 modelMatrixAstroProta2 = glm::mat4(1.0f);
@@ -278,7 +272,7 @@ float timer;
 int banderaCaminar = 0;
 bool fontbandera = false;
 int animationIndex = 1;
-int animationIndexMayow = 0;
+int animationIndexEnemy = 0;
 int modelSelected = 2;
 bool enableCountSelected = true;
 int limiteIzquierdo = 132 - 80;
@@ -322,7 +316,8 @@ std::vector<bool> lucesBotones = { false, false, false, false };
 int indPalanca = 0;
 std::vector<int> animaPalancas = { 0, 0, 0, 0 };
 std::vector<bool> lucesPalancas = { false, false, false, false };
-bool enablePuerta = false;
+bool enablePuerta = true;
+float movimientoPuerta = 0.0f;
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-7.03, 0, -19.14), glm::vec3(
@@ -344,17 +339,16 @@ std::vector<glm::vec3> palancaPos = { glm::vec3(-62.9, 1.5, -26.8), glm::vec3(
 		-35.4, 1.5, -38.3), glm::vec3(27.92, 1.5, -27.25), glm::vec3(54.5, 1.5, -18.9) };
 std::vector<float> palancaOrientation = { -90.0, 180.0, 180.0, 90.0};
 
+std::vector<glm::vec3> lucesPuzzleEsc2 = { glm::vec3(-10.8, 1.4, -36.0), glm::vec3(
+		-18.0, 1.4, -36.0), glm::vec3(-5.66, 1.4, -36.0)};
+
 std::vector<glm::vec3> rokas2Pos = { glm::vec3(89.25, 0, -0.39), glm::vec3(
 		73.242, 0, 21.875), glm::vec3(11.3281, 0, -3.51), glm::vec3(-3.71, 0, 27.929) };
 
 std::vector<glm::vec3> edificios = { glm::vec3(15.5, 7.2, 13.1), glm::vec3(1.2f, 9.5f, 4.8f)};
 
 // Blending model unsorted
-std::map<std::string, glm::vec3> blendingUnsorted = { { "aircraft", glm::vec3(
-		10.0, 0.0, -17.5) }, { "lambo", glm::vec3(23.0, 0.0, 0.0) }, { "heli",
-		glm::vec3(5.0, 10.0, -5.0) },
-		{ "fountain", glm::vec3(5.0, 0.0, -40.0) }, { "fire", glm::vec3(0.0,
-				0.0, 7.0) } };
+std::map<std::string, glm::vec3> blendingUnsorted = { { "enemigo", glm::vec3(0.0) }};
 
 double deltaTime;
 double currTime, lastTime;
@@ -487,6 +481,7 @@ void renderScene2(bool renderParticles = true);
 void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view);
 void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view);
 void cameraMove();
+void cameraMove2();
 bool excepCollider(std::string string1, std::string string2);
 bool excepCollider2(std::string string1, std::string string2);
 void updateBotonCollider(std::map<std::string, bool> collisionDetection);
@@ -817,9 +812,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelFountain.loadModel("../models/fountain/fountain.obj");
 	modelFountain.setShader(&shaderMulLighting);
 
-	//Mayow
-	mayowModelAnimate.loadModel("../models/Enemigo/Enemy.fbx");
-	mayowModelAnimate.setShader(&shaderMulLighting);
+	//Enemy
+	enemyModelAnimate.loadModel("../models/Enemigo/Enemy.fbx");
+	enemyModelAnimate.setShader(&shaderMulLighting);
 
 	//astroProta
 	astroProta.loadModel("../models/astroProta/astroAnim.fbx");
@@ -1667,7 +1662,7 @@ void destroy() {
 	modelMarcoPuerta.destroy();
 
 	// Custom objects animate
-	mayowModelAnimate.destroy();
+	enemyModelAnimate.destroy();
 
 	//modelos segundo escenario
 	modelEscenario2.destroy();
@@ -1795,7 +1790,7 @@ bool processInput(bool continueApplication) {
 		fontbandera = true;
 	}
 
-	enemigo1.setMatrixEnemigo(modelMatrixMayow);
+	enemigo1.setMatrixEnemigo(modelMatrixEnemigo);
 
 
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
@@ -1811,12 +1806,12 @@ bool processInput(bool continueApplication) {
 		std::cout << "Right Trigger/R2: " << axes[5] << std::endl;
 
 		if (fabs(axes[1]) > 0.2) {
-			modelMatrixMayow = glm::translate(modelMatrixMayow,
+			modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
 				glm::vec3(0, 0, -axes[1] * 0.1));
 			animationIndex = 0;
 		}
 		if (fabs(axes[0]) > 0.2) {
-			modelMatrixMayow = glm::rotate(modelMatrixMayow,
+			modelMatrixEnemigo = glm::rotate(modelMatrixEnemigo,
 				glm::radians(-axes[0] * 0.5f), glm::vec3(0, 1, 0));
 			animationIndex = 0;
 		}
@@ -1913,10 +1908,10 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0, 1, 0));
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
 			astroPosition.x += -58.0f;
 			astroPosition.z += -10.0f;
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 		}
 		else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -1924,10 +1919,10 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0, 1, 0));
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
 			astroPosition.x += -58.0f;
 			astroPosition.z += -10.0f;
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 		}
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 			if (escenario1) {
@@ -1968,9 +1963,14 @@ bool processInput(bool continueApplication) {
 			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 
 
-			cameraMove();
+			if (escenario1) {
+				cameraMove();
+			}
+			if (escenario2) {
+				cameraMove2();
+			}
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
 			astroPosition.x += -58.0f;
 			astroPosition.z += -10.0f;
 
@@ -1996,31 +1996,41 @@ bool processInput(bool continueApplication) {
 			animationIndex = 0;
 			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
 			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-			cameraMove();
+			if (escenario1) {
+				cameraMove();
+			}
+			if (escenario2) {
+				cameraMove2();
+			}
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 
 		/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
 		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
-			cameraMove();
+			if (escenario1) {
+				cameraMove();
+			}
+			if (escenario2) {
+				cameraMove2();
+			}
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixMayow[3], modelMatrixAstroProta[3]));
+			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
 			astroPosition.x += -58.0f;
 			astroPosition.z += -10.0f;
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
+			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 				//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-				//std::cout << "modelMatrixMayow: " << modelMatrixMayow[3][0] << std::endl;
-				//std::cout << "position mayow: " << terrain.getXCoordTerrain(modelMatrixMayow[3][0]) << std::endl;
+				//std::cout << "modelMatrixEnemy: " << modelMatrixEnemy[3][0] << std::endl;
+				//std::cout << "position enemigo: " << terrain.getXCoordTerrain(modelMatrixEnemy[3][0]) << std::endl;
 		}
 
 	}
 
 	//************************INTERACCIONES DE COLLIDERS ENEMIGO JUGADOR ******************************/
 
-	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixMayow[3]);
+	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixEnemigo[3]);
 
 	if (playerRespawn == true) {
 
@@ -2047,7 +2057,8 @@ bool processInput(bool continueApplication) {
 		enemigo1.velocidad = 0.05 * 1.5f;
 
 	if (enemigo1.respawn == true) {
-		modelMatrixMayow = glm::translate(modelMatrixMayow,
+		//Descomentar
+		modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
 			glm::vec3(0.0f, 0.0f, 0.0f));
 		tiempo += 1;
 
@@ -2059,8 +2070,8 @@ bool processInput(bool continueApplication) {
 
 	}
 	else if (enemigo1.respawn == false) {
-		modelMatrixMayow = glm::translate(modelMatrixMayow, vectorDireccionEnemigo * enemigo1.velocidad);
-		//modelMatrixMayow = glm::rotate(modelMatrixMayow, enemigo1.faceDirection(vectorDireccionEnemigo), glm::vec3(0,1,0));
+		modelMatrixEnemigo = glm::translate(modelMatrixEnemigo, vectorDireccionEnemigo * enemigo1.velocidad); //Descomentar
+		//modelMatrixEnemigo = glm::rotate(modelMatrixEnemigo, enemigo1.faceDirection(vectorDireccionEnemigo), glm::vec3(0,1,0));
 	}
 
 	/******************************************************************************/
@@ -2115,22 +2126,35 @@ void applicationLoop() {
 		psi = processInput(true);
 
 		if (cameraSelected == 0) {
-			axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
-			angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
-			target = modelMatrixPivoteCam[3];
-			if (modelSelected == 1)
-				angleTarget -= glm::radians(90.0);
+			if (escenario1) {
+				axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam));
+				angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam));
+				target = modelMatrixPivoteCam[3];
+				if (std::isnan(angleTarget))
+					angleTarget = 0.0;
+				if (axis.y < 0)
+					angleTarget = -angleTarget;
+				camera->setCameraTarget(target);
+				camera->setAngleTarget(angleTarget);
 
-			if (std::isnan(angleTarget))
-				angleTarget = 0.0;
-			if (axis.y < 0)
-				angleTarget = -angleTarget;
-			camera->setCameraTarget(target);
-			camera->setAngleTarget(angleTarget);
+				camera->updateCamera();
+				view = camera->getViewMatrix();
+			}
+			if (escenario2) {
+				camera->setDistanceFromTarget(25);
+				axis = glm::axis(glm::quat_cast(modelMatrixPivoteCam2));
+				angleTarget = glm::angle(glm::quat_cast(modelMatrixPivoteCam2));
+				target = modelMatrixPivoteCam2[3];
+				if (std::isnan(angleTarget))
+					angleTarget = 0.0;
+				if (axis.y < 0)
+					angleTarget = -angleTarget;
+				camera->setCameraTarget(target);
+				camera->setAngleTarget(angleTarget);
 
-			camera->updateCamera();
-			view = camera->getViewMatrix();
-
+				camera->updateCamera();
+				view = camera->getViewMatrix();
+			}
 		}
 		else {
 			view = cameraFP->getViewMatrix();
@@ -2324,6 +2348,7 @@ void applicationLoop() {
 		}
 		glfwSwapBuffers(window);
 	}
+
 }
 
 void prepareScene() {
@@ -2333,8 +2358,7 @@ void prepareScene() {
 
 	terrain.setShader(&shaderTerrain);
 
-	//Mayow
-	mayowModelAnimate.setShader(&shaderMulLighting);
+	enemyModelAnimate.setShader(&shaderMulLighting);
 
 	pivoteCam.setShader(&shaderMulLighting);
 
@@ -2381,8 +2405,7 @@ void prepareDepthScene() {
 
 	terrain.setShader(&shaderDepth);
 
-	//Mayow
-	mayowModelAnimate.setShader(&shaderDepth);
+	enemyModelAnimate.setShader(&shaderDepth);
 
 	pivoteCam.setShader(&shaderDepth);
 
@@ -2818,9 +2841,15 @@ void inicialMatrixs() {
 		glm::vec3(0.0f, 5.0f, 23.0f));
 	modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 		glm::vec3(0, 0, 1));
+
+	//Pivote de Camara 2
+	modelMatrixPivoteCam2 = glm::translate(modelMatrixPivoteCam2,
+		glm::vec3(-58.0f, 5.0f, -10.0f));
+	modelMatrixPivoteCam2 = glm::rotate(modelMatrixPivoteCam2, glm::radians(-180.0f),
+		glm::vec3(0, 0, 1));
 	
-	modelMatrixMayow = glm::mat4(1.0f);
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 3.0f, -5.0f));
+	modelMatrixEnemigo = glm::mat4(1.0f);
+	modelMatrixEnemigo = glm::translate(modelMatrixEnemigo, glm::vec3(13.0f, 3.0f, -5.0f));
 
 	//Matriz
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
@@ -2880,22 +2909,17 @@ void inicialMatrixs() {
 	modelMatrixMarcoPuerta = translate(modelMatrixMarcoPuerta,
 		glm::vec3(7.5f, 0.0f, -36.5f));
 	modelMatrixPuertaDer = translate(modelMatrixMarcoPuerta,
-		glm::vec3(2.0f, 0.0f, 0.0f));
+		glm::vec3(0.0f, 0.0f, 0.0f));
 	modelMatrixPuertaDer = glm::rotate(modelMatrixPuertaDer, glm::radians(-90.0f),
 		glm::vec3(0, 1, 0));
 	modelMatrixPuertaIzq = translate(modelMatrixMarcoPuerta,
-		glm::vec3(-2.0f, 0.0f, 0.0f));
+		glm::vec3(0.0f, 0.0f, 0.0f));
 	modelMatrixPuertaIzq = glm::rotate(modelMatrixPuertaIzq, glm::radians(-90.0f),
 		glm::vec3(0, 1, 0));
 	modelMatrixMarcoPuerta = glm::rotate(modelMatrixMarcoPuerta, glm::radians(-90.0f),
 		glm::vec3(0, 1, 0));
 	modelMatrixMarcoPuerta = scale(modelMatrixMarcoPuerta,
 		glm::vec3(2.9f, 2.0f, 3.1f));
-
-	//Puerta derecha
-
-
-	//Puerta izquierda
 
 }
 
@@ -3069,10 +3093,10 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 			glm::value_ptr(color));
 		shaderMulLighting.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.diffuse",
-			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+			glm::value_ptr(color));
 		shaderMulLighting.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.specular",
-			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+			glm::value_ptr(color));
 		shaderMulLighting.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].position",
 			glm::value_ptr(lampPosition));
@@ -3087,10 +3111,10 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 			glm::value_ptr(color));
 		shaderTerrain.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.diffuse",
-			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+			glm::value_ptr(color));
 		shaderTerrain.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].light.specular",
-			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+			glm::value_ptr(color));
 		shaderTerrain.setVectorFloat3(
 			"pointLights[" + std::to_string(i) + "].position",
 			glm::value_ptr(lampPosition));
@@ -3162,18 +3186,34 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 		shaderMulLighting.setFloat(
 			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].quadratic", 0.01);
-		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(botonesPos.size() + i)
-			+ "].light.ambient",
-			glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
-		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(botonesPos.size() + i)
-			+ "].light.diffuse",
-			glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
-		shaderTerrain.setVectorFloat3(
-			"pointLights[" + std::to_string(botonesPos.size() + i)
-			+ "].light.specular",
-			glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		if (lucesBotones[i]) {
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.ambient",
+				glm::value_ptr(glm::vec3(0.2, 0.16, 0.01)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.4, 0.32, 0.02)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.specular",
+				glm::value_ptr(glm::vec3(0.6, 0.58, 0.03)));
+		}
+		else {
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(lamp1Position.size() + i)
+				+ "].light.specular",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+		}
 		shaderTerrain.setVectorFloat3(
 			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].position", glm::value_ptr(lampPosition));
@@ -3187,6 +3227,7 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 			"pointLights[" + std::to_string(botonesPos.size() + i)
 			+ "].quadratic", 0.02);
 	}
+
 }
 
 void preRender1() {
@@ -3640,8 +3681,8 @@ void collidersManagmentEs1() {
 					std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;
 
-					//if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
-					//	&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
+					//if ((it->first.compare("enemigo") == 0 || it->first.compare("astroProta") == 0)
+					//	&& (jt->first.compare("enemigo") == 0 || jt->first.compare("astroProta") == 0))
 					//	isCollisionEnemy = true;
 
 					isCollision = true;
@@ -3725,10 +3766,10 @@ void collidersManagmentEs1() {
 				addOrUpdateColliders(collidersOBB, jt->first);
 			}
 			else {
-				if (jt->first.compare("mayow") == 0) {
+				if (jt->first.compare("enemigo") == 0) {
 					if (isCollisionEnemy == true) {
 						enemigo1.respawn = true;
-						//modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+						//modelMatrixEnemy = glm::translate(modelMatrixEnemy, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixEnemy[3]));
 						playerRespawn = true;
 						isCollisionEnemy = false;
 					}
@@ -3788,8 +3829,7 @@ void prepareScene2() {
 
 	terrain2.setShader(&shaderTerrain);
 
-	//Mayow
-	mayowModelAnimate.setShader(&shaderMulLighting);
+	enemyModelAnimate.setShader(&shaderMulLighting);
 
 	pivoteCam.setShader(&shaderMulLighting);
 
@@ -3883,8 +3923,7 @@ void prepareDepthScene2() {
 
 	terrain2.setShader(&shaderDepth);
 
-	//Mayow
-	mayowModelAnimate.setShader(&shaderDepth);
+	enemyModelAnimate.setShader(&shaderDepth);
 
 	pivoteCam.setShader(&shaderDepth);
 
@@ -4021,17 +4060,14 @@ void renderScene2(bool renderParticles) {
 
 	// Pivote cam
 	glDisable(GL_CULL_FACE);
-	//pivoteCam.render(modelMatrixPivoteCam);
-	//muroFondo.render(modelMatrixMuroFondo);
 	glEnable(GL_CULL_FACE);
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
-	modelMatrixAstroProta[3][1] = terrain2.getHeightTerrain(modelMatrixAstroProta[3][0],
-		modelMatrixAstroProta[3][2] - 20.0);
 	glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
 	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 10.0;
 	modelMatrixAstroBody[3].x = modelMatrixAstroBody[3].x - 58.0;
+	modelMatrixAstroBody[3].y = modelMatrixAstroBody[3].y + 0.4;
 	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
@@ -4040,34 +4076,23 @@ void renderScene2(bool renderParticles) {
 
 	astroOrigin = modelMatrixAstroProta[3];
 
-	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
-		+ terrain2.getHeightTerrain(modelMatrixMayow[3][0],
-			modelMatrixMayow[3][2]);
-	tmv = currTime - startTimeJump;
-	if (modelMatrixMayow[3][1]
-		< terrain2.getHeightTerrain(modelMatrixMayow[3][0],
-			modelMatrixMayow[3][2])) {
-		isJump = false;
-		modelMatrixMayow[3][1] = terrain2.getHeightTerrain(
-			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-	}
-
-	//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
-	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody,
-		glm::vec3(0.021, 0.021, 0.021));
-	mayowModelAnimate.setAnimationIndex(animationIndexMayow);
-	mayowModelAnimate.render(modelMatrixMayowBody);
+	//modelMatrixEnemigo[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
+	//	+ terrain2.getHeightTerrain(modelMatrixEnemigo[3][0],
+	//		modelMatrixEnemigo[3][2]);
+	//tmv = currTime - startTimeJump;
+	//if (modelMatrixEnemigo[3][1]
+	//	< terrain2.getHeightTerrain(modelMatrixEnemigo[3][0],
+	//		modelMatrixEnemigo[3][2])) {
+	//	isJump = false;
+	//	modelMatrixEnemigo[3][1] = terrain2.getHeightTerrain(
+	//		modelMatrixEnemigo[3][0], modelMatrixEnemigo[3][2]);
+	//}
 
 	//escenario2
 	glDisable(GL_CULL_FACE);
 	modelEscenario2.render(modelMatrixEscenario2);
 
 	//Bidones
-	//modelBidones.setPosition(glm::vec3(-59.0, 0.2, -34.0));
-	//modelBidones.setScale(glm::vec3(2.0, 2.0, 2.0));
-	//modelBidones.render();
-
 	modelMatrixBidones = glm::mat4(1.0);
 	modelMatrixBidones = glm::translate(modelMatrixBidones, glm::vec3(-59.0, 0.2, -34.0));
 	modelMatrixBidones = glm::scale(modelMatrixBidones, glm::vec3(2.0, 2.0, 2.0));
@@ -4089,9 +4114,6 @@ void renderScene2(bool renderParticles) {
 	modelBidones.render(modelMatrixBidones4);
 
 	//Caja1 (Cuadradas)
-	//modelCajaCuadrada.setPosition(glm::vec3(-7.0, 0.2, -20.0));
-	//modelCajaCuadrada.setScale(glm::vec3(2.0, 2.0, 2.0));
-	//Descomentar los modelos en el init
 	modelMatrixCajaCuadrada = glm::mat4(1.0);
 	modelMatrixCajaCuadrada = glm::translate(modelMatrixCajaCuadrada, glm::vec3(-60.3, 0.2, -17.3));
 	modelMatrixCajaCuadrada = glm::scale(modelMatrixCajaCuadrada, glm::vec3(2.0, 2.0, 2.0));
@@ -4124,10 +4146,6 @@ void renderScene2(bool renderParticles) {
 	modelCajaCuadrada.render(modelMatrixCajaCuadrada5);
 
 	//Caja2 (Low Poly)
-
-	//modelCajaLowPoly.setPosition(glm::vec3(0.0, 0.2, -20.0));
-	//modelCajaLowPoly.setScale(glm::vec3(2.0, 1.5, 2.0));
-	//Descomentar los modelos en el init
 	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
 	modelMatrixCajaLowPoly = glm::mat4(1.0);
 	modelMatrixCajaLowPoly = glm::translate(modelMatrixCajaLowPoly, glm::vec3(-42.0, 0.2, -7.0));
@@ -4198,8 +4216,6 @@ void renderScene2(bool renderParticles) {
 	modelCuerpo.render();
 
 	//Estanteria
-	//modelEstanteria.setPosition(glm::vec3(15.0, 1.0, -20.0));
-	//modelEstanteria.setScale(glm::vec3(2.0, 2.0, 2.0));
 	modelEstanteria.setOrientation(glm::vec3(0.0, 30.0, 0.0));
 	modelMatrixEstanteria1 = glm::mat4(1.0);
 	modelMatrixEstanteria1 = glm::translate(modelMatrixEstanteria1, glm::vec3(-29.10, 0.2, -27.73));
@@ -4217,14 +4233,22 @@ void renderScene2(bool renderParticles) {
 	//Marco puerta
 	modelMarcoPuerta.render(modelMatrixMarcoPuerta);
 
+	if (enablePuerta && movimientoPuerta <= 4.0f) {
+		movimientoPuerta += 0.01f;
+	}
+
 	//Puerta Izquierda
 	glm::mat4 modelMatrixPuertaIzqAux = glm::mat4(modelMatrixPuertaIzq);
+	modelMatrixPuertaIzqAux = glm::translate(modelMatrixPuertaIzqAux,
+		glm::vec3(0.0f, 0.0f, movimientoPuerta));
 	modelMatrixPuertaIzqAux = glm::scale(modelMatrixPuertaIzqAux,
 		glm::vec3(2.9f, 2.0f, 3.1f));
 	modelPuertaIzq.render(modelMatrixPuertaIzqAux);
 
 	//Puerta Derecha
 	glm::mat4 modelMatrixPuertaDerAux = glm::mat4(modelMatrixPuertaDer);
+	modelMatrixPuertaDerAux = glm::translate(modelMatrixPuertaDerAux,
+		glm::vec3(0.0f, 0.0f, -movimientoPuerta));
 	modelMatrixPuertaDerAux = glm::scale(modelMatrixPuertaDerAux,
 		glm::vec3(2.9f, 2.0f, 3.1f));
 	modelPuertaDer.render(modelMatrixPuertaDerAux);
@@ -4238,14 +4262,35 @@ void renderScene2(bool renderParticles) {
 		modelPalanca.setAnimationIndex(animaPalancas[i]);
 		modelPalanca.render();
 	}
-	/*modelPalanca.setPosition(glm::vec3(0.0, 2.0, -20.0));
-	modelPalanca.setScale(glm::vec3(0.021, 0.021, 0.021));
-	modelPalanca.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-	modelPalanca.setAnimationIndex(0);
-	modelPalanca.render();*/
 
 	glEnable(GL_CULL_FACE);
+	modelMatrixEnemigo[3][1] = terrain2.getHeightTerrain(
+		modelMatrixEnemigo[3][0], modelMatrixEnemigo[3][2]);
+	blendingUnsorted.find("enemigo")->second = glm::vec3(modelMatrixEnemigo[3]);
 
+	// Ordenar los objetos con color alpha
+	std::map<float, std::pair<std::string, glm::vec3> > blendingSorted;
+	std::map<std::string, glm::vec3>::iterator itBlend = blendingUnsorted.begin();
+	for (; itBlend != blendingUnsorted.end(); itBlend++) {
+		float distanceFormView = glm::length(camera->getPosition() - itBlend->second);
+		blendingSorted[distanceFormView] = std::make_pair(itBlend->first, itBlend->second);
+	}
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CULL_FACE);
+	for (std::map<float, std::pair<std::string, glm::vec3> >::reverse_iterator it =
+		blendingSorted.rbegin(); it != blendingSorted.rend(); it++) {
+		if (it->second.first.compare("enemigo") == 0) {
+			glm::mat4 modelMatrixEnemyBody = glm::mat4(modelMatrixEnemigo);
+			modelMatrixEnemyBody = glm::scale(modelMatrixEnemyBody,
+				glm::vec3(0.021, 0.021, 0.021));
+			enemyModelAnimate.setAnimationIndex(animationIndexEnemy);
+			enemyModelAnimate.render(modelMatrixEnemyBody);
+		}
+	}
+	glEnable(GL_CULL_FACE);
+	//glDisable(GL_BLEND);
 }
 
 void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view) {
@@ -4349,6 +4394,79 @@ void lucesEscenari2(ShadowBox* shadowBox, glm::mat4* view) {
 	shaderTerrain.setVectorFloat3("directionalLight.direction",
 		glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
 
+	shaderMulLighting.setInt("pointLightCount",
+		lucesPuzzleEsc2.size());
+	shaderTerrain.setInt("pointLightCount",
+		lucesPuzzleEsc2.size());
+
+	//Lamparas generadores
+	for (int i = 0; i < lucesPuzzleEsc2.size(); i++) {
+		glm::mat4 matrixLuzPuzz = glm::mat4(1.0f);
+		matrixLuzPuzz = glm::translate(matrixLuzPuzz,
+			glm::vec3(lucesPuzzleEsc2[i]));
+		glm::vec3 lampPosition = glm::vec3(matrixLuzPuzz[3]);
+		if (lucesPalancas[i]) {
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.4, 0.0)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.0, 0.02, 0.0)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.specular",
+				glm::value_ptr(glm::vec3(0.0, 0.09, 0.0)));
+		}
+		else {
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderMulLighting.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+		}
+		shaderMulLighting.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].position", glm::value_ptr(lampPosition));
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(i) + "].constant", 1.0);
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(i) + "].linear", 0.09);
+		shaderMulLighting.setFloat(
+			"pointLights[" + std::to_string(i) + "].quadratic", 0.01);
+		if (lucesPalancas[i]) {
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.4, 0.0)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.diffuse",
+				glm::value_ptr(glm::vec3(0.0, 0.9, 0.0)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.specular",
+				glm::value_ptr(glm::vec3(0.0, 0.2, 0.0)));
+		}
+		else {
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+			shaderTerrain.setVectorFloat3(
+				"pointLights[" + std::to_string(i) + "].light.ambient",
+				glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+		}
+		shaderTerrain.setVectorFloat3(
+			"pointLights[" + std::to_string(i) + "].position", glm::value_ptr(lampPosition));
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(i) + "].constant", 1.0);
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(i) + "].linear", 0.09);
+		shaderTerrain.setFloat(
+			"pointLights[" + std::to_string(i) + "].quadratic", 0.02);
+	}
+
 }
 
 void preRender2() {
@@ -4448,25 +4566,25 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "action", actionCollider,
 		modelMatrixAstroProta);
 
-	// Collider de mayow
-	AbstractModel::OBB mayowCollider;
-	glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
-	modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow,
+	// Collider de enemigo
+	AbstractModel::OBB enemyCollider;
+	glm::mat4 modelmatrixColliderEnemy = glm::mat4(modelMatrixEnemigo);
+	modelmatrixColliderEnemy = glm::rotate(modelmatrixColliderEnemy,
 		glm::radians(-90.0f), glm::vec3(1, 0, 0));
 	// Set the orientation of collider before doing the scale
-	mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
-	modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow,
+	enemyCollider.u = glm::quat_cast(modelmatrixColliderEnemy);
+	modelmatrixColliderEnemy = glm::scale(modelmatrixColliderEnemy,
 		glm::vec3(0.021, 0.021, 0.021));
-	modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow,
-		glm::vec3(mayowModelAnimate.getObb().c.x,
-			mayowModelAnimate.getObb().c.y + 10.0f,
-			mayowModelAnimate.getObb().c.z));
-	mayowCollider.e = mayowModelAnimate.getObb().e
+	modelmatrixColliderEnemy = glm::translate(modelmatrixColliderEnemy,
+		glm::vec3(enemyModelAnimate.getObb().c.x,
+			enemyModelAnimate.getObb().c.y + 10.0f,
+			enemyModelAnimate.getObb().c.z));
+	enemyCollider.e = enemyModelAnimate.getObb().e
 		* glm::vec3(3.0, 3.0, 3.0)
 		* glm::vec3(1.0f, 1.0f, 1.0f);
-	mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
-	addOrUpdateColliders(collidersOBB2, "mayow", mayowCollider,
-		modelMatrixMayow);
+	enemyCollider.c = glm::vec3(modelmatrixColliderEnemy[3]);
+	addOrUpdateColliders(collidersOBB2, "enemigo", enemyCollider,
+		modelMatrixEnemigo);
 
 	//Collider muro fondo
 	AbstractModel::OBB muroFondoCollider;
@@ -4780,6 +4898,104 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "bidones4", modelBidonesCollider4,
 		modelMatrixBidonesCollider4);
 
+	//Collider boxCD
+	AbstractModel::OBB boxCDCollider;
+	glm::mat4 modelmatrixColliderBoxCD = glm::mat4(modelMatrixBoxCD);
+	// Set the orientation of collider before doing the scale
+	boxCDCollider.u = glm::quat_cast(modelmatrixColliderBoxCD);
+	modelmatrixColliderBoxCD = glm::translate(modelmatrixColliderBoxCD,
+		glm::vec3(boxCD.getObb().c.x + 33.5,
+			boxCD.getObb().c.y,
+			boxCD.getObb().c.z - 14.45));
+	boxCDCollider.e = glm::vec3(2.0f, 10.0f, 12.0f);
+	boxCDCollider.c = glm::vec3(modelmatrixColliderBoxCD[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCD", boxCDCollider,
+		modelMatrixBoxCD);
+
+	//Collider boxCIS
+	AbstractModel::OBB boxCISCollider;
+	glm::mat4 modelmatrixColliderboxCIS = glm::mat4(modelMatrixBoxCIS);
+	// Set the orientation of collider before doing the scale
+	boxCISCollider.u = glm::quat_cast(modelmatrixColliderboxCIS);
+	modelmatrixColliderboxCIS = glm::translate(modelmatrixColliderboxCIS,
+		glm::vec3(boxCIS.getObb().c.x + 19.7,
+			boxCIS.getObb().c.y,
+			boxCIS.getObb().c.z - 22.85));
+	boxCISCollider.e = glm::vec3(0.3f, 10.0f, 4.5f);
+	boxCISCollider.c = glm::vec3(modelmatrixColliderboxCIS[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCIS", boxCISCollider,
+		modelMatrixBoxCIS);
+
+	//Collider boxCII
+	AbstractModel::OBB boxCIICollider;
+	glm::mat4 modelmatrixColliderboxCII = glm::mat4(modelMatrixBoxCII);
+	// Set the orientation of collider before doing the scale
+	boxCIICollider.u = glm::quat_cast(modelmatrixColliderboxCII);
+	modelmatrixColliderboxCII = glm::translate(modelmatrixColliderboxCII,
+		glm::vec3(boxCII.getObb().c.x + 27.25,
+			boxCII.getObb().c.y,
+			boxCII.getObb().c.z - 6.4));
+	boxCIICollider.e = glm::vec3(8.1f, 10.0f, 4.0f);
+	boxCIICollider.c = glm::vec3(modelmatrixColliderboxCII[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCII", boxCIICollider,
+		modelMatrixBoxCII);
+
+	//Collider boxCS
+	AbstractModel::OBB boxCSCollider;
+	glm::mat4 modelmatrixColliderboxCS = glm::mat4(modelMatrixBoxCS);
+	// Set the orientation of collider before doing the scale
+	boxCSCollider.u = glm::quat_cast(modelmatrixColliderboxCS);
+	modelmatrixColliderboxCS = glm::translate(modelmatrixColliderboxCS,
+		glm::vec3(boxCS.getObb().c.x + 27.25,
+			boxCS.getObb().c.y,
+			boxCS.getObb().c.z - 27.55));
+	boxCSCollider.e = glm::vec3(8.1f, 10.0f, 0.3f);
+	boxCSCollider.c = glm::vec3(modelmatrixColliderboxCS[3]);
+	addOrUpdateColliders(collidersOBB2, "boxCS", boxCSCollider,
+		modelMatrixBoxCS);
+
+
+	//Colliders Palancas
+	for (int i = 0; i < palancaPos.size(); i++) {
+		AbstractModel::OBB palancaCollider;
+		glm::mat4 modelMatrixColliderPalanca = glm::mat4(1.0);
+		modelMatrixColliderPalanca = glm::translate(modelMatrixColliderPalanca,
+			palancaPos[i]);
+		modelMatrixColliderPalanca = glm::rotate(modelMatrixColliderPalanca,
+			glm::radians(90.0f), glm::vec3(0, 0, 1));
+		addOrUpdateColliders(collidersOBB2, "palanca-" + std::to_string(i),
+			palancaCollider, modelMatrixColliderPalanca);
+		palancaCollider.u = glm::quat_cast(modelMatrixColliderPalanca);
+		modelMatrixColliderPalanca = glm::scale(modelMatrixColliderPalanca,
+			glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixColliderPalanca = glm::translate(modelMatrixColliderPalanca,
+			modelPalanca.getObb().c);
+		palancaCollider.c = glm::vec3(modelMatrixColliderPalanca[3]);
+		palancaCollider.e = modelGenerador.getObb().e
+			* glm::vec3(1.0, 1.0, 1.0);
+		std::get<0>(collidersOBB2.find("palanca-" + std::to_string(i))->second) =
+			palancaCollider;
+	}
+
+	//Collider puerta
+	AbstractModel::OBB puertaCollider;
+	glm::mat4 modelmatrixColliderPuerta = glm::mat4(1.0);
+	modelmatrixColliderPuerta = glm::translate(modelmatrixColliderPuerta,
+		glm::vec3(7.5f, 0.0f, -36.5f));
+	modelmatrixColliderPuerta = glm::rotate(modelmatrixColliderPuerta,
+		glm::radians(-90.0f), glm::vec3(0, 1, 0));
+	// Set the orientation of collider before doing the scale
+	puertaCollider.u = glm::quat_cast(modelmatrixColliderPuerta);
+	modelmatrixColliderPuerta = glm::scale(modelmatrixColliderPuerta,
+		glm::vec3(2.9f, 2.0f, 3.1f));
+	modelmatrixColliderPuerta = glm::translate(modelmatrixColliderPuerta,
+		glm::vec3(modelMarcoPuerta.getObb().c));
+	puertaCollider.e = modelMarcoPuerta.getObb().e 
+		* glm::vec3(2.9f, 2.0f, 3.1f);;
+	puertaCollider.c = glm::vec3(modelmatrixColliderPuerta[3]);
+	addOrUpdateColliders(collidersOBB2, "marcoPuerta", puertaCollider,
+		modelMatrixMarcoPuerta);
+
 	//Render colliders
 	for (std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
@@ -4816,8 +5032,8 @@ void collidersManagmentEs2() {
 				{
 					/*std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;*/
-					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
-						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
+					if ((it->first.compare("enemigo") == 0 || it->first.compare("astroProta") == 0)
+						&& (jt->first.compare("enemigo") == 0 || jt->first.compare("astroProta") == 0))
 							isCollisionEnemy = true;
 
 					isCollision = true;
@@ -4897,10 +5113,10 @@ void collidersManagmentEs2() {
 			}
 			else {
 				//std::cout << "Cuarto " << jt->first << std::endl;
-				if (jt->first.compare("mayow") == 0) {
+				if (jt->first.compare("enemigo") == 0) {
 					if (isCollisionEnemy == true) {
 						enemigo1.respawn = true;
-						modelMatrixMayow = glm::translate(modelMatrixMayow, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixMayow[3]));
+						modelMatrixEnemigo = glm::translate(modelMatrixEnemigo, enemigo1.calculaReaparicion(enemigo1.origen, modelMatrixEnemigo[3]));
 						playerRespawn = true;
 						isCollisionEnemy = false;
 					}
@@ -4920,13 +5136,13 @@ void soundEscene2() {
 		 * Open AL sound data
 		 */
 		 // Listener for the Thris person camera
-	listenerPos[0] = modelMatrixMayow[3].x;
-	listenerPos[1] = modelMatrixMayow[3].y;
-	listenerPos[2] = modelMatrixMayow[3].z;
+	listenerPos[0] = modelMatrixEnemigo[3].x;
+	listenerPos[1] = modelMatrixEnemigo[3].y;
+	listenerPos[2] = modelMatrixEnemigo[3].z;
 	alListenerfv(AL_POSITION, listenerPos);
 
-	glm::vec3 upModel = glm::normalize(modelMatrixMayow[1]);
-	glm::vec3 frontModel = glm::normalize(modelMatrixMayow[2]);
+	glm::vec3 upModel = glm::normalize(modelMatrixEnemigo[1]);
+	glm::vec3 frontModel = glm::normalize(modelMatrixEnemigo[2]);
 
 	listenerOri[0] = frontModel.x;
 	listenerOri[1] = frontModel.y;
@@ -4958,36 +5174,42 @@ void soundEscene2() {
 
 void cameraMove() {
 	int camaraXcoord = 0;
-	if (escenario1) {
-		posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
-	}
-	if (escenario2) {
-		posterior = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		camaraXcoord = terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
-	}
+	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+	camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
 	if (camaraXcoord < posterior) {
-		if (escenario1) {
-			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(-0.1, 0, 0.0));
-		}
-		if (escenario2) {
-			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(-0.1, 0, 0.0));
+		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
+			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+				glm::vec3(-0.1, 0, 0.0));
+	}
+	if (camaraXcoord > posterior) {
+		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
+			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+				glm::vec3(0.1, 0, 0.0));
+	}
+
+}
+
+void cameraMove2() {
+	int camaraXcoord = 0;
+	posterior = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) - 74;
+	camaraXcoord = terrain2.getXCoordTerrain(modelMatrixPivoteCam2[3][0]);
+	//std::cout << "Posterior " << posterior <<std::endl;
+	//std::cout << "camaraXcord " << camaraXcoord  <<std::endl;
+	//std::cout << "Limite derecho " << (limiteDerecho - 30) << std::endl;
+	if (camaraXcoord < posterior) {
+		
+		if (terrain2.getXCoordTerrain(modelMatrixPivoteCam2[3][0]) < (limiteDerecho - 30) && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) >= limiteIzquierdo) {
+			modelMatrixPivoteCam2 = glm::translate(modelMatrixPivoteCam2,
+				glm::vec3(-0.1, 0, 0.0));
+			/*std::cout << "derecha " << std::endl;*/
 		}
 	}
 	if (camaraXcoord > posterior) {
-		if (escenario1) {
-			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(0.1, 0, 0.0));
-		}
-		if (escenario2) {
-			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(0.1, 0, 0.0));
+		
+		if (terrain2.getXCoordTerrain(modelMatrixPivoteCam2[3][0]) > limiteIzquierdo) {
+			modelMatrixPivoteCam2 = glm::translate(modelMatrixPivoteCam2,
+				glm::vec3(0.1, 0, 0.0));
+			/*std::cout << "izquierda " << std::endl;*/
 		}
 	}
 }
@@ -5067,6 +5289,11 @@ bool excepCollider2(std::string string1, std::string string2) {
 
 	if ((string1.compare("astroProta") == 0 || string1.compare("action") == 0) &&
 		(string2.compare("astroProta") == 0 || string2.compare("action") == 0)) {
+		return true;
+	}
+
+	if ((string1.compare("muroFondo2") == 0 || string1.compare("marcoPuerta") == 0) &&
+		(string2.compare("muroFondo2") == 0 || string2.compare("marcoPuerta") == 0)) {
 		return true;
 	}
 	
