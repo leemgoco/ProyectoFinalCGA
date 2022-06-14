@@ -1855,47 +1855,204 @@ bool processInput(bool continueApplication) {
 
 
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
-		std::cout << "Esta presente el joystick" << std::endl;
+		//std::cout << "Esta presente el joystick" << std::endl;
 		int axesCount, buttonCount;
 		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-		std::cout << "Número de ejes disponibles :=>" << axesCount << std::endl;
-		std::cout << "Left Stick X axis: " << axes[0] << std::endl;
-		std::cout << "Left Stick Y axis: " << axes[1] << std::endl;
-		std::cout << "Left Trigger/L2: " << axes[2] << std::endl;
-		std::cout << "Right Stick X axis: " << axes[3] << std::endl;
-		std::cout << "Right Stick Y axis: " << axes[4] << std::endl;
-		std::cout << "Right Trigger/R2: " << axes[5] << std::endl;
+		//std::cout << "Número de ejes disponibles :=>" << axesCount << std::endl;
+		//std::cout << "Left Stick X axis: " << axes[0] << std::endl;
+		//std::cout << "Left Stick Y axis: " << axes[1] << std::endl;
+		//std::cout << "Left Trigger/L2: " << axes[2] << std::endl;
+		//std::cout << "Right Stick X axis: " << axes[3] << std::endl;
+		//std::cout << "Right Stick Y axis: " << axes[4] << std::endl;
+		//std::cout << "Right Trigger/R2: " << axes[5] << std::endl;
 
-		if (fabs(axes[1]) > 0.2) {
-			modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
-				glm::vec3(0, 0, -axes[1] * 0.1));
-			animationIndex = 0;
-		}
-		if (fabs(axes[0]) > 0.2) {
-			modelMatrixEnemigo = glm::rotate(modelMatrixEnemigo,
-				glm::radians(-axes[0] * 0.5f), glm::vec3(0, 1, 0));
-			animationIndex = 0;
-		}
-
-		if (fabs(axes[3]) > 0.2) {
-			camera->mouseMoveCamera(axes[3], 0.0, deltaTime);
-		}
-		if (fabs(axes[4]) > 0.2) {
-			camera->mouseMoveCamera(0.0, axes[4], deltaTime);
-		}
+		//Y axis (Arriba/abajo)
+		//if (fabs(axes[1]) > 0.2) {
+		//	modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
+		//		glm::vec3(0, 0, -axes[1] * 0.1));
+		//	animationIndex = 0;
+		//}
+		////Y axis (izquierda/derecha)
+		//if (fabs(axes[0]) > 0.2) {
+		//	modelMatrixEnemigo = glm::rotate(modelMatrixEnemigo,
+		//		glm::radians(-axes[0] * 0.5f), glm::vec3(0, 1, 0));
+		//	animationIndex = 0;
+		//}
 
 		const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1,
 			&buttonCount);
-		std::cout << "Número de botones disponibles :=>" << buttonCount
-			<< std::endl;
-		if (buttons[0] == GLFW_PRESS)
-			std::cout << "Se presiona x" << std::endl;
 
-		if (!isJump && buttons[0] == GLFW_PRESS) {
-			isJump = true;
-			startTimeJump = currTime;
-			tmv = 0;
+		//Start
+		if (!empiezaJuego || cambianivel2 || cambianivel3) {
+			bool pressEnter = buttons[7] == GLFW_PRESS;
+			if (pressEnter) {
+				empiezaJuego = true;
+				cambianivel2 = false;
+				if (cambianivel3) {
+					exitApp = true;
+				}
+				//sourcesPlay[0] = false;
+			}
+			fontbandera = true;
 		}
+
+		//Back
+		if (buttons[6] == GLFW_PRESS) {
+			exitApp = true;
+		}
+		//std::cout << "Número de botones disponibles :=>" << buttonCount
+		//	<< std::endl;
+		if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
+			//std::cout << "primer if:" << actionE << std::endl;
+			//if (modelSelected == 2 && buttons[13] == GLFW_PRESS)
+			//	modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
+
+			if (enableAction && buttons[0] == GLFW_PRESS) {
+				enableAction = false;
+				actionE = true;
+				animationIndex = 2;
+				std::cout << "actionE:" << actionE << std::endl;
+			}
+			else if (!enableAction) {
+				enableAction = true;
+				actionE = false;
+				std::cout << "Desactivado:" << actionE << std::endl;
+			}
+
+			//Cruzeta izquierda
+			if (modelSelected == 2 && buttons[13] == GLFW_PRESS) {
+				modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f),
+					glm::vec3(0, 1, 0));
+				animationIndex = 0;
+				astroPosition = modelMatrixAstroProta[3];
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -58.0f;
+				astroPosition.z += -10.0f;
+				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
+
+			}
+			//Cruzeta Derecha
+			else if (modelSelected == 2 && buttons[11] == GLFW_PRESS) {
+				modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
+					glm::vec3(0, 1, 0));
+				animationIndex = 0;
+				astroPosition = modelMatrixAstroProta[3];
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -58.0f;
+				astroPosition.z += -10.0f;
+				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
+			}
+			//Cruzeta Arriba
+			if (modelSelected == 2 && buttons[10] == GLFW_PRESS) {
+				if (escenario1) {
+					pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+				}
+				if (escenario2) {
+					pasado = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+				}
+				modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+					glm::vec3(0.0, 0.0, 0.1));
+				animationIndex = 0;
+				timer += 0.0075f;
+				std::cout << timer << std::endl;
+				if (timer > 0.1f)
+					banderaCaminar = 1;
+				if (timer > 5.0f && banderaCaminar == 1)
+					banderaCaminar = 2;
+				if (timer > 8.0f && banderaCaminar == 2)
+					banderaCaminar = 3;
+				if (timer > 12.0f && banderaCaminar == 3)
+					banderaCaminar = 4;
+				if (timer > 16.0f && banderaCaminar == 4)
+					banderaCaminar = 5;
+				if (timer > 20.0f && banderaCaminar == 5)
+					banderaCaminar = 6;
+				if (timer > 23.0f && banderaCaminar == 6)
+					banderaCaminar = 7;
+				if (timer > 26.0f && banderaCaminar == 7)
+					banderaCaminar = 8;
+				if (timer > 29.0f && banderaCaminar == 8)
+					banderaCaminar = 9;
+				if (timer > 32.0f && banderaCaminar == 9)
+					banderaCaminar = 10;
+				if (timer > 35.0f && banderaCaminar == 10)
+					banderaCaminar = 11;
+				//std::cout << banderaCaminar << std::endl;
+				//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+				//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+
+
+				if (escenario1) {
+					cameraMove();
+				}
+				if (escenario2) {
+					cameraMove2();
+				}
+				astroPosition = modelMatrixAstroProta[3];
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -58.0f;
+				astroPosition.z += -10.0f;
+
+				animationIndex = 0;
+
+				//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+				//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+
+
+
+			}
+			//Cruzeta abajo
+			else if (modelSelected
+				== 2 && buttons[12] == GLFW_PRESS) {
+				if (escenario1) {
+					pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+				}
+				if (escenario2) {
+					pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+				}
+
+				modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
+					glm::vec3(0.0, 0.0, -0.1));
+				animationIndex = 0;
+				//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
+				//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
+				if (escenario1) {
+					cameraMove();
+				}
+				if (escenario2) {
+					cameraMove2();
+				}
+				astroPosition = modelMatrixAstroProta[3];
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
+
+
+			/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
+			std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
+				if (escenario1) {
+					cameraMove();
+				}
+				if (escenario2) {
+					cameraMove2();
+				}
+				astroPosition = modelMatrixAstroProta[3];
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -58.0f;
+				astroPosition.z += -10.0f;
+				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
+
+					//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
+					//std::cout << "modelMatrixEnemy: " << modelMatrixEnemy[3][0] << std::endl;
+					//std::cout << "position enemigo: " << terrain.getXCoordTerrain(modelMatrixEnemy[3][0]) << std::endl;
+			}
+
+		}
+		//for (int i = 1; i < buttonCount; i++) {
+		//	if (buttons[i] == GLFW_PRESS)
+		//		std::cout << "Se pesiono el boton " << i <<std::endl;
+		//}
+		/*if (buttons[0] == GLFW_PRESS)
+			std::cout << "Se presiona x" << std::endl;*/
 	}
 
 	if (cameraSelected == 1) {
@@ -1920,38 +2077,27 @@ bool processInput(bool continueApplication) {
 	offsetY = 0;
 
 
-	if (enableCameraSelected && glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS
-		&& (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS
-			|| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)) {
-		enableCameraSelected = false;
-		cameraSelected++;
-		if (cameraSelected > 1)
-			cameraSelected = 0;
-		std::cout << "cameraSelected:" << cameraSelected << std::endl;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE
-		|| (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE
-			&& glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_RELEASE))
-		enableCameraSelected = true;
+	//if (enableCameraSelected && glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS
+	//	&& (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS
+	//		|| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)) {
+	//	enableCameraSelected = false;
+	//	cameraSelected++;
+	//	if (cameraSelected > 1)
+	//		cameraSelected = 0;
+	//	std::cout << "cameraSelected:" << cameraSelected << std::endl;
+	//}
+	//else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE
+	//	|| (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE
+	//		&& glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_RELEASE))
+	//	enableCameraSelected = true;
 
-	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(1.0f),
-			glm::vec3(0, 0, 1));
-		yaw += 1;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-1.0f),
-			glm::vec3(0, 0, 1));
-		yaw -= 1;
-	}
 	//std::cout << "respaw empieza el juego:" << (playerRespawn == false && empiezaJuego == true) << std::endl;
 	//std::cout << "respaw empieza el cambia nivel:" << (playerRespawn == false && cambianivel2 == true) << std::endl;
 	//std::cout << "respaw empieza el cambia nivel 2:" << (playerRespawn == false && cambianivel3 == true) << std::endl;
 	if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
 		//std::cout << "primer if:" << actionE << std::endl;
-		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
+		//if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		//	modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
 
 		if (enableAction && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			enableAction = false;
