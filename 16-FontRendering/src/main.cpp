@@ -138,23 +138,35 @@ Model modelGenerador;
 Model modelCompuerta;
 Model modelEdCompuerta;
 Model modelPlataforma;
-Model modelPlaCompuerta;
 Model modelRokas;
 Model modelRokas2;
-Model modelMontana;
-Model modelMontana2;
 Model modelLuzGenerador;
 Model modelLuzBotones;
 
 //Scene 2
 Model modelEscenario2;
 Model modelCuerpo;
+Model modelCuerpo2;
+Model modelCuerpo3;
 Model modelCompu;
+Model modelCompu2;
 Model modelEstanteria;
-//Model modelEstanteria2;
+Model modelEstanteria2;
 Model modelCajaCuadrada;
+Model modelCajaCuadrada2;
+Model modelCajaCuadrada3;
+Model modelCajaCuadrada4;
+Model modelCajaCuadrada5;
 Model modelCajaLowPoly;
+Model modelCajaLowPoly2;
+Model modelCajaLowPoly3;
+Model modelCajaLowPoly4;
+Model modelCajaLowPoly5;
+Model modelCajaLowPoly6;
 Model modelBidones;
+Model modelBidones2;
+Model modelBidones3;
+Model modelBidones4;
 Model modelPalanca;
 Model modelPuertaIzq;
 Model modelPuertaDer;
@@ -176,7 +188,9 @@ Terrain terrain2(-1, -1, 200, 1, "../Textures/AlturasMapa2.png");
 GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
 textureGreenID, texturePurpleID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
-textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2;
+textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2,
+textureTerrainBackgroundID2, textureTerrainRID2, textureTerrainGID2,
+textureTerrainBID2;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
 GLuint skyboxTextureID;
 GLuint textureMenuID, textureMenu2ID, textureActivaID;
@@ -198,12 +212,12 @@ GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
 
-std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
-		"../Textures/mp_bloodvalley/blood-valley_bk.tga",
-		"../Textures/mp_bloodvalley/blood-valley_up.tga",
-		"../Textures/mp_bloodvalley/blood-valley_dn.tga",
-		"../Textures/mp_bloodvalley/blood-valley_rt.tga",
-		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };
+std::string fileNames[6] = { "../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapDown.png",
+		"../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapUp.png" };
 
 bool exitApp = false;
 int lastMousePosX, offsetX = 0;
@@ -269,10 +283,10 @@ glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 camPivOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
-glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
-glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
-glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
-glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
+//glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
+//glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
+//glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
+//glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
 
 float timer;
 int banderaCaminar = 0;
@@ -302,8 +316,8 @@ bool pressEnter = false;
 bool musicaIntro = true;
 int animationIndexEscotilla = 0;
 
-bool escenario1 = false;
-bool escenario2 = true;
+bool escenario1 = true;
+bool escenario2 = false;
 
 //bool escenario2 = false;
 glm::vec3 vectorDireccionEnemigo = glm::vec3(0.0f);
@@ -401,8 +415,8 @@ GLuint depthMap, depthMapFBO;
  */
 
  // OpenAL Defines
-#define NUM_BUFFERS 12
-#define NUM_SOURCES 15
+#define NUM_BUFFERS 11
+#define NUM_SOURCES 16
 #define NUM_ENVIRONMENTS 1
 // Listener
 ALfloat listenerPos[] = { 0.0, 0.0, 4.0 };
@@ -453,6 +467,9 @@ ALfloat source13Vel[] = { 0.0, 0.0, 0.0 };
 // Source 14
 ALfloat source14Pos[] = { 2.0, 0.0, 0.0 };
 ALfloat source14Vel[] = { 0.0, 0.0, 0.0 };
+// Source 15
+ALfloat source15Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source15Vel[] = { 0.0, 0.0, 0.0 };
 // Buffers
 ALuint buffer[NUM_BUFFERS];
 ALuint source[NUM_SOURCES];
@@ -463,8 +480,8 @@ ALenum format;
 ALvoid* data;
 int ch;
 ALboolean loop;
-std::vector<bool> sourcesPlay = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
-std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Ejecutandose
+std::vector<bool> sourcesPlay = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
+std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
 
 
 // Se definen todos las funciones.
@@ -753,10 +770,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	terrain.setShader(&shaderTerrain);
 	terrain.setPosition(glm::vec3(100, 0, 100));
 
-	terrain2.init();
-	terrain2.setShader(&shaderTerrain);
-	terrain2.setPosition(glm::vec3(100, 0, 100));
-
 	pivoteCam.init();
 	pivoteCam.setShader(&shaderMulLighting);
 
@@ -770,16 +783,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxMenu.setOrientation(glm::vec3(-25.0, 0.0, 0.0));
 
 	////Rokas
-	//modelRokas.loadModel("../models/rokas/Piedras2.obj");
-	//modelRokas.setShader(&shaderMulLighting);
-	//modelRokas2.loadModel("../models/rokas/Piedras.obj");
-	//modelRokas2.setShader(&shaderMulLighting);
-
-	////Rokas
-	//modelMontana.loadModel("../models/Montanas/Montana.obj");
-	//modelMontana.setShader(&shaderMulLighting);
-	//modelMontana2.loadModel("../models/Montanas/Montana2.obj");
-	//modelMontana2.setShader(&shaderMulLighting);
+	modelRokas.loadModel("../models/rokas/Piedras2.obj");
+	modelRokas.setShader(&shaderMulLighting);
+	modelRokas2.loadModel("../models/rokas/Piedras.obj");
+	modelRokas2.setShader(&shaderMulLighting);
 
 	//Generador
 	modelGenerador.loadModel("../models/generadorG/Generador.obj");
@@ -804,10 +811,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Edificio compuerta
 	modelEdCompuerta.loadModel("../models/edCompuerta/EdificioCompuerta.fbx");
 	modelEdCompuerta.setShader(&shaderMulLighting);
-
-	//PlatCompuerta
-	modelPlaCompuerta.loadModel("../models/compuerta/CompuertaBase.fbx");
-	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	//Plataforma
 	modelPlataforma.loadModel("../models/plataforma/Plataforma.fbx");
@@ -836,72 +839,72 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	muroIzquierdo.setShader(&shaderMulLighting);
 
 	////Escenario2
-	modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
-	modelEscenario2.setShader(&shaderMulLighting);
+	//modelEscenario2.loadModel("../models/SegundoEscenario/Escenario2.obj");
+	//modelEscenario2.setShader(&shaderMulLighting);
 
-	//Bidones
-	modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
-	modelBidones.setShader(&shaderMulLighting);
+	////Bidones
+	//modelBidones.loadModel("../models/SegundoEscenario/Bidones.obj");
+	//modelBidones.setShader(&shaderMulLighting);
 
-	//modelBidones2 = modelBidones;
-	//modelBidones3 = modelBidones;
-	//modelBidones4 = modelBidones;
+	////modelBidones2 = modelBidones;
+	////modelBidones3 = modelBidones;
+	////modelBidones4 = modelBidones;
 
 	////Caja1
-	modelCajaCuadrada.loadModel("../models/SegundoEscenario/Caja1.obj");
-	modelCajaCuadrada.setShader(&shaderMulLighting);
+	//modelCajaCuadrada.loadModel("../models/SegundoEscenario/Caja1.obj");
+	//modelCajaCuadrada.setShader(&shaderMulLighting);
 
-	//modelCajaCuadrada2 = modelCajaCuadrada;
-	//modelCajaCuadrada3 = modelCajaCuadrada;
-	//modelCajaCuadrada4 = modelCajaCuadrada;
-	//modelCajaCuadrada5 = modelCajaCuadrada;
+	////modelCajaCuadrada2 = modelCajaCuadrada;
+	////modelCajaCuadrada3 = modelCajaCuadrada;
+	////modelCajaCuadrada4 = modelCajaCuadrada;
+	////modelCajaCuadrada5 = modelCajaCuadrada;
 
 	////Caja2
-	modelCajaLowPoly.loadModel("../models/SegundoEscenario/Caja2.obj");
-	modelCajaLowPoly.setShader(&shaderMulLighting);
+	//modelCajaLowPoly.loadModel("../models/SegundoEscenario/Caja2.obj");
+	//modelCajaLowPoly.setShader(&shaderMulLighting);
 
-	modelCajaLowPoly = modelCajaLowPoly;
-	//modelCajaLowPoly2 = modelCajaLowPoly;
-	//modelCajaLowPoly3 = modelCajaLowPoly;
-	//modelCajaLowPoly4 = modelCajaLowPoly;
-	//modelCajaLowPoly5 = modelCajaLowPoly;
-	//modelCajaLowPoly6 = modelCajaLowPoly;
+	////modelCajaLowPoly = modelCajaLowPoly;
+	////modelCajaLowPoly2 = modelCajaLowPoly;
+	////modelCajaLowPoly3 = modelCajaLowPoly;
+	////modelCajaLowPoly4 = modelCajaLowPoly;
+	////modelCajaLowPoly5 = modelCajaLowPoly;
+	////modelCajaLowPoly6 = modelCajaLowPoly;
 
 	////Compu
-	modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
-	modelCompu.setShader(&shaderMulLighting);
+	//modelCompu.loadModel("../models/SegundoEscenario/Compu.obj");
+	//modelCompu.setShader(&shaderMulLighting);
 
-	//modelCompu2 = modelCompu;
+	////modelCompu2 = modelCompu;
 
 	////Cuerpo
-	modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
-	modelCuerpo.setShader(&shaderMulLighting);
+	//modelCuerpo.loadModel("../models/SegundoEscenario/Cuerpo.obj");
+	//modelCuerpo.setShader(&shaderMulLighting);
 
-	//modelCuerpo2 = modelCuerpo;
-	//modelCuerpo3 = modelCuerpo;
+	////modelCuerpo2 = modelCuerpo;
+	////modelCuerpo3 = modelCuerpo;
 
 	////Estanteria
-	modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
-	modelEstanteria.setShader(&shaderMulLighting);
+	//modelEstanteria.loadModel("../models/SegundoEscenario/Estanteria.obj");
+	//modelEstanteria.setShader(&shaderMulLighting);
 
-	//modelEstanteria2 = modelEstanteria;
+	////modelEstanteria2 = modelEstanteria;
 
 
 	////Palanca
-	modelPalanca.loadModel("../models/SegundoEscenario/Palanca.fbx");
-	modelPalanca.setShader(&shaderMulLighting);
+	//modelPalanca.loadModel("../models/SegundoEscenario/Palanca.fbx");
+	//modelPalanca.setShader(&shaderMulLighting);
 
 	////PuertaIzquierda
-	modelPuertaIzq.loadModel("../models/SegundoEscenario/PuertaIzquierda.obj");
-	modelPuertaIzq.setShader(&shaderMulLighting);
+	//modelPuertaIzq.loadModel("../models/SegundoEscenario/PuertaIzquierda.obj");
+	//modelPuertaIzq.setShader(&shaderMulLighting);
 
 	////PuertaDerecha
-	modelPuertaDer.loadModel("../models/SegundoEscenario/PuertaDerecha.obj");
-	modelPuertaDer.setShader(&shaderMulLighting);
+	//modelPuertaDer.loadModel("../models/SegundoEscenario/PuertaDerecha.obj");
+	//modelPuertaDer.setShader(&shaderMulLighting);
 
 	////MarcoPuerta
-	modelMarcoPuerta.loadModel("../models/SegundoEscenario/MarcoPuerta.obj");
-	modelMarcoPuerta.setShader(&shaderMulLighting);
+	//modelMarcoPuerta.loadModel("../models/SegundoEscenario/MarcoPuerta.obj");
+	//modelMarcoPuerta.setShader(&shaderMulLighting);
 
 	//Box
 	boxCD.init();
@@ -947,32 +950,20 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		skyboxTexture.freeImage(bitmap);
 	}
 
-	// Definiendo la textura a utilizar
+	// Definiendo la textura a utilizar | Negro BlendMap2
 	Texture textureTerrainBackground("../Textures/BlendMap/TierraColor.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBackground.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainBackground.convertToData(bitmap, imageWidth,
 		imageHeight);
-	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBackgroundID);
-	// Enlazar esa textura a una tipo de textura de 2D.
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBackgroundID);
-	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
 	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -980,31 +971,40 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainBackground.freeImage(bitmap);
 
-	// Definiendo la textura a utilizar
-	Texture textureTerrainR("../Textures/BlendMap/Cables.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureTerrainR.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureTerrainR.convertToData(bitmap, imageWidth, imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureTerrainRID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureTerrainRID);
-	// set the texture wrapping parameters
+	// Definiendo la textura a utilizar | Negro BlendMap3
+	Texture textureTerrainBackground2("../Textures/BlendMap/PisoFondoNegro.png");
+	bitmap = textureTerrainBackground2.loadImage();
+	data = textureTerrainBackground2.convertToData(bitmap, imageWidth,
+		imageHeight);
+	glGenTextures(1, &textureTerrainBackgroundID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBackgroundID2);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
 	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainBackground2.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Rojo Blendmap 2
+	Texture textureTerrainR("../Textures/BlendMap/Cables.png");
+	bitmap = textureTerrainR.loadImage();
+	data = textureTerrainR.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainRID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainRID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -1012,8 +1012,108 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainR.freeImage(bitmap);
 
+	// Definiendo la textura a utilizar | Rojo BlendMap 3
+	Texture textureTerrainR2("../Textures/BlendMap/PisoRojo.png");
+	bitmap = textureTerrainR2.loadImage();
+	data = textureTerrainR2.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainRID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainRID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainR2.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Verde BlendMap2
+	Texture textureTerrainG("../Textures/BlendMap/RocasColor.png");
+	bitmap = textureTerrainG.loadImage();
+	data = textureTerrainG.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainGID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainGID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainG.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Verde BlendMap3
+	Texture textureTerrainG2("../Textures/BlendMap/PisoVerde.png");
+	bitmap = textureTerrainG2.loadImage();
+	data = textureTerrainG2.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainGID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainGID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainG2.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Azul BlendMap2
+	Texture textureTerrainB("../Textures/BlendMap/Plano.png");
+	bitmap = textureTerrainB.loadImage();
+	data = textureTerrainB.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainBID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainB.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Azul BlendMap3
+	Texture textureTerrainB2("../Textures/BlendMap/PisoAzul.png");
+	bitmap = textureTerrainB2.loadImage();
+	data = textureTerrainB2.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainBID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainB2.freeImage(bitmap);
+
 	// Definiendo la textura a utilizar para el INICIO
-	Texture textureMenu1("../Textures/Menu.png");
+	Texture textureMenu1("../Textures/Transiciones/Menu.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureMenu1.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -1043,70 +1143,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureMenu1.freeImage(bitmap);
-
-	// Definiendo la textura a utilizar
-	Texture textureTerrainG("../Textures/BlendMap/RocasColor.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureTerrainG.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureTerrainG.convertToData(bitmap, imageWidth, imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureTerrainGID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureTerrainGID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureTerrainG.freeImage(bitmap);
-
-	// Definiendo la textura a utilizar
-	Texture textureTerrainB("../Textures/BlendMap/Plano.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureTerrainB.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureTerrainB.convertToData(bitmap, imageWidth, imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureTerrainBID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureTerrainBID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureTerrainB.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
 	Texture textureTerrainBlendMap("../Textures/blendMap2.png");
@@ -1446,11 +1482,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 buffer[4] = alutCreateBufferFromFile("../sounds/Generador.wav");
 	 buffer[5] = alutCreateBufferFromFile("../sounds/Interruptor.wav");
 	 buffer[6] = alutCreateBufferFromFile("../sounds/MovimientoAlien.wav");
-	 buffer[7] = alutCreateBufferFromFile("../sounds/AtaqueAlien.wav");
-	 buffer[8] = alutCreateBufferFromFile("../sounds/AmbientalExterior.wav");
-	 buffer[9] = alutCreateBufferFromFile("../sounds/AmbientalInterior.wav");
-	 buffer[10] = alutCreateBufferFromFile("../sounds/ErrorCodigo.wav");
-	 buffer[11] = alutCreateBufferFromFile("../sounds/GameOver.wav");
+	 buffer[7] = alutCreateBufferFromFile("../sounds/AmbientalExterior.wav");
+	 buffer[8] = alutCreateBufferFromFile("../sounds/AmbientalInterior.wav");
+	 buffer[9] = alutCreateBufferFromFile("../sounds/ErrorCodigo.wav");
+	 buffer[10] = alutCreateBufferFromFile("../sounds/GameOver.wav");
 
 	 int errorAlut = alutGetError();
 	 if (errorAlut != ALUT_ERROR_NO_ERROR) {
@@ -1458,19 +1493,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 	exit(2);
 	 }
 
-	 //if (alGetError() != AL_NO_ERROR) {
-	 //	printf("- Error creating sources !!\n");
-	 //	exit(2);
-	 //} else {
-	 //	printf("init - no errors after alGenSources\n");
-	 //}
-	 //alSourcef(source[0], AL_PITCH, 1.0f);
-	 //alSourcef(source[0], AL_GAIN, 3.0f);
-	 //alSourcefv(source[0], AL_POSITION, source0Pos);
-	 //alSourcefv(source[0], AL_VELOCITY, source0Vel);
-	 //alSourcei(source[0], AL_BUFFER, buffer[0]);
-	 //alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	 //alSourcef(source[0], AL_MAX_DISTANCE, 2000);
+	 alGetError(); /* clear error */
+	 alGenSources(NUM_SOURCES, source);
 
 	 if (alGetError() != AL_NO_ERROR) {
 	 	printf("- Error creating sources !!\n");
@@ -1488,15 +1512,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcef(source[0], AL_MAX_DISTANCE, 2000);//DISTANCIA A LA QUE SE ESCUCHA
 	 // Pisadas exterior
 	 alSourcef(source[1], AL_PITCH, 1.0f);
-	 alSourcef(source[1], AL_GAIN, 0.3f);
+	 alSourcef(source[1], AL_GAIN, 0.7f);
 	 alSourcefv(source[1], AL_POSITION, source1Pos);
 	 alSourcefv(source[1], AL_VELOCITY, source1Vel);
 	 alSourcei(source[1], AL_BUFFER, buffer[1]);
 	 alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[1], AL_MAX_DISTANCE, 500);
+	 alSourcef(source[1], AL_MAX_DISTANCE, 1000);
 	 //Pisadas interior
 	 alSourcef(source[2], AL_PITCH, 1.0f);
-	 alSourcef(source[2], AL_GAIN, 1.0f);
+	 alSourcef(source[2], AL_GAIN, 0.7f);
 	 alSourcefv(source[2], AL_POSITION, source2Pos);
 	 alSourcefv(source[2], AL_VELOCITY, source2Vel);
 	 alSourcei(source[2], AL_BUFFER, buffer[2]);
@@ -1504,12 +1528,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcef(source[2], AL_MAX_DISTANCE, 1000);
 	 //Puerta y compuerta
 	 alSourcef(source[3], AL_PITCH, 1.0f);
-	 alSourcef(source[3], AL_GAIN, 1.0f);
+	 alSourcef(source[3], AL_GAIN, 2.0f);
 	 alSourcefv(source[3], AL_POSITION, source3Pos);
 	 alSourcefv(source[3], AL_VELOCITY, source3Vel);
 	 alSourcei(source[3], AL_BUFFER, buffer[3]);
-	 alSourcei(source[3], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[3], AL_MAX_DISTANCE, 2000);
+	 alSourcei(source[3], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[3], AL_MAX_DISTANCE, 1000);
 
 	 alSourcef(source[4], AL_PITCH, 1.0f);
 	 alSourcef(source[4], AL_GAIN, 1.0f);
@@ -1517,89 +1541,100 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcefv(source[4], AL_VELOCITY, source4Vel);
 	 alSourcei(source[4], AL_BUFFER, buffer[3]);
 	 alSourcei(source[4], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[4], AL_MAX_DISTANCE, 2000);
+	 alSourcef(source[4], AL_MAX_DISTANCE, 50);
 
 	 //Generadores
 	 alSourcef(source[5], AL_PITCH, 1.0f);
-	 alSourcef(source[5], AL_GAIN, 2.0f);
+	 alSourcef(source[5], AL_GAIN, 3.0f);
 	 alSourcefv(source[5], AL_POSITION, source5Pos);
 	 alSourcefv(source[5], AL_VELOCITY, source5Vel);
 	 alSourcei(source[5], AL_BUFFER, buffer[4]);
 	 alSourcei(source[5], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[5], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[5], AL_MAX_DISTANCE, 50);
 
 	 alSourcef(source[6], AL_PITCH, 1.0f);
-	 alSourcef(source[6], AL_GAIN, 2.0f);
+	 alSourcef(source[6], AL_GAIN, 3.0f);
 	 alSourcefv(source[6], AL_POSITION, source6Pos);
 	 alSourcefv(source[6], AL_VELOCITY, source6Vel);
 	 alSourcei(source[6], AL_BUFFER, buffer[4]);
 	 alSourcei(source[6], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[6], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[6], AL_MAX_DISTANCE, 50);
 
 	 alSourcef(source[7], AL_PITCH, 1.0f);
-	 alSourcef(source[7], AL_GAIN, 2.0f);
+	 alSourcef(source[7], AL_GAIN, 3.0f);
 	 alSourcefv(source[7], AL_POSITION, source7Pos);
 	 alSourcefv(source[7], AL_VELOCITY, source7Vel);
 	 alSourcei(source[7], AL_BUFFER, buffer[4]);
 	 alSourcei(source[7], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[7], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[7], AL_MAX_DISTANCE, 50);
 
 	 //Interruptores
 	 alSourcef(source[8], AL_PITCH, 1.0f);
-	 alSourcef(source[8], AL_GAIN, 1.5f);
-	 alSourcefv(source[8], AL_POSITION, source2Pos);
-	 alSourcefv(source[8], AL_VELOCITY, source2Vel);
+	 alSourcef(source[8], AL_GAIN, 1.8f);
+	 alSourcefv(source[8], AL_POSITION, source8Pos);
+	 alSourcefv(source[8], AL_VELOCITY, source8Vel);
 	 alSourcei(source[8], AL_BUFFER, buffer[5]);
 	 alSourcei(source[8], AL_LOOPING, AL_FALSE);
 	 alSourcef(source[8], AL_MAX_DISTANCE, 1000);
-	 //MovimientoAlien
+
 	 alSourcef(source[9], AL_PITCH, 1.0f);
-	 alSourcef(source[9], AL_GAIN, 1.5f);
-	 alSourcefv(source[9], AL_POSITION, source2Pos);
-	 alSourcefv(source[9], AL_VELOCITY, source2Vel);
-	 alSourcei(source[9], AL_BUFFER, buffer[6]);
-	 alSourcei(source[9], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[9], AL_MAX_DISTANCE, 700);
-	//Ataque Alien
+	 alSourcef(source[9], AL_GAIN, 1.8f);
+	 alSourcefv(source[9], AL_POSITION, source9Pos);
+	 alSourcefv(source[9], AL_VELOCITY, source9Vel);
+	 alSourcei(source[9], AL_BUFFER, buffer[5]);
+	 alSourcei(source[9], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[9], AL_MAX_DISTANCE, 1000);
+
 	 alSourcef(source[10], AL_PITCH, 1.0f);
-	 alSourcef(source[10], AL_GAIN, 1.5f);
-	 alSourcefv(source[10], AL_POSITION, source2Pos);
-	 alSourcefv(source[10], AL_VELOCITY, source2Vel);
-	 alSourcei(source[10], AL_BUFFER, buffer[7]);
+	 alSourcef(source[10], AL_GAIN, 1.8f);
+	 alSourcefv(source[10], AL_POSITION, source10Pos);
+	 alSourcefv(source[10], AL_VELOCITY, source10Vel);
+	 alSourcei(source[10], AL_BUFFER, buffer[5]);
 	 alSourcei(source[10], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[10], AL_MAX_DISTANCE, 700);
-	 //AmbientalExterior
+	 alSourcef(source[10], AL_MAX_DISTANCE, 1000);
+
+	 //MovimientoAlien
 	 alSourcef(source[11], AL_PITCH, 1.0f);
-	 alSourcef(source[11], AL_GAIN, 1.5f);
-	 alSourcefv(source[11], AL_POSITION, source2Pos);
-	 alSourcefv(source[11], AL_VELOCITY, source2Vel);
-	 alSourcei(source[11], AL_BUFFER, buffer[8]);
+	 alSourcef(source[11], AL_GAIN, 1.0f);
+	 alSourcefv(source[11], AL_POSITION, source11Pos);
+	 alSourcefv(source[11], AL_VELOCITY, source11Vel);
+	 alSourcei(source[11], AL_BUFFER, buffer[6]);
 	 alSourcei(source[11], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[11], AL_MAX_DISTANCE, 1000);
-	 //AmbientalInterior
+	 alSourcef(source[11], AL_MAX_DISTANCE, 30);
+
+	 //AmbientalExterior
 	 alSourcef(source[12], AL_PITCH, 1.0f);
-	 alSourcef(source[12], AL_GAIN, 1.5f);
-	 alSourcefv(source[12], AL_POSITION, source2Pos);
-	 alSourcefv(source[12], AL_VELOCITY, source2Vel);
-	 alSourcei(source[12], AL_BUFFER, buffer[9]);
+	 alSourcef(source[12], AL_GAIN, 2.3f);
+	 alSourcefv(source[12], AL_POSITION, source12Pos);
+	 alSourcefv(source[12], AL_VELOCITY, source12Vel);
+	 alSourcei(source[12], AL_BUFFER, buffer[7]);
 	 alSourcei(source[12], AL_LOOPING, AL_TRUE);
 	 alSourcef(source[12], AL_MAX_DISTANCE, 1000);
-	 //ErrorCódigo
+
+	 //AmbientalInterior
 	 alSourcef(source[13], AL_PITCH, 1.0f);
 	 alSourcef(source[13], AL_GAIN, 1.5f);
-	 alSourcefv(source[13], AL_POSITION, source2Pos);
-	 alSourcefv(source[13], AL_VELOCITY, source2Vel);
-	 alSourcei(source[13], AL_BUFFER, buffer[10]);
-	 alSourcei(source[13], AL_LOOPING, AL_FALSE);
+	 alSourcefv(source[13], AL_POSITION, source13Pos);
+	 alSourcefv(source[13], AL_VELOCITY, source13Vel);
+	 alSourcei(source[13], AL_BUFFER, buffer[8]);
+	 alSourcei(source[13], AL_LOOPING, AL_TRUE);
 	 alSourcef(source[13], AL_MAX_DISTANCE, 1000);
-	 //GameOver
+	 //ErrorCódigo
 	 alSourcef(source[14], AL_PITCH, 1.0f);
 	 alSourcef(source[14], AL_GAIN, 1.5f);
-	 alSourcefv(source[14], AL_POSITION, source2Pos);
-	 alSourcefv(source[14], AL_VELOCITY, source2Vel);
-	 alSourcei(source[14], AL_BUFFER, buffer[11]);
+	 alSourcefv(source[14], AL_POSITION, source14Pos);
+	 alSourcefv(source[14], AL_VELOCITY, source14Vel);
+	 alSourcei(source[14], AL_BUFFER, buffer[9]);
 	 alSourcei(source[14], AL_LOOPING, AL_FALSE);
 	 alSourcef(source[14], AL_MAX_DISTANCE, 1000);
+	 //GameOver
+	 alSourcef(source[15], AL_PITCH, 1.0f);
+	 alSourcef(source[15], AL_GAIN, 1.5f);
+	 alSourcefv(source[15], AL_POSITION, source2Pos);
+	 alSourcefv(source[15], AL_VELOCITY, source2Vel);
+	 alSourcei(source[15], AL_BUFFER, buffer[10]);
+	 alSourcei(source[15], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[15], AL_MAX_DISTANCE, 1000);
 	 
 	 // Se inicializa el modelo de texeles.
 	modelText = new FontTypeRendering::FontTypeRendering(screenWidth,
@@ -1635,7 +1670,6 @@ void destroy() {
 
 	// Terrains objects Delete
 	terrain.destroy();
-	terrain.destroy();
 
 	// Custom objects Delete
 	modelFountain.destroy();
@@ -1650,7 +1684,6 @@ void destroy() {
 	modelEdCompuerta.destroy();
 	modelGenerador.destroy();
 	modelPlataforma.destroy();
-	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
 	modelRokas2.destroy();
 	modelLuzBotones.destroy();
@@ -1672,26 +1705,27 @@ void destroy() {
 	//modelos segundo escenario
 	modelEscenario2.destroy();
 	modelBidones.destroy();
-	//modelBidones2.destroy();
-	//modelBidones3.destroy();
-	//modelBidones4.destroy();
+	modelBidones2.destroy();
+	modelBidones3.destroy();
+	modelBidones4.destroy();
 	modelCajaCuadrada.destroy();
-	//modelCajaCuadrada2.destroy();
-	//modelCajaCuadrada3.destroy();
-	//modelCajaCuadrada4.destroy();
-	//modelCajaCuadrada5.destroy();
+	modelCajaCuadrada2.destroy();
+	modelCajaCuadrada3.destroy();
+	modelCajaCuadrada4.destroy();
+	modelCajaCuadrada5.destroy();
 	modelCajaLowPoly.destroy();
-	//modelCajaLowPoly2.destroy();
-	//modelCajaLowPoly3.destroy();
-	//modelCajaLowPoly4.destroy();
-	//modelCajaLowPoly5.destroy();
+	modelCajaLowPoly2.destroy();
+	modelCajaLowPoly3.destroy();
+	modelCajaLowPoly4.destroy();
+	modelCajaLowPoly5.destroy();
+	modelCajaLowPoly6.destroy();
 	modelCompu.destroy();
-	//modelCompu2.destroy();
+	modelCompu2.destroy();
 	modelCuerpo.destroy();
-	//modelCuerpo2.destroy();
-	//modelCuerpo3.destroy();
+	modelCuerpo2.destroy();
+	modelCuerpo3.destroy();
 	modelEstanteria.destroy();
-	//modelEstanteria2.destroy();
+	modelEstanteria2.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1790,7 +1824,6 @@ bool processInput(bool continueApplication) {
 		bool pressEnter = glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS;
 		if (textureActivaID == textureMenuID && pressEnter) {
 			empiezaJuego = true;
-			//sourcesPlay[0] = false;
 		}
 		fontbandera = true;
 	}
@@ -1930,16 +1963,11 @@ bool processInput(bool continueApplication) {
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixMayow[3]);
 		}
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-			if (escenario1) {
-				pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-			}
-			if (escenario2) {
-				pasado = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-			}
+			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
 			animationIndex = 0;
-			timer += 0.01f;
+			timer += 0.0075f;
 			std::cout << timer << std::endl;
 			if (timer > 0.1f)
 				banderaCaminar = 1;
@@ -1984,13 +2012,7 @@ bool processInput(bool continueApplication) {
 		}
 		else if (modelSelected
 			== 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-			if (escenario1) {
-				pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-			}
-			if (escenario2) {
-				pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-			}
-			
+			pasado = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
 			animationIndex = 0;
@@ -2168,12 +2190,6 @@ void applicationLoop() {
 				alSourcePlay(source[i]);
 			}
 		}
-
-		//Carga de escenarios
-		//if (!musicaIntro) {
-		//	sourcesPlay[0] = false;
-		//	alSourceStop(source[0]);
-		//}
 		if (escenario1) {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
@@ -2191,7 +2207,7 @@ void applicationLoop() {
 			}
 			std::cout << "Entra linea renderizados" << std::endl;
 			empiezaJuego = true;
-			musicaIntro = false;
+			//musicaIntro = false;
 			sourcesPlay[0] = false;
 			preRender1();
 			renderScene();
@@ -2358,15 +2374,9 @@ void prepareScene() {
 
 	modelPlataforma.setShader(&shaderMulLighting);
 
-	modelPlaCompuerta.setShader(&shaderMulLighting);
-
 	modelRokas.setShader(&shaderMulLighting);
 
 	modelRokas2.setShader(&shaderMulLighting);
-
-	modelMontana.setShader(&shaderMulLighting);
-
-	modelMontana2.setShader(&shaderMulLighting);
 
 	boxReferencia.setShader(&shaderMulLighting);
 
@@ -2406,15 +2416,9 @@ void prepareDepthScene() {
 
 	modelPlataforma.setShader(&shaderDepth);
 
-	modelPlaCompuerta.setShader(&shaderDepth);
-
 	modelRokas.setShader(&shaderDepth);
 
 	modelRokas2.setShader(&shaderDepth);
-
-	modelMontana.setShader(&shaderDepth);
-
-	modelMontana2.setShader(&shaderDepth);
 
 	boxReferencia.setShader(&shaderDepth);
 
@@ -2483,27 +2487,6 @@ void renderScene(bool renderParticles) {
 	 * Custom Anim objects obj
 	 *******************************************/
 
-	 /*
-	 glm::vec3 ejey = glm::normalize(terrain.getNormalTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]));
-	 glm::vec3 ejex = glm::normalize(modelMatrixCompuerta[0]);
-	 glm::vec3 ejez = glm::normalize(glm::cross(ejex, ejey));
-	 ejex = glm::normalize(glm::cross(ejey, ejez));
-	 modelMatrixCompuerta[0] = glm::vec4(ejex, 0.0);
-	 modelMatrixCompuerta[1] = glm::vec4(ejey, 0.0);
-	 modelMatrixCompuerta[2] = glm::vec4(ejez, 0.0);
-	 modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]);*/
-
-	 //glDisable(GL_BLEND);
-	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-	//	modelMatrixCompuerta[3][2]) + 2.0f;
-	//glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
-	//modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-	//	glm::vec3(0.0021, 0.0021, 0.0021));
-	//modelCompuerta.setAnimationIndex(2);
-	//modelCompuerta.render(modelMatrixCompuertaBody);
-
-
-
 	//modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 	//	glm::vec3(0, 0, 1));
 
@@ -2561,29 +2544,23 @@ void renderScene(bool renderParticles) {
 		modelLuzGenerador.render();
 	}
 
-	//for (int i = 0; i < rokas2Pos.size(); i++) {
-	//	rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
-	//		rokas2Pos[i].z) - 0.5f;
-	//	modelRokas2.setPosition(rokas2Pos[i]);
-	//	modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
-	//	//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
-	//	modelRokas2.render();
-	//}
-	//for (int i = 0; i < rokasPos.size(); i++) {
-	//	rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
-	//		rokasPos[i].z) - 0.5f;
-	//	modelRokas.setPosition(rokasPos[i]);
-	//	modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
-	//	//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
-	//	modelRokas.render();
-	//}
+	for (int i = 0; i < rokas2Pos.size(); i++) {
+		rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
+		rokas2Pos[i].z) - 0.5f;
+		modelRokas2.setPosition(rokas2Pos[i]);
+		modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
+		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+		modelRokas2.render();
+	}
+	for (int i = 0; i < rokasPos.size(); i++) {
+		rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
+		rokasPos[i].z) - 0.5f;
+		modelRokas.setPosition(rokasPos[i]);
+		modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
+		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+		modelRokas.render();
+	}
 	//Compuerta
-	//modelMatrixCompuerta = glm::translate(modelMatrixCompuerta, glm::vec3(10.445f, 0.0f, 13.789f));
-	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-		//modelMatrixCompuerta[3][2]) - 2.0f;
-	//glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
-	//modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-	//	glm::vec3(0.021, 0.021, 0.021));
 	modelCompuerta.setPosition(glm::vec3(3.3f, 2.8f, 19.1f));
 	modelCompuerta.setScale(glm::vec3(0.03, 0.03, 0.03));
 	modelCompuerta.setAnimationIndex(animationIndexEscotilla);
@@ -2606,19 +2583,6 @@ void renderScene(bool renderParticles) {
 	modelEdCompuerta.setScale(glm::vec3(0.9, 0.9, 0.9));
 	modelEdCompuerta.render();
 
-	////Montañas Fondo
-	//modelMontana2.setPosition(glm::vec3(-80.03, 1.0, -4.0));
-	//modelMontana2.setOrientation(glm::vec3(0.0, -90, 0.0));
-	//modelMontana2.render();
-
-	//modelMontana2.setPosition(glm::vec3(-15.0, 1.0, -19));
-	//modelMontana2.setOrientation(glm::vec3(0.0, 180.0, 0.0));
-	//modelMontana2.render();
-
-	//modelMontana2.setPosition(glm::vec3(94.0, 1.0, 6.0));
-	//modelMontana2.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-	//modelMontana2.render();
-
 	//astroProta
 	glDisable(GL_CULL_FACE);
 	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
@@ -2627,19 +2591,7 @@ void renderScene(bool renderParticles) {
 	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
-	astroProta.render(modelMatrixAstroBody);
-	source1Pos[0] = modelMatrixAstroProta[3].x;
-	source1Pos[1] = modelMatrixAstroProta[3].y+7;
-	source1Pos[2] = modelMatrixAstroProta[3].z;
-	alSourcefv(source[1], AL_POSITION, source1Pos);
-	if (animationIndex != 1) {
-		std::cout << "Cambia sourcesPlay[1] "  << std::endl;
-		sourcesPlay[1] = true;
-	}
-	else {
-		sourcesPlay[1] = false;
-	}
-	
+	astroProta.render(modelMatrixAstroBody);	
 	glEnable(GL_CULL_FACE);
 
 	///**********
@@ -3422,9 +3374,6 @@ void collidersManagmentEs1() {
 	glm::mat4 modelmatrixColliderCompuerta = glm::mat4(1.0);
 	modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,glm::vec3(1.9f, terrain.getHeightTerrain(2.2f,
 		13.0f) + 1.0f , 12.7f));
-	//modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
-		//glm::radians(-90.0f), glm::vec3(1, 0, 0));
-	// Set the orientation of collider before doing the scale
 	compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
 	modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
 		glm::vec3(4.0, 4.0, 4.0));
@@ -3436,7 +3385,7 @@ void collidersManagmentEs1() {
 		* glm::vec3(4.0, 4.0, 4.0);
 	compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
 	addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
-		modelMatrixCompuerta);
+		modelmatrixColliderCompuerta);
 
 
 	// Collider de edificio compuerta edificios
@@ -3446,8 +3395,6 @@ void collidersManagmentEs1() {
 		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
 			glm::vec3(edificios[i].x, terrain.getHeightTerrain(edificios[i].x,
 				edificios[i].z) - 1.0f, edificios[i].z));
-		//modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
-		//	glm::radians(120.0f), glm::vec3(0, 1, 0));
 		addOrUpdateColliders(collidersOBB, "edificios-" + std::to_string(i),
 			edCompuertaCollider, modelmatrixColliderEdCompuerta);
 		// Set the orientation of collider before doing the scale
@@ -3749,25 +3696,25 @@ void soundEscene1() {
 	source0Pos[2] = modelMatrixAstroProta[3].z;
 	alSourcefv(source[0], AL_POSITION, source0Pos);
 
-	//Pasos
-	//source1Pos[0] = modelMatrixAstroProta[3].x;
-	//source1Pos[1] = modelMatrixAstroProta[3].y + 10.0f;
-	//source1Pos[2] = modelMatrixAstroProta[3].z;
-	//alSourcefv(source[1], AL_POSITION, source1Pos);
-	//sourcesPlay[1] = true;
+	//Caminata
+	source1Pos[0] = modelMatrixAstroProta[3].x;
+	source1Pos[1] = modelMatrixAstroProta[3].y + 7;
+	source1Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[1], AL_POSITION, source1Pos);
+	if (animationIndex != 1) {
+		std::cout << "Cambia sourcesPlay[1] " << std::endl;
+		sourcesPlay[1] = true;
+	}
+	else {
+		sourcesPlay[1] = false;
+	}
 
 	//Generadores
-	sourcesPlay[5] = true;
-	source5Pos[0] = modelMatrixAstroProta[3].x;
-	source5Pos[1] = modelMatrixAstroProta[3].y;
-	source5Pos[2] = modelMatrixAstroProta[3].z;
+	source5Pos[0] = -66.6;
+	source5Pos[1] = terrain.getHeightTerrain(-66.6, -2) + 1.0;
+	source5Pos[2] = -2;
 	alSourcefv(source[5], AL_POSITION, source5Pos);
-	//sourcesPlay[5] = true;
-	//source5Pos[0] = -66.6;
-	//source5Pos[1] = terrain.getHeightTerrain(-66.6, -2) +1.0;
-	//source5Pos[2] = -2;
-	//alSourcefv(source[5], AL_POSITION, source5Pos);
-	//sourcesPlay[5] = true;
+	sourcesPlay[5] = true;
 
 	source6Pos[0] = 78;
 	source6Pos[1] = terrain.getHeightTerrain(78, 12) + 1.0;
@@ -3781,12 +3728,46 @@ void soundEscene1() {
 	alSourcefv(source[7], AL_POSITION, source7Pos);
 	sourcesPlay[7] = true;
 
+	//Ambiental Exterior
+	source12Pos[0] = modelMatrixAstroProta[3].x;
+	source12Pos[1] = modelMatrixAstroProta[3].y + 3;
+	source12Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[12], AL_POSITION, source12Pos);
+	sourcesPlay[12] = true;
+
+	//Generador Código correcto G1
+	source8Pos[0] = modelMatrixAstroProta[3].x;
+	source8Pos[1] = modelMatrixAstroProta[3].y;
+	source8Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[8], AL_POSITION, source8Pos);
+	//sourcesPlay[8] = true;
+
+	//Generador Código correcto G2
+	source9Pos[0] = modelMatrixAstroProta[3].x;
+	source9Pos[1] = modelMatrixAstroProta[3].y;
+	source9Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[9], AL_POSITION, source9Pos);
+	//sourcesPlay[8] = true;
+
+	//Generador Código correcto G3
+	source10Pos[0] = modelMatrixAstroProta[3].x;
+	source10Pos[1] = modelMatrixAstroProta[3].y;
+	source10Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[10], AL_POSITION, source10Pos);
+	//sourcesPlay[8] = true;
+
+	//Compuerta Abierta
+	source3Pos[0] = 1.9f;
+	source3Pos[1] = terrain.getHeightTerrain(2.2f, 13.0f) + 1.0f;
+	source3Pos[2] = 12.7f;
+	alSourcefv(source[3], AL_POSITION, source3Pos);
+
 }
 
 void prepareScene2() {
 	skyboxSphere.setShader(&shaderSkybox);
 
-	terrain2.setShader(&shaderTerrain);
+	terrain.setShader(&shaderTerrain);
 
 	//Mayow
 	mayowModelAnimate.setShader(&shaderMulLighting);
@@ -3812,8 +3793,6 @@ void prepareScene2() {
 	modelGenerador.setShader(&shaderMulLighting);
 
 	modelPlataforma.setShader(&shaderMulLighting);
-
-	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	modelRokas.setShader(&shaderMulLighting);
 
@@ -3881,7 +3860,7 @@ void prepareScene2() {
 void prepareDepthScene2() {
 	skyboxSphere.setShader(&shaderDepth);
 
-	terrain2.setShader(&shaderDepth);
+	terrain.setShader(&shaderDepth);
 
 	//Mayow
 	mayowModelAnimate.setShader(&shaderDepth);
@@ -3907,8 +3886,6 @@ void prepareDepthScene2() {
 	modelGenerador.setShader(&shaderDepth);
 
 	modelPlataforma.setShader(&shaderDepth);
-
-	modelPlaCompuerta.setShader(&shaderDepth);
 
 	modelRokas.setShader(&shaderDepth);
 
@@ -3974,7 +3951,6 @@ void prepareDepthScene2() {
 	modelMarcoPuerta.setShader(&shaderDepth);
 }
 
-//Descomentar los modelos en el init
 void renderScene2(bool renderParticles) {
 	// Se activa la textura del background
 	glActiveTexture(GL_TEXTURE0);
@@ -3997,7 +3973,7 @@ void renderScene2(bool renderParticles) {
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID2);
 	shaderTerrain.setInt("blendMapTexture", 4);
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(40, 40)));
-	terrain2.render();
+	terrain.render();
 	shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -4027,7 +4003,7 @@ void renderScene2(bool renderParticles) {
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
-	modelMatrixAstroProta[3][1] = terrain2.getHeightTerrain(modelMatrixAstroProta[3][0],
+	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
 		modelMatrixAstroProta[3][2] - 20.0);
 	glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
 	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 10.0;
@@ -4041,14 +4017,14 @@ void renderScene2(bool renderParticles) {
 	astroOrigin = modelMatrixAstroProta[3];
 
 	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
-		+ terrain2.getHeightTerrain(modelMatrixMayow[3][0],
+		+ terrain.getHeightTerrain(modelMatrixMayow[3][0],
 			modelMatrixMayow[3][2]);
 	tmv = currTime - startTimeJump;
 	if (modelMatrixMayow[3][1]
-		< terrain2.getHeightTerrain(modelMatrixMayow[3][0],
+		< terrain.getHeightTerrain(modelMatrixMayow[3][0],
 			modelMatrixMayow[3][2])) {
 		isJump = false;
-		modelMatrixMayow[3][1] = terrain2.getHeightTerrain(
+		modelMatrixMayow[3][1] = terrain.getHeightTerrain(
 			modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 	}
 
@@ -4066,68 +4042,65 @@ void renderScene2(bool renderParticles) {
 	//Bidones
 	//modelBidones.setPosition(glm::vec3(-59.0, 0.2, -34.0));
 	//modelBidones.setScale(glm::vec3(2.0, 2.0, 2.0));
-	//modelBidones.render();
 
 	modelMatrixBidones = glm::mat4(1.0);
 	modelMatrixBidones = glm::translate(modelMatrixBidones, glm::vec3(-59.0, 0.2, -34.0));
 	modelMatrixBidones = glm::scale(modelMatrixBidones, glm::vec3(2.0, 2.0, 2.0));
 	modelBidones.render(modelMatrixBidones);
 
-	modelMatrixBidones2 = glm::mat4(1.0);
-	modelMatrixBidones2 = glm::translate(modelMatrixBidones2, glm::vec3(-31.6, 0.2, -18.1));
-	modelMatrixBidones2 = glm::scale(modelMatrixBidones2, glm::vec3(2.0, 2.0, 2.0));
-	modelBidones.render(modelMatrixBidones2);
+	//modelMatrixBidones2 = glm::mat4(1.0);
+	//modelMatrixBidones2 = glm::translate(modelMatrixBidones2, glm::vec3(-31.6, 0.2, -18.1));
+	//modelMatrixBidones2 = glm::scale(modelMatrixBidones2, glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones2.render(modelMatrixBidones2);
 
-	modelMatrixBidones3 = glm::mat4(1.0);
-	modelMatrixBidones3 = glm::translate(modelMatrixBidones3, glm::vec3(-28.7, 0.2, -15.0));
-	modelMatrixBidones3 = glm::scale(modelMatrixBidones3, glm::vec3(2.0, 2.0, 2.0));
-	modelBidones.render(modelMatrixBidones3);
+	//modelMatrixBidones3 = glm::mat4(1.0);
+	//modelMatrixBidones3 = glm::translate(modelMatrixBidones3, glm::vec3(-28.7, 0.2, -15.0));
+	//modelMatrixBidones3 = glm::scale(modelMatrixBidones3, glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones3.render(modelMatrixBidones3);
 
-	modelMatrixBidones4 = glm::mat4(1.0);
-	modelMatrixBidones4 = glm::translate(modelMatrixBidones4, glm::vec3(38.0, 0.2, -12.3));
-	modelMatrixBidones4 = glm::scale(modelMatrixBidones4, glm::vec3(2.0, 2.0, 2.0));
-	modelBidones.render(modelMatrixBidones4);
+	//modelMatrixBidones4 = glm::mat4(1.0);
+	//modelMatrixBidones4 = glm::translate(modelMatrixBidones4, glm::vec3(38.0, 0.2, -12.3));
+	//modelMatrixBidones4 = glm::scale(modelMatrixBidones4, glm::vec3(2.0, 2.0, 2.0));
+	//modelBidones4.render(modelMatrixBidones4);
 
 	//Caja1 (Cuadradas)
 	//modelCajaCuadrada.setPosition(glm::vec3(-7.0, 0.2, -20.0));
 	//modelCajaCuadrada.setScale(glm::vec3(2.0, 2.0, 2.0));
-	//Descomentar los modelos en el init
 	modelMatrixCajaCuadrada = glm::mat4(1.0);
 	modelMatrixCajaCuadrada = glm::translate(modelMatrixCajaCuadrada, glm::vec3(-60.3, 0.2, -17.3));
 	modelMatrixCajaCuadrada = glm::scale(modelMatrixCajaCuadrada, glm::vec3(2.0, 2.0, 2.0));
 	modelCajaCuadrada.render(modelMatrixCajaCuadrada);
 
-	modelMatrixCajaCuadrada2 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada2 = glm::translate(modelMatrixCajaCuadrada2, glm::vec3(-47, 0.2, -7.0));
-	modelMatrixCajaCuadrada2 = glm::scale(modelMatrixCajaCuadrada2, glm::vec3(2.0, 2.0, 2.0));
-	modelCajaCuadrada.render(modelMatrixCajaCuadrada2);
+	//modelMatrixCajaCuadrada2 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada2 = glm::translate(modelMatrixCajaCuadrada2, glm::vec3(-47, 0.2, -7.0));
+	//modelMatrixCajaCuadrada2 = glm::scale(modelMatrixCajaCuadrada2, glm::vec3(2.0, 2.0, 2.0));
+	//modelCajaCuadrada2.render(modelMatrixCajaCuadrada2);
 
-	modelCajaCuadrada.setOrientation(glm::vec3(0.0, 30.0, 0.0));
-	modelMatrixCajaCuadrada3 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada3 = glm::translate(modelMatrixCajaCuadrada3, glm::vec3(-17.0, 0.2, -6.25));
-	modelMatrixCajaCuadrada3 = glm::scale(modelMatrixCajaCuadrada3, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaCuadrada3 = glm::rotate(modelMatrixCajaCuadrada3, glm::radians(30.0f), glm::vec3(0, 1, 0));
-	modelCajaCuadrada.render(modelMatrixCajaCuadrada3);
+	//modelCajaCuadrada3.setOrientation(glm::vec3(0.0, 30.0, 0.0));
+	//modelMatrixCajaCuadrada3 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada3 = glm::translate(modelMatrixCajaCuadrada3, glm::vec3(-17.0, 0.2, -6.25));
+	//modelMatrixCajaCuadrada3 = glm::scale(modelMatrixCajaCuadrada3, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaCuadrada3 = glm::rotate(modelMatrixCajaCuadrada3, glm::radians(30.0f), glm::vec3(0, 1, 0));
+	//modelCajaCuadrada3.render(modelMatrixCajaCuadrada3);
 
-	modelCajaCuadrada.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaCuadrada4 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada4 = glm::translate(modelMatrixCajaCuadrada4, glm::vec3(-12.3, 0.2, -6.2));
-	modelMatrixCajaCuadrada4 = glm::scale(modelMatrixCajaCuadrada4, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaCuadrada4 = glm::rotate(modelMatrixCajaCuadrada4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaCuadrada.render(modelMatrixCajaCuadrada4);
+	//modelCajaCuadrada4.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaCuadrada4 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada4 = glm::translate(modelMatrixCajaCuadrada4, glm::vec3(-12.3, 0.2, -6.2));
+	//modelMatrixCajaCuadrada4 = glm::scale(modelMatrixCajaCuadrada4, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaCuadrada4 = glm::rotate(modelMatrixCajaCuadrada4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaCuadrada4.render(modelMatrixCajaCuadrada4);
 
-	modelCajaCuadrada.setOrientation(glm::vec3(0.0, 30.0, 0.0));
-	modelMatrixCajaCuadrada5 = glm::mat4(1.0);
-	modelMatrixCajaCuadrada5 = glm::translate(modelMatrixCajaCuadrada5, glm::vec3(17.0, 0.2, -25.5));
-	modelMatrixCajaCuadrada5 = glm::scale(modelMatrixCajaCuadrada5, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaCuadrada5 = glm::rotate(modelMatrixCajaCuadrada5, glm::radians(30.0f), glm::vec3(0, 1, 0));
-	modelCajaCuadrada.render(modelMatrixCajaCuadrada5);
+	//modelCajaCuadrada5.setOrientation(glm::vec3(0.0, 30.0, 0.0));
+	//modelMatrixCajaCuadrada5 = glm::mat4(1.0);
+	//modelMatrixCajaCuadrada5 = glm::translate(modelMatrixCajaCuadrada5, glm::vec3(17.0, 0.2, -25.5));
+	//modelMatrixCajaCuadrada5 = glm::scale(modelMatrixCajaCuadrada5, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaCuadrada5 = glm::rotate(modelMatrixCajaCuadrada5, glm::radians(30.0f), glm::vec3(0, 1, 0));
+	//modelCajaCuadrada5.render(modelMatrixCajaCuadrada5);
 
 	//Caja2 (Low Poly)
 
 	//modelCajaLowPoly.setPosition(glm::vec3(0.0, 0.2, -20.0));
 	//modelCajaLowPoly.setScale(glm::vec3(2.0, 1.5, 2.0));
-	//Descomentar los modelos en el init
 	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
 	modelMatrixCajaLowPoly = glm::mat4(1.0);
 	modelMatrixCajaLowPoly = glm::translate(modelMatrixCajaLowPoly, glm::vec3(-42.0, 0.2, -7.0));
@@ -4135,40 +4108,40 @@ void renderScene2(bool renderParticles) {
 	modelMatrixCajaLowPoly = glm::rotate(modelMatrixCajaLowPoly, glm::radians(-30.0f), glm::vec3(0, 1, 0));
 	modelCajaLowPoly.render(modelMatrixCajaLowPoly);
 
-	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly2 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly2 = glm::translate(modelMatrixCajaLowPoly2, glm::vec3(-18.0, 0.2, -23.0));
-	modelMatrixCajaLowPoly2 = glm::scale(modelMatrixCajaLowPoly2, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly2 = glm::rotate(modelMatrixCajaLowPoly2, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly.render(modelMatrixCajaLowPoly2);
+	//modelCajaLowPoly2.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly2 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly2 = glm::translate(modelMatrixCajaLowPoly2, glm::vec3(-18.0, 0.2, -23.0));
+	//modelMatrixCajaLowPoly2 = glm::scale(modelMatrixCajaLowPoly2, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly2 = glm::rotate(modelMatrixCajaLowPoly2, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly2.render(modelMatrixCajaLowPoly2);
 
-	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly3 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly3 = glm::translate(modelMatrixCajaLowPoly3, glm::vec3(-22.6, 0.2, -28.9));
-	modelMatrixCajaLowPoly3 = glm::scale(modelMatrixCajaLowPoly3, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly3 = glm::rotate(modelMatrixCajaLowPoly3, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly.render(modelMatrixCajaLowPoly3);
+	//modelCajaLowPoly3.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly3 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly3 = glm::translate(modelMatrixCajaLowPoly3, glm::vec3(-22.6, 0.2, -28.9));
+	//modelMatrixCajaLowPoly3 = glm::scale(modelMatrixCajaLowPoly3, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly3 = glm::rotate(modelMatrixCajaLowPoly3, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly3.render(modelMatrixCajaLowPoly3);
 
-	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly4 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly4 = glm::translate(modelMatrixCajaLowPoly4, glm::vec3(-23.6, 0.2, -34.2));
-	modelMatrixCajaLowPoly4 = glm::scale(modelMatrixCajaLowPoly4, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly4 = glm::rotate(modelMatrixCajaLowPoly4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly.render(modelMatrixCajaLowPoly4);
+	//modelCajaLowPoly4.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly4 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly4 = glm::translate(modelMatrixCajaLowPoly4, glm::vec3(-23.6, 0.2, -34.2));
+	//modelMatrixCajaLowPoly4 = glm::scale(modelMatrixCajaLowPoly4, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly4 = glm::rotate(modelMatrixCajaLowPoly4, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly4.render(modelMatrixCajaLowPoly4);
 
-	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly5 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly5 = glm::translate(modelMatrixCajaLowPoly5, glm::vec3(12.3, 0.2, -20.5));
-	modelMatrixCajaLowPoly5 = glm::scale(modelMatrixCajaLowPoly5, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly5 = glm::rotate(modelMatrixCajaLowPoly5, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly.render(modelMatrixCajaLowPoly5);
+	//modelCajaLowPoly5.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly5 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly5 = glm::translate(modelMatrixCajaLowPoly5, glm::vec3(12.3, 0.2, -20.5));
+	//modelMatrixCajaLowPoly5 = glm::scale(modelMatrixCajaLowPoly5, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly5 = glm::rotate(modelMatrixCajaLowPoly5, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly5.render(modelMatrixCajaLowPoly5);
 
-	modelCajaLowPoly.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixCajaLowPoly6 = glm::mat4(1.0);
-	modelMatrixCajaLowPoly6 = glm::translate(modelMatrixCajaLowPoly6, glm::vec3(50.6, 0.2, -34.5));
-	modelMatrixCajaLowPoly6 = glm::scale(modelMatrixCajaLowPoly6, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixCajaLowPoly6 = glm::rotate(modelMatrixCajaLowPoly6, glm::radians(-30.0f), glm::vec3(0, 1, 0));
-	modelCajaLowPoly.render(modelMatrixCajaLowPoly6);
+	//modelCajaLowPoly6.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixCajaLowPoly6 = glm::mat4(1.0);
+	//modelMatrixCajaLowPoly6 = glm::translate(modelMatrixCajaLowPoly6, glm::vec3(50.6, 0.2, -34.5));
+	//modelMatrixCajaLowPoly6 = glm::scale(modelMatrixCajaLowPoly6, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixCajaLowPoly6 = glm::rotate(modelMatrixCajaLowPoly6, glm::radians(-30.0f), glm::vec3(0, 1, 0));
+	//modelCajaLowPoly5.render(modelMatrixCajaLowPoly6);
 
 	//Compus
 	modelCompu.setPosition(glm::vec3(17.0, 2.8, -25.5));
@@ -4176,10 +4149,10 @@ void renderScene2(bool renderParticles) {
 	modelCompu.setOrientation(glm::vec3(0.0, -90.0, 0.0));
 	modelCompu.render();
 
-	modelCompu.setPosition(glm::vec3(-17.77, 3.3, -22.65));
-	modelCompu.setScale(glm::vec3(2.0, 2.0, 2.0));
-	modelCompu.setOrientation(glm::vec3(0.0, -90.0, 0.0));
-	modelCompu.render();
+	//modelCompu2.setPosition(glm::vec3(-17.77, 3.3, -22.65));
+	//modelCompu2.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelCompu2.setOrientation(glm::vec3(0.0, -90.0, 0.0));
+	//modelCompu2.render();
 
 	//Cuerpos
 	modelCuerpo.setPosition(glm::vec3(-31.71, 0.0, -15.03));
@@ -4187,15 +4160,15 @@ void renderScene2(bool renderParticles) {
 	modelCuerpo.setOrientation(glm::vec3(0.0, -90.0, 0.0));
 	modelCuerpo.render();
 
-	modelCuerpo.setPosition(glm::vec3(50.58, 3.3, -34.5));
-	modelCuerpo.setScale(glm::vec3(2.0, 2.0, 2.0));
-	modelCuerpo.setOrientation(glm::vec3(0.0, -45.0, 0.0));
-	modelCuerpo.render();
+	//modelCuerpo2.setPosition(glm::vec3(50.58, 3.3, -34.5));
+	//modelCuerpo2.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelCuerpo2.setOrientation(glm::vec3(0.0, -45.0, 0.0));
+	//modelCuerpo2.render();
 
-	modelCuerpo.setPosition(glm::vec3(-21.0, 0.0, -25.0));
-	modelCuerpo.setScale(glm::vec3(2.0, 2.0, 2.0));
-	modelCuerpo.setOrientation(glm::vec3(0.0, -45.0, 0.0));
-	modelCuerpo.render();
+	//modelCuerpo3.setPosition(glm::vec3(-21.0, 0.0, -25.0));
+	//modelCuerpo3.setScale(glm::vec3(2.0, 2.0, 2.0));
+	//modelCuerpo3.setOrientation(glm::vec3(0.0, -45.0, 0.0));
+	//modelCuerpo3.render();
 
 	//Estanteria
 	//modelEstanteria.setPosition(glm::vec3(15.0, 1.0, -20.0));
@@ -4207,12 +4180,12 @@ void renderScene2(bool renderParticles) {
 	modelMatrixEstanteria1 = glm::rotate(modelMatrixEstanteria1, glm::radians(30.0f), glm::vec3(0, 1, 0));
 	modelEstanteria.render(modelMatrixEstanteria1);
 
-	modelEstanteria.setOrientation(glm::vec3(0.0, -30.0, 0.0));
-	modelMatrixEstanteria2 = glm::mat4(1.0);
-	modelMatrixEstanteria2 = glm::translate(modelMatrixEstanteria2, glm::vec3(-7.03, 0.2, -7.22));
-	modelMatrixEstanteria2 = glm::scale(modelMatrixEstanteria2, glm::vec3(2.0, 2.0, 2.0));
-	modelMatrixEstanteria2 = glm::rotate(modelMatrixEstanteria2, glm::radians(-45.0f), glm::vec3(0, 1, 0));
-	modelEstanteria.render(modelMatrixEstanteria2);
+	//modelEstanteria2.setOrientation(glm::vec3(0.0, -30.0, 0.0));
+	//modelMatrixEstanteria2 = glm::mat4(1.0);
+	//modelMatrixEstanteria2 = glm::translate(modelMatrixEstanteria2, glm::vec3(-7.03, 0.2, -7.22));
+	//modelMatrixEstanteria2 = glm::scale(modelMatrixEstanteria2, glm::vec3(2.0, 2.0, 2.0));
+	//modelMatrixEstanteria2 = glm::rotate(modelMatrixEstanteria2, glm::radians(-45.0f), glm::vec3(0, 1, 0));
+	//modelEstanteria2.render(modelMatrixEstanteria2);
 
 	//Marco puerta
 	modelMarcoPuerta.render(modelMatrixMarcoPuerta);
@@ -4426,7 +4399,7 @@ void collidersManagmentEs2() {
 	astroProtaCollider.e = astroProta.getObb().e
 		* glm::vec3(1.5, 4.0, 1.4);
 	astroProtaCollider.c = glm::vec3(modelmatrixColliderAstroProta[3]);
-	addOrUpdateColliders(collidersOBB2, "astroProta", astroProtaCollider,
+	addOrUpdateColliders(collidersOBB2, "astroProta2", astroProtaCollider,
 		modelMatrixAstroProta);
 
 	//Collider de actionAstroProta
@@ -4524,261 +4497,261 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "muroIzquierdo2", muroIzquierdoCollider,
 		modelMatrixMuroIzquierdo2);
 
-	//Collider Estanteria
-	AbstractModel::OBB modelEstanteriaCollider1;
-	glm::mat4 modelMatrixEstanteriaCollider1 = glm::mat4(modelMatrixEstanteria1);
-	// Set the orientation of collider before doing the scale
-	modelEstanteriaCollider1.u = glm::quat_cast(modelMatrixEstanteriaCollider1);
-	modelMatrixEstanteriaCollider1 = glm::translate(modelMatrixEstanteriaCollider1,
-		glm::vec3(modelEstanteria.getObb().c.x,
-			modelEstanteria.getObb().c.y,
-			modelEstanteria.getObb().c.z));
-	modelEstanteriaCollider1.e = modelEstanteria.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelEstanteriaCollider1.c = glm::vec3(modelMatrixEstanteriaCollider1[3]);
-	addOrUpdateColliders(collidersOBB2, "Estanteria1", modelEstanteriaCollider1,
-		modelMatrixEstanteriaCollider1);
+	////Collider Estanteria
+	//AbstractModel::OBB modelEstanteriaCollider1;
+	//glm::mat4 modelMatrixEstanteriaCollider1 = glm::mat4(modelMatrixEstanteria1);
+	//// Set the orientation of collider before doing the scale
+	//modelEstanteriaCollider1.u = glm::quat_cast(modelMatrixEstanteriaCollider1);
+	//modelMatrixEstanteriaCollider1 = glm::translate(modelMatrixEstanteriaCollider1,
+	//	glm::vec3(modelEstanteria.getObb().c.x,
+	//		modelEstanteria.getObb().c.y,
+	//		modelEstanteria.getObb().c.z));
+	//modelEstanteriaCollider1.e = modelEstanteria.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelEstanteriaCollider1.c = glm::vec3(modelMatrixEstanteriaCollider1[3]);
+	//addOrUpdateColliders(collidersOBB2, "Estanteria1", modelEstanteriaCollider1,
+	//	modelMatrixEstanteriaCollider1);
 
-	//Collider Estanteria2
-	AbstractModel::OBB modelEstanteriaCollider2;
-	glm::mat4 modelMatrixEstanteriaCollider2 = glm::mat4(modelMatrixEstanteria2);
-	// Set the orientation of collider before doing the scale
-	modelEstanteriaCollider2.u = glm::quat_cast(modelMatrixEstanteriaCollider2);
-	modelMatrixEstanteriaCollider2 = glm::translate(modelMatrixEstanteriaCollider2,
-		glm::vec3(modelEstanteria.getObb().c.x,
-			modelEstanteria.getObb().c.y,
-			modelEstanteria.getObb().c.z));
-	modelEstanteriaCollider2.e = modelEstanteria.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelEstanteriaCollider2.c = glm::vec3(modelMatrixEstanteriaCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "Estanteria2", modelEstanteriaCollider2,
-		modelMatrixEstanteriaCollider2);
+	////Collider Estanteria2
+	//AbstractModel::OBB modelEstanteriaCollider2;
+	//glm::mat4 modelMatrixEstanteriaCollider2 = glm::mat4(modelMatrixEstanteria2);
+	//// Set the orientation of collider before doing the scale
+	//modelEstanteriaCollider2.u = glm::quat_cast(modelMatrixEstanteriaCollider2);
+	//modelMatrixEstanteriaCollider2 = glm::translate(modelMatrixEstanteriaCollider2,
+	//	glm::vec3(modelEstanteria2.getObb().c.x,
+	//		modelEstanteria2.getObb().c.y,
+	//		modelEstanteria2.getObb().c.z));
+	//modelEstanteriaCollider2.e = modelEstanteria2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelEstanteriaCollider2.c = glm::vec3(modelMatrixEstanteriaCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "Estanteria2", modelEstanteriaCollider2,
+	//	modelMatrixEstanteriaCollider2);
 
-	//Collider modelCajaCuadrada
-	AbstractModel::OBB modelCajaCuadradaCollider;
-	glm::mat4 modelMatrixCajaCuadradaCollider = glm::mat4(modelMatrixCajaCuadrada);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider.u = glm::quat_cast(modelMatrixCajaCuadradaCollider);
-	modelMatrixCajaCuadradaCollider = glm::translate(modelMatrixCajaCuadradaCollider,
-		glm::vec3(modelCajaCuadrada.getObb().c.x,
-			modelCajaCuadrada.getObb().c.y,
-			modelCajaCuadrada.getObb().c.z));
-	modelCajaCuadradaCollider.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(1.0, 1.0, 1.0);
-	modelCajaCuadradaCollider.c = glm::vec3(modelMatrixCajaCuadradaCollider[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada1", modelCajaCuadradaCollider,
-		modelMatrixCajaCuadradaCollider);
+	////Collider modelCajaCuadrada
+	//AbstractModel::OBB modelCajaCuadradaCollider;
+	//glm::mat4 modelMatrixCajaCuadradaCollider = glm::mat4(modelMatrixCajaCuadrada);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider.u = glm::quat_cast(modelMatrixCajaCuadradaCollider);
+	//modelMatrixCajaCuadradaCollider = glm::translate(modelMatrixCajaCuadradaCollider,
+	//	glm::vec3(modelCajaCuadrada.getObb().c.x,
+	//		modelCajaCuadrada.getObb().c.y,
+	//		modelCajaCuadrada.getObb().c.z));
+	//modelCajaCuadradaCollider.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(1.0, 1.0, 1.0);
+	//modelCajaCuadradaCollider.c = glm::vec3(modelMatrixCajaCuadradaCollider[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada1", modelCajaCuadradaCollider,
+	//	modelMatrixCajaCuadradaCollider);
 
-	//Collider modelCajaCuadrada2
-	AbstractModel::OBB modelCajaCuadradaCollider2;
-	glm::mat4 modelMatrixCajaCuadradaCollider2 = glm::mat4(modelMatrixCajaCuadrada2);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider2.u = glm::quat_cast(modelMatrixCajaCuadradaCollider2);
-	modelMatrixCajaCuadradaCollider2 = glm::translate(modelMatrixCajaCuadradaCollider2,
-		glm::vec3(modelCajaCuadrada.getObb().c.x,
-			modelCajaCuadrada.getObb().c.y,
-			modelCajaCuadrada.getObb().c.z));
-	modelCajaCuadradaCollider2.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(1.0, 1.0, 1.0);
-	modelCajaCuadradaCollider2.c = glm::vec3(modelMatrixCajaCuadradaCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada2", modelCajaCuadradaCollider2,
-		modelMatrixCajaCuadradaCollider2);
+	////Collider modelCajaCuadrada2
+	//AbstractModel::OBB modelCajaCuadradaCollider2;
+	//glm::mat4 modelMatrixCajaCuadradaCollider2 = glm::mat4(modelMatrixCajaCuadrada2);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider2.u = glm::quat_cast(modelMatrixCajaCuadradaCollider2);
+	//modelMatrixCajaCuadradaCollider2 = glm::translate(modelMatrixCajaCuadradaCollider2,
+	//	glm::vec3(modelCajaCuadrada2.getObb().c.x,
+	//		modelCajaCuadrada2.getObb().c.y,
+	//		modelCajaCuadrada2.getObb().c.z));
+	//modelCajaCuadradaCollider2.e = modelCajaCuadrada2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(1.0, 1.0, 1.0);
+	//modelCajaCuadradaCollider2.c = glm::vec3(modelMatrixCajaCuadradaCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada2", modelCajaCuadradaCollider2,
+	//	modelMatrixCajaCuadradaCollider2);
 
-	//Collider modelCajaCuadrada3
-	AbstractModel::OBB modelCajaCuadradaCollider3;
-	glm::mat4 modelMatrixCajaCuadradaCollider3 = glm::mat4(modelMatrixCajaCuadrada3);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider3.u = glm::quat_cast(modelMatrixCajaCuadradaCollider3);
-	modelMatrixCajaCuadradaCollider3 = glm::translate(modelMatrixCajaCuadradaCollider3,
-		glm::vec3(modelCajaCuadrada.getObb().c.x,
-			modelCajaCuadrada.getObb().c.y,
-			modelCajaCuadrada.getObb().c.z));
-	modelCajaCuadradaCollider3.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaCuadradaCollider3.c = glm::vec3(modelMatrixCajaCuadradaCollider3[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada3", modelCajaCuadradaCollider3,
-		modelMatrixCajaCuadradaCollider3);
+	////Collider modelCajaCuadrada3
+	//AbstractModel::OBB modelCajaCuadradaCollider3;
+	//glm::mat4 modelMatrixCajaCuadradaCollider3 = glm::mat4(modelMatrixCajaCuadrada3);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider3.u = glm::quat_cast(modelMatrixCajaCuadradaCollider3);
+	//modelMatrixCajaCuadradaCollider3 = glm::translate(modelMatrixCajaCuadradaCollider3,
+	//	glm::vec3(modelCajaCuadrada3.getObb().c.x,
+	//		modelCajaCuadrada3.getObb().c.y,
+	//		modelCajaCuadrada3.getObb().c.z));
+	//modelCajaCuadradaCollider3.e = modelCajaCuadrada3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaCuadradaCollider3.c = glm::vec3(modelMatrixCajaCuadradaCollider3[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada3", modelCajaCuadradaCollider3,
+	//	modelMatrixCajaCuadradaCollider3);
 
-	//Collider modelCajaCuadrada4
-	AbstractModel::OBB modelCajaCuadradaCollider4;
-	glm::mat4 modelMatrixCajaCuadradaCollider4 = glm::mat4(modelMatrixCajaCuadrada4);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider4.u = glm::quat_cast(modelMatrixCajaCuadradaCollider4);
-	modelMatrixCajaCuadradaCollider4 = glm::translate(modelMatrixCajaCuadradaCollider4,
-		glm::vec3(modelCajaCuadrada.getObb().c.x,
-			modelCajaCuadrada.getObb().c.y,
-			modelCajaCuadrada.getObb().c.z));
-	modelCajaCuadradaCollider4.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaCuadradaCollider4.c = glm::vec3(modelMatrixCajaCuadradaCollider4[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada4", modelCajaCuadradaCollider4,
-		modelMatrixCajaCuadradaCollider4);
+	////Collider modelCajaCuadrada4
+	//AbstractModel::OBB modelCajaCuadradaCollider4;
+	//glm::mat4 modelMatrixCajaCuadradaCollider4 = glm::mat4(modelMatrixCajaCuadrada4);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider4.u = glm::quat_cast(modelMatrixCajaCuadradaCollider4);
+	//modelMatrixCajaCuadradaCollider4 = glm::translate(modelMatrixCajaCuadradaCollider4,
+	//	glm::vec3(modelCajaCuadrada4.getObb().c.x,
+	//		modelCajaCuadrada4.getObb().c.y,
+	//		modelCajaCuadrada4.getObb().c.z));
+	//modelCajaCuadradaCollider4.e = modelCajaCuadrada4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaCuadradaCollider4.c = glm::vec3(modelMatrixCajaCuadradaCollider4[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada4", modelCajaCuadradaCollider4,
+	//	modelMatrixCajaCuadradaCollider4);
 
 
-	//Collider modelCajaCuadrada5
-	AbstractModel::OBB modelCajaCuadradaCollider5;
-	glm::mat4 modelMatrixCajaCuadradaCollider5 = glm::mat4(modelMatrixCajaCuadrada5);
-	// Set the orientation of collider before doing the scale
-	modelCajaCuadradaCollider5.u = glm::quat_cast(modelMatrixCajaCuadradaCollider5);
-	modelMatrixCajaCuadradaCollider5 = glm::translate(modelMatrixCajaCuadradaCollider5,
-		glm::vec3(modelCajaCuadrada.getObb().c.x,
-			modelCajaCuadrada.getObb().c.y,
-			modelCajaCuadrada.getObb().c.z));
-	modelCajaCuadradaCollider5.e = modelCajaCuadrada.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaCuadradaCollider5.c = glm::vec3(modelMatrixCajaCuadradaCollider5[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaCuadrada5", modelCajaCuadradaCollider5,
-		modelMatrixCajaCuadradaCollider5);
+	////Collider modelCajaCuadrada5
+	//AbstractModel::OBB modelCajaCuadradaCollider5;
+	//glm::mat4 modelMatrixCajaCuadradaCollider5 = glm::mat4(modelMatrixCajaCuadrada5);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaCuadradaCollider5.u = glm::quat_cast(modelMatrixCajaCuadradaCollider5);
+	//modelMatrixCajaCuadradaCollider5 = glm::translate(modelMatrixCajaCuadradaCollider5,
+	//	glm::vec3(modelCajaCuadrada5.getObb().c.x,
+	//		modelCajaCuadrada5.getObb().c.y,
+	//		modelCajaCuadrada5.getObb().c.z));
+	//modelCajaCuadradaCollider5.e = modelCajaCuadrada5.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaCuadradaCollider5.c = glm::vec3(modelMatrixCajaCuadradaCollider5[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaCuadrada5", modelCajaCuadradaCollider5,
+	//	modelMatrixCajaCuadradaCollider5);
 
-	//Collider modelCajaLowPoly
-	AbstractModel::OBB modelCajaLowPolyCollider;
-	glm::mat4 modelMatrixCajaLowPolyCollider = glm::mat4(modelMatrixCajaLowPoly);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider.u = glm::quat_cast(modelMatrixCajaLowPolyCollider);
-	modelMatrixCajaLowPolyCollider = glm::translate(modelMatrixCajaLowPolyCollider,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider.c = glm::vec3(modelMatrixCajaLowPolyCollider[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly1", modelCajaLowPolyCollider,
-		modelMatrixCajaLowPolyCollider);
+	////Collider modelCajaLowPoly
+	//AbstractModel::OBB modelCajaLowPolyCollider;
+	//glm::mat4 modelMatrixCajaLowPolyCollider = glm::mat4(modelMatrixCajaLowPoly);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider.u = glm::quat_cast(modelMatrixCajaLowPolyCollider);
+	//modelMatrixCajaLowPolyCollider = glm::translate(modelMatrixCajaLowPolyCollider,
+	//	glm::vec3(modelCajaLowPoly.getObb().c.x,
+	//		modelCajaLowPoly.getObb().c.y,
+	//		modelCajaLowPoly.getObb().c.z));
+	//modelCajaLowPolyCollider.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider.c = glm::vec3(modelMatrixCajaLowPolyCollider[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly1", modelCajaLowPolyCollider,
+	//	modelMatrixCajaLowPolyCollider);
 
-	//Collider modelCajaLowPoly2
-	AbstractModel::OBB modelCajaLowPolyCollider2;
-	glm::mat4 modelMatrixCajaLowPolyCollider2 = glm::mat4(modelMatrixCajaLowPoly2);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider2.u = glm::quat_cast(modelMatrixCajaLowPolyCollider2);
-	modelMatrixCajaLowPolyCollider2 = glm::translate(modelMatrixCajaLowPolyCollider2,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider2.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider2.c = glm::vec3(modelMatrixCajaLowPolyCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly2", modelCajaLowPolyCollider2,
-		modelMatrixCajaLowPolyCollider2);
+	////Collider modelCajaLowPoly2
+	//AbstractModel::OBB modelCajaLowPolyCollider2;
+	//glm::mat4 modelMatrixCajaLowPolyCollider2 = glm::mat4(modelMatrixCajaLowPoly2);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider2.u = glm::quat_cast(modelMatrixCajaLowPolyCollider2);
+	//modelMatrixCajaLowPolyCollider2 = glm::translate(modelMatrixCajaLowPolyCollider2,
+	//	glm::vec3(modelCajaLowPoly2.getObb().c.x,
+	//		modelCajaLowPoly2.getObb().c.y,
+	//		modelCajaLowPoly2.getObb().c.z));
+	//modelCajaLowPolyCollider2.e = modelCajaLowPoly2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider2.c = glm::vec3(modelMatrixCajaLowPolyCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly2", modelCajaLowPolyCollider2,
+	//	modelMatrixCajaLowPolyCollider2);
 
-	//Collider modelCajaLowPoly3
-	AbstractModel::OBB modelCajaLowPolyCollider3;
-	glm::mat4 modelMatrixCajaLowPolyCollider3 = glm::mat4(modelMatrixCajaLowPoly3);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider3.u = glm::quat_cast(modelMatrixCajaLowPolyCollider3);
-	modelMatrixCajaLowPolyCollider3 = glm::translate(modelMatrixCajaLowPolyCollider3,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider3.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider3.c = glm::vec3(modelMatrixCajaLowPolyCollider3[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly3", modelCajaLowPolyCollider3,
-		modelMatrixCajaLowPolyCollider3);
+	////Collider modelCajaLowPoly3
+	//AbstractModel::OBB modelCajaLowPolyCollider3;
+	//glm::mat4 modelMatrixCajaLowPolyCollider3 = glm::mat4(modelMatrixCajaLowPoly3);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider3.u = glm::quat_cast(modelMatrixCajaLowPolyCollider3);
+	//modelMatrixCajaLowPolyCollider3 = glm::translate(modelMatrixCajaLowPolyCollider3,
+	//	glm::vec3(modelCajaLowPoly3.getObb().c.x,
+	//		modelCajaLowPoly3.getObb().c.y,
+	//		modelCajaLowPoly3.getObb().c.z));
+	//modelCajaLowPolyCollider3.e = modelCajaLowPoly3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider3.c = glm::vec3(modelMatrixCajaLowPolyCollider3[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly3", modelCajaLowPolyCollider3,
+	//	modelMatrixCajaLowPolyCollider3);
 
-	//Collider modelCajaLowPoly4
-	AbstractModel::OBB modelCajaLowPolyCollider4;
-	glm::mat4 modelMatrixCajaLowPolyCollider4 = glm::mat4(modelMatrixCajaLowPoly4);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider4.u = glm::quat_cast(modelMatrixCajaLowPolyCollider4);
-	modelMatrixCajaLowPolyCollider4 = glm::translate(modelMatrixCajaLowPolyCollider4,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider4.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider4.c = glm::vec3(modelMatrixCajaLowPolyCollider4[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly4", modelCajaLowPolyCollider4,
-		modelMatrixCajaLowPolyCollider4);
+	////Collider modelCajaLowPoly4
+	//AbstractModel::OBB modelCajaLowPolyCollider4;
+	//glm::mat4 modelMatrixCajaLowPolyCollider4 = glm::mat4(modelMatrixCajaLowPoly4);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider4.u = glm::quat_cast(modelMatrixCajaLowPolyCollider4);
+	//modelMatrixCajaLowPolyCollider4 = glm::translate(modelMatrixCajaLowPolyCollider4,
+	//	glm::vec3(modelCajaLowPoly4.getObb().c.x,
+	//		modelCajaLowPoly4.getObb().c.y,
+	//		modelCajaLowPoly4.getObb().c.z));
+	//modelCajaLowPolyCollider4.e = modelCajaLowPoly4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider4.c = glm::vec3(modelMatrixCajaLowPolyCollider4[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly4", modelCajaLowPolyCollider4,
+	//	modelMatrixCajaLowPolyCollider4);
 
-	//Collider modelCajaLowPoly5
-	AbstractModel::OBB modelCajaLowPolyCollider5;
-	glm::mat4 modelMatrixCajaLowPolyCollider5 = glm::mat4(modelMatrixCajaLowPoly5);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider5.u = glm::quat_cast(modelMatrixCajaLowPolyCollider5);
-	modelMatrixCajaLowPolyCollider5 = glm::translate(modelMatrixCajaLowPolyCollider5,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider5.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider5.c = glm::vec3(modelMatrixCajaLowPolyCollider5[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly5", modelCajaLowPolyCollider5,
-		modelMatrixCajaLowPolyCollider5);
+	////Collider modelCajaLowPoly5
+	//AbstractModel::OBB modelCajaLowPolyCollider5;
+	//glm::mat4 modelMatrixCajaLowPolyCollider5 = glm::mat4(modelMatrixCajaLowPoly5);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider5.u = glm::quat_cast(modelMatrixCajaLowPolyCollider5);
+	//modelMatrixCajaLowPolyCollider5 = glm::translate(modelMatrixCajaLowPolyCollider5,
+	//	glm::vec3(modelCajaLowPoly5.getObb().c.x,
+	//		modelCajaLowPoly5.getObb().c.y,
+	//		modelCajaLowPoly5.getObb().c.z));
+	//modelCajaLowPolyCollider5.e = modelCajaLowPoly5.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider5.c = glm::vec3(modelMatrixCajaLowPolyCollider5[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly5", modelCajaLowPolyCollider5,
+	//	modelMatrixCajaLowPolyCollider5);
 
-	//Collider modelCajaLowPoly6
-	AbstractModel::OBB modelCajaLowPolyCollider6;
-	glm::mat4 modelMatrixCajaLowPolyCollider6 = glm::mat4(modelMatrixCajaLowPoly6);
-	// Set the orientation of collider before doing the scale
-	modelCajaLowPolyCollider6.u = glm::quat_cast(modelMatrixCajaLowPolyCollider6);
-	modelMatrixCajaLowPolyCollider6 = glm::translate(modelMatrixCajaLowPolyCollider6,
-		glm::vec3(modelCajaLowPoly.getObb().c.x,
-			modelCajaLowPoly.getObb().c.y,
-			modelCajaLowPoly.getObb().c.z));
-	modelCajaLowPolyCollider6.e = modelCajaLowPoly.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelCajaLowPolyCollider6.c = glm::vec3(modelMatrixCajaLowPolyCollider6[3]);
-	addOrUpdateColliders(collidersOBB2, "cajaLowPoly6", modelCajaLowPolyCollider6,
-		modelMatrixCajaLowPolyCollider6);
+	////Collider modelCajaLowPoly6
+	//AbstractModel::OBB modelCajaLowPolyCollider6;
+	//glm::mat4 modelMatrixCajaLowPolyCollider6 = glm::mat4(modelMatrixCajaLowPoly6);
+	//// Set the orientation of collider before doing the scale
+	//modelCajaLowPolyCollider6.u = glm::quat_cast(modelMatrixCajaLowPolyCollider6);
+	//modelMatrixCajaLowPolyCollider6 = glm::translate(modelMatrixCajaLowPolyCollider6,
+	//	glm::vec3(modelCajaLowPoly6.getObb().c.x,
+	//		modelCajaLowPoly6.getObb().c.y,
+	//		modelCajaLowPoly6.getObb().c.z));
+	//modelCajaLowPolyCollider6.e = modelCajaLowPoly6.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelCajaLowPolyCollider6.c = glm::vec3(modelMatrixCajaLowPolyCollider6[3]);
+	//addOrUpdateColliders(collidersOBB2, "cajaLowPoly6", modelCajaLowPolyCollider6,
+	//	modelMatrixCajaLowPolyCollider6);
 
-	//Collider modelBidones
-	AbstractModel::OBB modelBidonesCollider;
-	glm::mat4 modelMatrixBidonesCollider = glm::mat4(modelMatrixBidones);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider.u = glm::quat_cast(modelMatrixBidonesCollider);
-	modelMatrixBidonesCollider = glm::translate(modelMatrixBidonesCollider,
-		glm::vec3(modelBidones.getObb().c.x,
-			modelBidones.getObb().c.y,
-			modelBidones.getObb().c.z));
-	modelBidonesCollider.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider.c = glm::vec3(modelMatrixBidonesCollider[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones1", modelBidonesCollider,
-		modelMatrixBidonesCollider);
+	////Collider modelBidones
+	//AbstractModel::OBB modelBidonesCollider;
+	//glm::mat4 modelMatrixBidonesCollider = glm::mat4(modelMatrixBidones);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider.u = glm::quat_cast(modelMatrixBidonesCollider);
+	//modelMatrixBidonesCollider = glm::translate(modelMatrixBidonesCollider,
+	//	glm::vec3(modelBidones.getObb().c.x,
+	//		modelBidones.getObb().c.y,
+	//		modelBidones.getObb().c.z));
+	//modelBidonesCollider.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider.c = glm::vec3(modelMatrixBidonesCollider[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones1", modelBidonesCollider,
+	//	modelMatrixBidonesCollider);
 
-	//Collider modelBidones2
-	AbstractModel::OBB modelBidonesCollider2;
-	glm::mat4 modelMatrixBidonesCollider2 = glm::mat4(modelMatrixBidones2);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider2.u = glm::quat_cast(modelMatrixBidonesCollider2);
-	modelMatrixBidonesCollider2 = glm::translate(modelMatrixBidonesCollider2,
-		glm::vec3(modelBidones.getObb().c.x,
-			modelBidones.getObb().c.y,
-			modelBidones.getObb().c.z));
-	modelBidonesCollider2.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider2.c = glm::vec3(modelMatrixBidonesCollider2[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones2", modelBidonesCollider2,
-		modelMatrixBidonesCollider2);
+	////Collider modelBidones2
+	//AbstractModel::OBB modelBidonesCollider2;
+	//glm::mat4 modelMatrixBidonesCollider2 = glm::mat4(modelMatrixBidones2);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider2.u = glm::quat_cast(modelMatrixBidonesCollider2);
+	//modelMatrixBidonesCollider2 = glm::translate(modelMatrixBidonesCollider2,
+	//	glm::vec3(modelBidones2.getObb().c.x,
+	//		modelBidones2.getObb().c.y,
+	//		modelBidones2.getObb().c.z));
+	//modelBidonesCollider2.e = modelBidones2.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider2.c = glm::vec3(modelMatrixBidonesCollider2[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones2", modelBidonesCollider2,
+	//	modelMatrixBidonesCollider2);
 
-	//Collider modelBidones3
-	AbstractModel::OBB modelBidonesCollider3;
-	glm::mat4 modelMatrixBidonesCollider3 = glm::mat4(modelMatrixBidones3);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider3.u = glm::quat_cast(modelMatrixBidonesCollider3);
-	modelMatrixBidonesCollider3 = glm::translate(modelMatrixBidonesCollider3,
-		glm::vec3(modelBidones.getObb().c.x,
-			modelBidones.getObb().c.y,
-			modelBidones.getObb().c.z));
-	modelBidonesCollider3.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider3.c = glm::vec3(modelMatrixBidonesCollider3[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones3", modelBidonesCollider3,
-		modelMatrixBidonesCollider3);
+	////Collider modelBidones3
+	//AbstractModel::OBB modelBidonesCollider3;
+	//glm::mat4 modelMatrixBidonesCollider3 = glm::mat4(modelMatrixBidones3);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider3.u = glm::quat_cast(modelMatrixBidonesCollider3);
+	//modelMatrixBidonesCollider3 = glm::translate(modelMatrixBidonesCollider3,
+	//	glm::vec3(modelBidones3.getObb().c.x,
+	//		modelBidones3.getObb().c.y,
+	//		modelBidones3.getObb().c.z));
+	//modelBidonesCollider3.e = modelBidones3.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider3.c = glm::vec3(modelMatrixBidonesCollider3[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones3", modelBidonesCollider3,
+	//	modelMatrixBidonesCollider3);
 
-	//Collider modelBidones4
-	AbstractModel::OBB modelBidonesCollider4;
-	glm::mat4 modelMatrixBidonesCollider4 = glm::mat4(modelMatrixBidones4);
-	// Set the orientation of collider before doing the scale
-	modelBidonesCollider4.u = glm::quat_cast(modelMatrixBidonesCollider4);
-	modelMatrixBidonesCollider4 = glm::translate(modelMatrixBidonesCollider4,
-		glm::vec3(modelBidones.getObb().c.x,
-			modelBidones.getObb().c.y,
-			modelBidones.getObb().c.z));
-	modelBidonesCollider4.e = modelBidones.getObb().e * glm::vec3(2.0, 2.0, 2.0)
-		* glm::vec3(0.9, 0.9, 0.9);
-	modelBidonesCollider4.c = glm::vec3(modelMatrixBidonesCollider4[3]);
-	addOrUpdateColliders(collidersOBB2, "bidones4", modelBidonesCollider4,
-		modelMatrixBidonesCollider4);
+	////Collider modelBidones4
+	//AbstractModel::OBB modelBidonesCollider4;
+	//glm::mat4 modelMatrixBidonesCollider4 = glm::mat4(modelMatrixBidones4);
+	//// Set the orientation of collider before doing the scale
+	//modelBidonesCollider4.u = glm::quat_cast(modelMatrixBidonesCollider4);
+	//modelMatrixBidonesCollider4 = glm::translate(modelMatrixBidonesCollider4,
+	//	glm::vec3(modelBidones4.getObb().c.x,
+	//		modelBidones4.getObb().c.y,
+	//		modelBidones4.getObb().c.z));
+	//modelBidonesCollider4.e = modelBidones4.getObb().e * glm::vec3(2.0, 2.0, 2.0)
+	//	* glm::vec3(0.9, 0.9, 0.9);
+	//modelBidonesCollider4.c = glm::vec3(modelMatrixBidonesCollider4[3]);
+	//addOrUpdateColliders(collidersOBB2, "bidones4", modelBidonesCollider4,
+	//	modelMatrixBidonesCollider4);
 
 	//Render colliders
 	for (std::map<std::string,
@@ -4816,6 +4789,7 @@ void collidersManagmentEs2() {
 				{
 					/*std::cout << "Colision " << it->first << " with "
 						<< jt->first << std::endl;*/
+
 					if ((it->first.compare("mayow") == 0 || it->first.compare("astroProta") == 0)
 						&& (jt->first.compare("mayow") == 0 || jt->first.compare("astroProta") == 0))
 							isCollisionEnemy = true;
@@ -4863,8 +4837,8 @@ void collidersManagmentEs2() {
 			collidersOBB2.begin();
 		for (; jt != collidersOBB2.end(); jt++) {
 			if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
-				//std::cout << "Colision " << it->first << " with "
-				//	<< jt->first << std::endl;
+				std::cout << "Colision " << it->first << " with "
+					<< jt->first << std::endl;
 
 				isCollision = true;
 				addOrUpdateCollisionDetection(collisionDetection, jt->first,
@@ -4884,19 +4858,15 @@ void collidersManagmentEs2() {
 		std::map<std::string,
 			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt =
 			collidersOBB2.find(colIt->first);
-		/*std::cout << "Primero" << std::endl;*/
 		if (it != collidersSBB2.end()) {
-			/*std::cout << "Segundo " << std::endl;*/
 			if (!colIt->second)
 				addOrUpdateColliders(collidersSBB2, it->first);
 		}
 		if (jt != collidersOBB2.end()) {
-			/*std::cout << "Tercero " << std::endl;*/
 			if (!colIt->second) {
 				addOrUpdateColliders(collidersOBB2, jt->first);
 			}
 			else {
-				//std::cout << "Cuarto " << jt->first << std::endl;
 				if (jt->first.compare("mayow") == 0) {
 					if (isCollisionEnemy == true) {
 						enemigo1.respawn = true;
@@ -4906,7 +4876,6 @@ void collidersManagmentEs2() {
 					}
 				}
 				if (jt->first.compare("astroProta") == 0) {
-					/*std::cout << "Entra astroProta " << std::endl;*/
 					modelMatrixAstroProta = std::get<1>(jt->second);
 				}
 			}
@@ -4916,79 +4885,41 @@ void collidersManagmentEs2() {
 }
 
 void soundEscene2() {
-	/****************************+
-		 * Open AL sound data
-		 */
-		 // Listener for the Thris person camera
-	listenerPos[0] = modelMatrixMayow[3].x;
-	listenerPos[1] = modelMatrixMayow[3].y;
-	listenerPos[2] = modelMatrixMayow[3].z;
-	alListenerfv(AL_POSITION, listenerPos);
-
-	glm::vec3 upModel = glm::normalize(modelMatrixMayow[1]);
-	glm::vec3 frontModel = glm::normalize(modelMatrixMayow[2]);
-
-	listenerOri[0] = frontModel.x;
-	listenerOri[1] = frontModel.y;
-	listenerOri[2] = frontModel.z;
-	listenerOri[3] = upModel.x;
-	listenerOri[4] = upModel.y;
-	listenerOri[5] = upModel.z;
-
-	// Listener for the First person camera
-	/*listenerPos[0] = camera->getPosition().x;
-	 listenerPos[1] = camera->getPosition().y;
-	 listenerPos[2] = camera->getPosition().z;
-	 alListenerfv(AL_POSITION, listenerPos);
-	 listenerOri[0] = camera->getFront().x;
-	 listenerOri[1] = camera->getFront().y;
-	 listenerOri[2] = camera->getFront().z;
-	 listenerOri[3] = camera->getUp().x;
-	 listenerOri[4] = camera->getUp().y;
-	 listenerOri[5] = camera->getUp().z;*/
-	alListenerfv(AL_ORIENTATION, listenerOri);
-
-	for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
-		if (sourcesPlay[i]) {
-			sourcesPlay[i] = false;
-			alSourcePlay(source[i]);
-		}
+	if (sourcesPlay[3]) {
+		// Apagado de sonidos primer nivel
+		sourcesPlay[1] = false;
+		sourcesPlay[3] = false;
+		sourcesPlay[5] = false;
+		sourcesPlay[6] = false;
+		sourcesPlay[7] = false;
+		sourcesPlay[12] = false;
+		sourcesPlay[8] = true;
+		sourcesPlay[9] = true;
+		sourcesPlay[10] = true;
 	}
+
+	//Interruptores reiniciar
+
+
+	//
+
+
+
+
 }
 
 void cameraMove() {
-	int camaraXcoord = 0;
-	if (escenario1) {
-		posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
-	}
-	if (escenario2) {
-		posterior = terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]);
-		camaraXcoord = terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
-	}
+	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
+	int camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
 	if (camaraXcoord < posterior) {
-		if (escenario1) {
-			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(-0.1, 0, 0.0));
-		}
-		if (escenario2) {
-			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(-0.1, 0, 0.0));
-		}
+		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
+			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+				glm::vec3(-0.1, 0, 0.0));
 	}
 	if (camaraXcoord > posterior) {
-		if (escenario1) {
-			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(0.1, 0, 0.0));
-		}
-		if (escenario2) {
-			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
-				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-					glm::vec3(0.1, 0, 0.0));
-		}
+		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
+			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+				glm::vec3(0.1, 0, 0.0));
 	}
 }
 
@@ -5112,6 +5043,7 @@ void updateEscenario1() {
 	if (!enableEscotilla1) {
 		if (combBotones[0][0] && !combBotones[0][1] && !combBotones[0][2]) {
 			lucesBotones[0] = true;
+			sourcesPlay[8] = true;
 			std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
 		}
 		else {
@@ -5119,6 +5051,7 @@ void updateEscenario1() {
 		}
 		if (combBotones[2][0] && !combBotones[2][1] && combBotones[2][2]) {
 			lucesBotones[2] = true;
+			sourcesPlay[9] = true;
 			std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
 		}
 		else {
@@ -5126,6 +5059,8 @@ void updateEscenario1() {
 		}
 		if (combBotones[3][0] && combBotones[3][1] && !combBotones[3][2]) {
 			lucesBotones[3] = true;
+			alSourcePlay(source[8]);
+			sourcesPlay[10] = true;
 			std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
 		}
 		else {
@@ -5134,6 +5069,7 @@ void updateEscenario1() {
 		if (lucesBotones[0] && lucesBotones[2] && lucesBotones[3]) {
 			enableEscotilla1 = true;
 			animationIndexEscotilla = 2;
+			sourcesPlay[3] = true;
 			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
 		}
 	}
