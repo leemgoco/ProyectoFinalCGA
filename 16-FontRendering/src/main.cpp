@@ -117,16 +117,6 @@ Box boxCS;
 
 ShadowBox* shadowBox;
 
-// Models complex instances
-/*
-// Lamps
-Model modelLamp1;
-Model modelLamp2;
-Model modelLampPost2;
-// Hierba
-Model modelGrass;
-*/
-
 // Fountain
 Model modelFountain;
 // Model animate instance
@@ -171,7 +161,7 @@ GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
 textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2,
 textureTerrainBackgroundID2, textureTerrainRID2, textureTerrainGID2,
 textureTerrainBID2;
-GLuint textureParticleFountainID, textureParticleFireID, texId;
+GLuint texId;
 GLuint skyboxTextureID;
 GLuint textureMenuID, textureMenu2ID, textureActivaID, textureTranID, textureEndID;
 
@@ -205,7 +195,6 @@ int lastMousePosY, offsetY = 0;
 glm::mat4 modelMatrixPivoteCam = glm::mat4(1.0f);
 glm::mat4 modelMatrixPivoteCam2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixEnemigo = glm::mat4(1.0f);
-glm::mat4 modelMatrixFountain = glm::mat4(1.0f);
 glm::mat4 modelMatrixAstroProta = glm::mat4(1.0f);
 glm::mat4 modelMatrixAstroProta2 = glm::mat4(1.0f);
 glm::mat4 modelMatrixMuroFondo = glm::mat4(1.0f);
@@ -260,10 +249,6 @@ glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 camPivOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
-//glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
-//glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
-//glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
-//glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
 
 float timer;
 int banderaCaminar = 0;
@@ -461,7 +446,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 void mouseButtonCallback(GLFWwindow* window, int button, int state, int mod);
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-void initParticleBuffers();
 void init(int width, int height, std::string strTitle, bool bFullScreen);
 void destroy();
 bool processInput(bool continueApplication = true);
@@ -491,161 +475,6 @@ void collidersManagmentEs2();
 void soundEscene2();
 glm::vec3 colorGenerador(std::vector<bool> combBotones);
 void luzMenus();
-
-
-void initParticleBuffers() {
-	// Generate the buffers
-	glGenBuffers(1, &initVel);   // Initial velocity buffer
-	glGenBuffers(1, &startTime); // Start time buffer
-
-	// Allocate space for all buffers
-	int size = nParticles * 3 * sizeof(float);
-	glBindBuffer(GL_ARRAY_BUFFER, initVel);
-	glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, startTime);
-	glBufferData(GL_ARRAY_BUFFER, nParticles * sizeof(float), NULL,
-		GL_STATIC_DRAW);
-
-	// Fill the first velocity buffer with random velocities
-	glm::vec3 v(0.0f);
-	float velocity, theta, phi;
-	GLfloat* data = new GLfloat[nParticles * 3];
-	for (unsigned int i = 0; i < nParticles; i++) {
-
-		theta = glm::mix(0.0f, glm::pi<float>() / 6.0f,
-			((float)rand() / RAND_MAX));
-		phi = glm::mix(0.0f, glm::two_pi<float>(), ((float)rand() / RAND_MAX));
-
-		v.x = sinf(theta) * cosf(phi);
-		v.y = cosf(theta);
-		v.z = sinf(theta) * sinf(phi);
-
-		velocity = glm::mix(0.6f, 0.8f, ((float)rand() / RAND_MAX));
-		v = glm::normalize(v) * velocity;
-
-		data[3 * i] = v.x;
-		data[3 * i + 1] = v.y;
-		data[3 * i + 2] = v.z;
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, initVel);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
-
-	// Fill the start time buffer
-	delete[] data;
-	data = new GLfloat[nParticles];
-	float time = 0.0f;
-	float rate = 0.00075f;
-	for (unsigned int i = 0; i < nParticles; i++) {
-		data[i] = time;
-		time += rate;
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, startTime);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, nParticles * sizeof(float), data);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	delete[] data;
-
-	glGenVertexArrays(1, &VAOParticles);
-	glBindVertexArray(VAOParticles);
-	glBindBuffer(GL_ARRAY_BUFFER, initVel);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, startTime);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0);
-}
-
-void initParticleBuffersFire() {
-	// Generate the buffers
-	glGenBuffers(2, posBuf);    // position buffers
-	glGenBuffers(2, velBuf);    // velocity buffers
-	glGenBuffers(2, age);       // age buffers
-
-	// Allocate space for all buffers
-	int size = nParticlesFire * sizeof(GLfloat);
-	glBindBuffer(GL_ARRAY_BUFFER, posBuf[0]);
-	glBufferData(GL_ARRAY_BUFFER, 3 * size, 0, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_ARRAY_BUFFER, posBuf[1]);
-	glBufferData(GL_ARRAY_BUFFER, 3 * size, 0, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_ARRAY_BUFFER, velBuf[0]);
-	glBufferData(GL_ARRAY_BUFFER, 3 * size, 0, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_ARRAY_BUFFER, velBuf[1]);
-	glBufferData(GL_ARRAY_BUFFER, 3 * size, 0, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_ARRAY_BUFFER, age[0]);
-	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_ARRAY_BUFFER, age[1]);
-	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_COPY);
-
-	// Fill the first age buffer
-	std::vector<GLfloat> initialAge(nParticlesFire);
-	float rate = particleLifetime / nParticlesFire;
-	for (unsigned int i = 0; i < nParticlesFire; i++) {
-		int index = i - nParticlesFire;
-		float result = rate * index;
-		initialAge[i] = result;
-	}
-	// Shuffle them for better looking results
-	//Random::shuffle(initialAge);
-	auto rng = std::default_random_engine{ };
-	std::shuffle(initialAge.begin(), initialAge.end(), rng);
-	glBindBuffer(GL_ARRAY_BUFFER, age[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, size, initialAge.data());
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// Create vertex arrays for each set of buffers
-	glGenVertexArrays(2, particleArray);
-
-	// Set up particle array 0
-	glBindVertexArray(particleArray[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, posBuf[0]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, velBuf[0]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, age[0]);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	// Set up particle array 1
-	glBindVertexArray(particleArray[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, posBuf[1]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, velBuf[1]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, age[1]);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(0);
-
-	// Setup the feedback objects
-	glGenTransformFeedbacks(2, feedback);
-
-	// Transform feedback 0
-	glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[0]);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, posBuf[0]);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, velBuf[0]);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, age[0]);
-
-	// Transform feedback 1
-	glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[1]);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, posBuf[1]);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, velBuf[1]);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, age[1]);
-
-	glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
-}
 
 // Implementacion de todas las funciones.
 void init(int width, int height, std::string strTitle, bool bFullScreen) {
@@ -1401,16 +1230,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		glm::value_ptr(basis));
 
 	/*******************************************
-	 * Inicializacion de los buffers de la fuente
-	 *******************************************/
-	initParticleBuffers();
-
-	/*******************************************
-	 * Inicializacion de los buffers del fuego
-	 *******************************************/
-	initParticleBuffersFire();
-
-	/*******************************************
 	 * Inicializacion del framebuffer para
 	 * almacenar el buffer de profunidadad
 	 *******************************************/
@@ -1646,7 +1465,6 @@ void destroy() {
 	terrain.destroy();
 
 	// Custom objects Delete
-	modelFountain.destroy();
 	pivoteCam.destroy();
 	astroProta.destroy();
 	muroDerecho.destroy();
@@ -1679,26 +1497,17 @@ void destroy() {
 	//modelos segundo escenario
 	modelEscenario2.destroy();
 	modelBidones.destroy();
-	//modelBidones2.destroy();
-	//modelBidones3.destroy();
-	//modelBidones4.destroy();
+
 	modelCajaCuadrada.destroy();
-	//modelCajaCuadrada2.destroy();
-	//modelCajaCuadrada3.destroy();
-	//modelCajaCuadrada4.destroy();
-	//modelCajaCuadrada5.destroy();
+
 	modelCajaLowPoly.destroy();
-	//modelCajaLowPoly2.destroy();
-	//modelCajaLowPoly3.destroy();
-	//modelCajaLowPoly4.destroy();
-	//modelCajaLowPoly5.destroy();
+
 	modelCompu.destroy();
-	//modelCompu2.destroy();
+
 	modelCuerpo.destroy();
-	//modelCuerpo2.destroy();
-	//modelCuerpo3.destroy();
+
 	modelEstanteria.destroy();
-	//modelEstanteria2.destroy();
+
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1714,8 +1523,6 @@ void destroy() {
 	glDeleteTextures(1, &textureTerrainBID);
 	glDeleteTextures(1, &textureTerrainBlendMapID);
 	glDeleteTextures(1, &textureTerrainBlendMapID2);
-	glDeleteTextures(1, &textureParticleFountainID);
-	glDeleteTextures(1, &textureParticleFireID);
 	glDeleteTextures(1, &textureEndID);
 	glDeleteTextures(1, &textureTranID);
 
@@ -1843,12 +1650,10 @@ bool processInput(bool continueApplication) {
 				actionE = true;
 				deControl = true;
 				animationIndex = 2;
-				std::cout << "actionE:" << actionE << std::endl;
 			}
 			else if (buttons[0] == GLFW_RELEASE) {
 				enableAction = true;
 				actionE = false;
-				std::cout << "Desactivado:" << actionE << std::endl;
 			}
 
 			//Cruzeta izquierda
@@ -1889,7 +1694,7 @@ bool processInput(bool continueApplication) {
 					glm::vec3(0.0, 0.0, 0.1));
 				animationIndex = 0;
 				timer += 0.0075f;
-				std::cout << timer << std::endl;
+				//std::cout << timer << std::endl;
 				if (timer > 0.1f)
 					banderaCaminar = 1;
 				if (timer > 5.0f && banderaCaminar == 1)
@@ -2011,7 +1816,6 @@ bool processInput(bool continueApplication) {
 			enableAction = false;
 			actionE = true;
 			animationIndex = 2;
-			std::cout << "actionE:" << actionE << std::endl;
 		}
 		else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE && !deControl) {
 			enableAction = true;
@@ -2051,7 +1855,7 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0.0, 0.0, 0.1));
 			animationIndex = 0;
 			timer += 0.0075f;
-			std::cout << timer << std::endl;
+			//std::cout << timer << std::endl;
 			if (timer > 0.1f)
 				banderaCaminar = 1;
 			if (timer > 5.0f && banderaCaminar == 1)
@@ -2295,12 +2099,12 @@ void applicationLoop() {
 		alListenerfv(AL_ORIENTATION, listenerOri);
 		for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
 			if (!sourcesPlay[i] && sourcesPlaying[i]) {
-				std::cout << "Apagando Source: " << i << std::endl;
+				//std::cout << "Apagando Source: " << i << std::endl;
 				sourcesPlaying[i] = false;
 				alSourceStop(source[i]);
 			}
 			if (sourcesPlay[i] && !sourcesPlaying[i]) {
-				std::cout << "Reproduciendo Source: " << i << std::endl;
+				//std::cout << "Reproduciendo Source: " << i << std::endl;
 				sourcesPlaying[i] = true;
 				alSourcePlay(source[i]);
 			}
@@ -2759,8 +2563,6 @@ void inicialMatrixs() {
 	//Matriz
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 		glm::vec3(0.0f, 0.0f, 20.0f));
-	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
-		glm::vec3(1, 0, 0));*/
 
 
 
@@ -2929,48 +2731,6 @@ void lucesEscenari1(ShadowBox* shadowBox, glm::mat4* view) {
 		glm::value_ptr(glm::vec3(0.2, 0.2, 0.2)));
 	shaderTerrain.setVectorFloat3("directionalLight.direction",
 		glm::value_ptr(glm::vec3(-0.707106781, -0.707106781, 0.0)));
-
-	/*******************************************
-	 * Propiedades SpotLights
-	 *******************************************/
-	 /*glm::vec3 spotPosition = glm::vec3(
-			 modelMatrixHeli * glm::vec4(0.32437, 0.226053, 1.79149, 1.0));
-	 shaderMulLighting.setInt("spotLightCount", 1);
-	 shaderTerrain.setInt("spotLightCount", 1);
-	 shaderMulLighting.setVectorFloat3("spotLights[0].light.ambient",
-			 glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
-	 shaderMulLighting.setVectorFloat3("spotLights[0].light.diffuse",
-			 glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
-	 shaderMulLighting.setVectorFloat3("spotLights[0].light.specular",
-			 glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
-	 shaderMulLighting.setVectorFloat3("spotLights[0].position",
-			 glm::value_ptr(spotPosition));
-	 shaderMulLighting.setVectorFloat3("spotLights[0].direction",
-			 glm::value_ptr(glm::vec3(0, -1, 0)));
-	 shaderMulLighting.setFloat("spotLights[0].constant", 1.0);
-	 shaderMulLighting.setFloat("spotLights[0].linear", 0.074);
-	 shaderMulLighting.setFloat("spotLights[0].quadratic", 0.03);
-	 shaderMulLighting.setFloat("spotLights[0].cutOff",
-			 cos(glm::radians(12.5f)));
-	 shaderMulLighting.setFloat("spotLights[0].outerCutOff",
-			 cos(glm::radians(15.0f)));
-	 shaderTerrain.setVectorFloat3("spotLights[0].light.ambient",
-			 glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
-	 shaderTerrain.setVectorFloat3("spotLights[0].light.diffuse",
-			 glm::value_ptr(glm::vec3(0.2, 0.3, 0.2)));
-	 shaderTerrain.setVectorFloat3("spotLights[0].light.specular",
-			 glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
-	 shaderTerrain.setVectorFloat3("spotLights[0].position",
-			 glm::value_ptr(spotPosition));
-	 shaderTerrain.setVectorFloat3("spotLights[0].direction",
-			 glm::value_ptr(glm::vec3(0, -1, 0)));
-	 shaderTerrain.setFloat("spotLights[0].constant", 1.0);
-	 shaderTerrain.setFloat("spotLights[0].linear", 0.074);
-	 shaderTerrain.setFloat("spotLights[0].quadratic", 0.03);
-	 shaderTerrain.setFloat("spotLights[0].cutOff",
-			 cos(glm::radians(12.5f)));
-	 shaderTerrain.setFloat("spotLights[0].outerCutOff",
-			 cos(glm::radians(15.0f)));*/
 
 			 /*******************************************
 			  * Propiedades PointLights
@@ -3153,15 +2913,6 @@ void preRender1() {
 	 * Debug to view the texture view map
 	*******************************************/
 	// reset viewport
-	/*glViewport(0, 0, screenWidth, screenHeight);
-	 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	 // render Depth map to quad for visual debugging
-	 shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-	 shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-	 glActiveTexture(GL_TEXTURE0);
-	 glBindTexture(GL_TEXTURE_2D, depthMap);
-	 boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
-	 boxViewDepth.render();*/
 
 	 /*******************************************
 	   * 2.- We render the normal objects
@@ -3320,8 +3071,6 @@ void collidersManagmentEs1() {
 		modelMatrixColliderRokas1 = glm::translate(modelMatrixColliderRokas1,
 			glm::vec3(rokasPos[i].x, terrain.getHeightTerrain(rokasPos[i].x,
 				rokasPos[i].z) - 1.0f, rokasPos[i].z));
-		//modelMatrixColliderLampGenerador = glm::rotate(modelMatrixColliderLampGenerador,
-		//	glm::radians(140.0f), glm::vec3(0, 1, 0));
 		addOrUpdateColliders(collidersOBB, "geneRocks1-" + std::to_string(i),
 			generadorRokas1, modelMatrixColliderRokas1);
 		// Set the orientation of collider before doing the scale
@@ -3415,26 +3164,6 @@ void collidersManagmentEs1() {
 		}
 
 	}
-
-	//// Collider de edificio compuerta
-	//AbstractModel::OBB edCompuertaCollider2;
-	//glm::mat4 modelmatrixColliderEdCompuerta2 = glm::mat4(1.0);
-	//modelmatrixColliderEdCompuerta2 = glm::translate(modelmatrixColliderEdCompuerta2, glm::vec3(2.0f, 9.5f, 4.8f));
-	//modelmatrixColliderEdCompuerta2 = glm::rotate(modelmatrixColliderEdCompuerta2,
-	//	glm::radians(-90.0f), glm::vec3(1, 0, 0));
-	//// Set the orientation of collider before doing the scale
-	//edCompuertaCollider2.u = glm::quat_cast(modelmatrixColliderEdCompuerta2);
-	//modelmatrixColliderEdCompuerta2 = glm::scale(modelmatrixColliderEdCompuerta2,
-	//	glm::vec3(0.5, 0.5, 1.0));
-	//modelmatrixColliderEdCompuerta2 = glm::translate(modelmatrixColliderEdCompuerta2,
-	//	glm::vec3(modelEdCompuerta.getObb().c.x,
-	//		modelEdCompuerta.getObb().c.y,
-	//		modelEdCompuerta.getObb().c.z));
-	//edCompuertaCollider2.e = modelEdCompuerta.getObb().e
-	//	* glm::vec3(0.5, 0.5, 1.0);
-	//edCompuertaCollider2.c = glm::vec3(modelmatrixColliderEdCompuerta2[3]);
-	//addOrUpdateColliders(collidersOBB, "edCompuerta", edCompuertaCollider2,
-	//	modelmatrixColliderEdCompuerta2);
 
 	//Collider de astroProta
 	AbstractModel::OBB astroProtaCollider;
@@ -3576,8 +3305,8 @@ void collidersManagmentEs1() {
 					std::get<0>(jt->second))) {
 				if (!(excepCollider(it->first, jt->first)))
 				{
-					std::cout << "Colision " << it->first << " with "
-						<< jt->first << std::endl;
+					//std::cout << "Colision " << it->first << " with "
+					//	<< jt->first << std::endl;
 
 					//if ((it->first.compare("enemigo") == 0 || it->first.compare("astroProta") == 0)
 					//	&& (jt->first.compare("enemigo") == 0 || jt->first.compare("astroProta") == 0))
@@ -3591,11 +3320,11 @@ void collidersManagmentEs1() {
 		addOrUpdateCollisionDetection(collisionDetection, it->first,
 			isCollision);
 	}
-	std::cout << "En collider " << std::endl;
-	std::cout << "actionE " << actionE <<std::endl;
-	std::cout << "isCollisionG " << isCollisionG << std::endl;
+	//std::cout << "En collider " << std::endl;
+	//std::cout << "actionE " << actionE <<std::endl;
+	//std::cout << "isCollisionG " << isCollisionG << std::endl;
 	if (isCollisionG && actionE && !enableEscotilla1) {
-		std::cout << "EntraISC " << std::endl;
+		//std::cout << "EntraISC " << std::endl;
 		updateBotonCollider(collisionDetection);
 		actionE = false;
 	}
@@ -3639,8 +3368,8 @@ void collidersManagmentEs1() {
 			collidersOBB.begin();
 		for (; jt != collidersOBB.end(); jt++) {
 			if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
-				std::cout << "Colision " << it->first << " with "
-					<< jt->first << std::endl;
+				//std::cout << "Colision " << it->first << " with "
+				//	<< jt->first << std::endl;
 
 				isCollision = true;
 				addOrUpdateCollisionDetection(collisionDetection, jt->first,
@@ -3699,7 +3428,7 @@ void soundEscene1() {
 	source1Pos[2] = modelMatrixAstroProta[3].z;
 	alSourcefv(source[1], AL_POSITION, source1Pos);
 	if (animationIndex != 1) {
-		std::cout << "Cambia sourcesPlay[1] " << std::endl;
+		//std::cout << "Cambia sourcesPlay[1] " << std::endl;
 		sourcesPlay[1] = true;
 	}
 	else {
@@ -3802,47 +3531,15 @@ void prepareScene2() {
 
 	modelBidones.setShader(&shaderMulLighting);
 
-	//modelBidones2.setShader(&shaderMulLighting);
-
-	//modelBidones3.setShader(&shaderMulLighting);
-
-	//modelBidones4.setShader(&shaderMulLighting);
-
 	modelCompu.setShader(&shaderMulLighting);
-
-	//modelCompu2.setShader(&shaderMulLighting);
 
 	modelCuerpo.setShader(&shaderMulLighting);
 
-	//modelCuerpo2.setShader(&shaderMulLighting);
-
-	//modelCuerpo3.setShader(&shaderMulLighting);
-
 	modelEstanteria.setShader(&shaderMulLighting);
-
-	//modelEstanteria2.setShader(&shaderMulLighting);
 
 	modelCajaCuadrada.setShader(&shaderMulLighting);
 
-	//modelCajaCuadrada2.setShader(&shaderMulLighting);
-
-	//modelCajaCuadrada3.setShader(&shaderMulLighting);
-
-	//modelCajaCuadrada4.setShader(&shaderMulLighting);
-
-	//modelCajaCuadrada5.setShader(&shaderMulLighting);
-
 	modelCajaLowPoly.setShader(&shaderMulLighting);
-
-	//modelCajaLowPoly2.setShader(&shaderMulLighting);
-
-	//modelCajaLowPoly3.setShader(&shaderMulLighting);
-
-	//modelCajaLowPoly4.setShader(&shaderMulLighting);
-
-	//modelCajaLowPoly5.setShader(&shaderMulLighting);
-
-	//modelCajaLowPoly6.setShader(&shaderMulLighting);
 
 	modelPalanca.setShader(&shaderMulLighting);
 
@@ -3894,48 +3591,15 @@ void prepareDepthScene2() {
 
 	modelBidones.setShader(&shaderDepth);
 
-	//modelBidones2.setShader(&shaderDepth);
-
-	//modelBidones3.setShader(&shaderDepth);
-
-	//modelBidones4.setShader(&shaderDepth);
-
 	modelCompu.setShader(&shaderDepth);
-
-	//modelCompu2.setShader(&shaderDepth);
 
 	modelCuerpo.setShader(&shaderDepth);
 
-	//modelCuerpo2.setShader(&shaderDepth);
-
-	//modelCuerpo3.setShader(&shaderDepth);
-
 	modelEstanteria.setShader(&shaderDepth);
-
-	//modelEstanteria2.setShader(&shaderDepth);
 
 	modelCajaCuadrada.setShader(&shaderDepth);
 
-	//modelCajaCuadrada2.setShader(&shaderDepth);
-
-	//modelCajaCuadrada3.setShader(&shaderDepth);
-
-	//modelCajaCuadrada4.setShader(&shaderDepth);
-
-	//modelCajaCuadrada5.setShader(&shaderDepth);
-
 	modelCajaLowPoly.setShader(&shaderDepth);
-
-	//modelCajaLowPoly2.setShader(&shaderDepth);
-
-	//modelCajaLowPoly3.setShader(&shaderDepth);
-
-	//modelCajaLowPoly4.setShader(&shaderDepth);
-
-	//modelCajaLowPoly5.setShader(&shaderDepth);
-
-	//modelCajaLowPoly6.setShader(&shaderDepth);
-
 
 	modelPalanca.setShader(&shaderDepth);
 
@@ -4008,18 +3672,6 @@ void renderScene2(bool renderParticles) {
 	glEnable(GL_CULL_FACE);
 
 	astroOrigin = modelMatrixAstroProta[3];
-
-	//modelMatrixEnemigo[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv
-	//	+ terrain2.getHeightTerrain(modelMatrixEnemigo[3][0],
-	//		modelMatrixEnemigo[3][2]);
-	//tmv = currTime - startTimeJump;
-	//if (modelMatrixEnemigo[3][1]
-	//	< terrain2.getHeightTerrain(modelMatrixEnemigo[3][0],
-	//		modelMatrixEnemigo[3][2])) {
-	//	isJump = false;
-	//	modelMatrixEnemigo[3][1] = terrain2.getHeightTerrain(
-	//		modelMatrixEnemigo[3][0], modelMatrixEnemigo[3][2]);
-	//}
 
 	//escenario2
 	glDisable(GL_CULL_FACE);
@@ -4425,15 +4077,6 @@ void preRender2() {
 	 * Debug to view the texture view map
 	*******************************************/
 	// reset viewport
-	/*glViewport(0, 0, screenWidth, screenHeight);
-	 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	 // render Depth map to quad for visual debugging
-	 shaderViewDepth.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-	 shaderViewDepth.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-	 glActiveTexture(GL_TEXTURE0);
-	 glBindTexture(GL_TEXTURE_2D, depthMap);
-	 boxViewDepth.setScale(glm::vec3(2.0, 2.0, 1.0));
-	 boxViewDepth.render();*/
 
 	 /*******************************************
 	   * 2.- We render the normal objects
@@ -4982,7 +4625,7 @@ void collidersManagmentEs2() {
 	}
 
 	if (isCollisionG && actionE && !enablePuerta) {
-		std::cout << "EntraPalancas " << std::endl;
+		//std::cout << "EntraPalancas " << std::endl;
 		updatePalancaCollider(collisionDetection);
 		actionE = false;
 	}
@@ -5096,7 +4739,7 @@ void soundEscene2() {
 	source2Pos[2] = modelMatrixAstroProta[3].z;
 	alSourcefv(source[2], AL_POSITION, source2Pos);
 	if (animationIndex != 1) {
-		std::cout << "Cambia sourcesPlay[2] " << std::endl;
+		//std::cout << "Cambia sourcesPlay[2] " << std::endl;
 		sourcesPlay[2] = true;
 	}
 	else {
@@ -5291,20 +4934,20 @@ bool excepCollider2(std::string string1, std::string string2) {
 void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
 	for (int i = 0; i < botonesPos.size(); i++) {
 		if (collisionDetection.find("botonBox-Y" + std::to_string(i))->second) {
-			std::cout << "collisionDetection " << collisionDetection.find("botonBox-Y" + std::to_string(i))->second << " de "
-				<< "botonBox-Y" + std::to_string(i) << std::endl;
+			//std::cout << "collisionDetection " << collisionDetection.find("botonBox-Y" + std::to_string(i))->second << " de "
+			//	<< "botonBox-Y" + std::to_string(i) << std::endl;
 			//std::cout << "previo a update " << combBotones[i][0] << std::endl;
 			combBotones[i][0] = !combBotones[i][0];
 			//std::cout << "despues de update " << combBotones[i][0] << std::endl;
 		}
 		if (collisionDetection.find("botonBox-B" + std::to_string(i))->second) {
-			std::cout << "collisionDetection " << collisionDetection.find("botonBox-B" + std::to_string(i))->second << " de "
-				<< "botonBox-B" + std::to_string(i) << std::endl;
+			//std::cout << "collisionDetection " << collisionDetection.find("botonBox-B" + std::to_string(i))->second << " de "
+			//	<< "botonBox-B" + std::to_string(i) << std::endl;
 			combBotones[i][1] = !combBotones[i][1];
 		}
 		if (collisionDetection.find("botonBox-R" + std::to_string(i))->second) {
-			std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
-				<< "botonBox-R" + std::to_string(i) << std::endl;
+			//std::cout << "collisionDetection " << collisionDetection.find("botonBox-R" + std::to_string(i))->second << " de "
+			//	<< "botonBox-R" + std::to_string(i) << std::endl;
 			combBotones[i][2] = !combBotones[i][2];
 		}
 	}
@@ -5313,12 +4956,10 @@ void updateBotonCollider(std::map<std::string, bool> collisionDetection) {
 void updatePalancaCollider(std::map<std::string, bool> collisionDetection) {
 	for (int i = 0; i < palancaPos.size(); i++) {
 		if (collisionDetection.find("palanca-" + std::to_string(i))->second && !(animaPalancas[i] == 1)) {
-			std::cout << "collisionDetection " << collisionDetection.find("palanca-" + std::to_string(i))->second << " de "
-				<< "palanca-" + std::to_string(i) << std::endl;
-			//std::cout << "previo a update " << combBotones[i][0] << std::endl;
+			/*std::cout << "collisionDetection " << collisionDetection.find("palanca-" + std::to_string(i))->second << " de "
+				<< "palanca-" + std::to_string(i) << std::endl;*/
 			animaPalancas[i] = 1;
 			indPalanca++;
-			//std::cout << "despues de update " << combBotones[i][0] << std::endl;
 		}
 	}
 }
@@ -5328,7 +4969,7 @@ void updateEscenario1() {
 		if (combBotones[0][0] && !combBotones[0][1] && !combBotones[0][2]) {
 			lucesBotones[0] = true;
 			sourcesPlay[8] = true;
-			std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
+			//std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
 		}
 		else {
 			lucesBotones[0] = false;
@@ -5336,7 +4977,7 @@ void updateEscenario1() {
 		if (combBotones[2][0] && !combBotones[2][1] && combBotones[2][2]) {
 			lucesBotones[2] = true;
 			sourcesPlay[9] = true;
-			std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
+			//std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
 		}
 		else {
 			lucesBotones[2] = false;
@@ -5345,7 +4986,7 @@ void updateEscenario1() {
 			lucesBotones[3] = true;
 			alSourcePlay(source[8]);
 			sourcesPlay[10] = true;
-			std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
+			//std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
 		}
 		else {
 			lucesBotones[3] = false;
@@ -5354,7 +4995,7 @@ void updateEscenario1() {
 			enableEscotilla1 = true;
 			animationIndexEscotilla = 2;
 			sourcesPlay[3] = true;
-			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
+			//std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
 		}
 	}
 }
@@ -5363,68 +5004,44 @@ glm::vec3 colorGenerador(std::vector<bool> combBotones) {
 	glm::vec3 color;
 	//Blanco
 	if (!combBotones[0] && !combBotones[1] && !combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
 		color = glm::vec3(0.0, 0.0, 0.0);
 		return color;
 	}
 	//Amarillo
 	if (combBotones[0] && !combBotones[1] && !combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
 		color = glm::vec3(1.2, 1.2, 0.0);
 		//std::cout << "Amarillo " << std::endl;
 		return color;
 	}
 	//Azul
 	if (!combBotones[0] && combBotones[1] && !combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
-		//std::cout << "Azul "<< std::endl;
 		color = glm::vec3(0.0, 0.0, 0.9);
 		return color;
 	}
 	//Rojo
 	if (!combBotones[0] && !combBotones[1] && combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
-		std::cout << "Rojo " << std::endl;
 		color = glm::vec3(0.9, 0.0, 0.0);
 		return color;
 	}
 	//Verde
 	if (combBotones[0] && combBotones[1] && !combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
 		color = glm::vec3(0.0, 0.9, 0.0);
 		return color;
 	}
 	//Naranja
 	if (combBotones[0] && !combBotones[1] && combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+
 		color = glm::vec3(1.3, 0.5, 0.0);
 		return color;
 	}
 	//Morado
 	if (!combBotones[0] && combBotones[1] && combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
+
 		color = glm::vec3(0.3, 0.0, 0.7);
 		return color;
 	}
 	//Cafe
 	if (combBotones[0] && combBotones[1] && combBotones[2]) {
-		//std::cout << "combBotones[0] " << combBotones[0] << std::endl;
-		//std::cout << "combBotones[1] " << combBotones[1] << std::endl;
-		//std::cout << "combBotones[2] " << combBotones[2] << std::endl;
 		color = glm::vec3(0.5, 0.25, 0.0);
 		return color;
 	}
@@ -5438,7 +5055,7 @@ void updateEscenario2() {
 				sourcesPlay[14] = false;
 				sourcesPlay[8] = true;
 				lucesPalancas[0] = true;
-				std::cout << "lucesPalancas[0] " << lucesPalancas[0] << std::endl;
+				//std::cout << "lucesPalancas[0] " << lucesPalancas[0] << std::endl;
 			}
 			else {
 				for (int i = 0; i < lucesPalancas.size(); i++){
@@ -5450,7 +5067,7 @@ void updateEscenario2() {
 				}
 				indPalanca=0;
 				sourcesPlay[14] = true;
-				std::cout << "Combinación Incorrecta "<< std::endl;
+				//std::cout << "Combinación Incorrecta "<< std::endl;
 			}
 		}
 		if (!lucesPalancas[1] && indPalanca == 2) {
@@ -5458,7 +5075,7 @@ void updateEscenario2() {
 				sourcesPlay[14] = false;
 				sourcesPlay[9] = true;
 				lucesPalancas[1] = true;
-				std::cout << "lucesPalancas[1] " << lucesPalancas[1] << std::endl;
+				//std::cout << "lucesPalancas[1] " << lucesPalancas[1] << std::endl;
 			}
 			else {
 				for (int i = 0; i < lucesPalancas.size(); i++) {
@@ -5470,7 +5087,7 @@ void updateEscenario2() {
 				}
 				indPalanca = 0;
 				sourcesPlay[14] = true;
-				std::cout << "Combinación Incorrecta " << std::endl;
+				//std::cout << "Combinación Incorrecta " << std::endl;
 			}
 		}
 		if (!lucesPalancas[2] && indPalanca == 3) {
@@ -5478,7 +5095,7 @@ void updateEscenario2() {
 				sourcesPlay[14] = false;
 				sourcesPlay[10] = true;
 				lucesPalancas[2] = true;
-				std::cout << "lucesPalancas[2] " << lucesPalancas[2] << std::endl;
+				//std::cout << "lucesPalancas[2] " << lucesPalancas[2] << std::endl;
 			}
 			else {
 				for (int i = 0; i < lucesPalancas.size(); i++) {
@@ -5490,13 +5107,13 @@ void updateEscenario2() {
 				}
 				indPalanca = 0;
 				sourcesPlay[14] = true;
-				std::cout << "Combinación Incorrecta " << std::endl;
+				//std::cout << "Combinación Incorrecta " << std::endl;
 			}
 		}
 		if ((lucesPalancas[0] && lucesPalancas[1] && lucesPalancas[2])) {
 			enablePuerta = true;
 			sourcesPlay[4] = true;
-			std::cout << "Combinación Correcta " << std::endl;
+			//std::cout << "Combinación Correcta " << std::endl;
 		}
 
 	}
@@ -5519,20 +5136,6 @@ void luzMenus() {
 	shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.7, 0.7, 0.7)));
 	shaderMulLighting.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.9, 0.9, 0.9)));
 	shaderMulLighting.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-1.0, 0.0, 0.0)));
-	//shaderMulLighting.setVectorFloat3("directionalLight.direction",
-	//	glm::value_ptr(glm::vec3(modelMatrixPivoteCam2[3])));
-	//if (cameraSelected == 0)
-	//	shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
-	//else
-	//	shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(cameraFP->getPosition()));
-	//shaderTerrain.setVectorFloat3("directionalLight.light.ambient",
-	//	glm::value_ptr(glm::vec3(0.14, 0.15, 0.0)));
-	//shaderTerrain.setVectorFloat3("directionalLight.light.diffuse",
-	//	glm::value_ptr(glm::vec3(0.5, 0.5, 0.0)));
-	//shaderTerrain.setVectorFloat3("directionalLight.light.specular",
-	//	glm::value_ptr(glm::vec3(0.5, 0.5, 0.0)));
-	//shaderTerrain.setVectorFloat3("directionalLight.direction",
-	//	glm::value_ptr(glm::vec3(modelMatrixPivoteCam2[3])));
 }
 
 int main(int argc, char** argv) {
