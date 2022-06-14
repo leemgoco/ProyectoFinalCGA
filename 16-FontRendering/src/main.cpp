@@ -1526,7 +1526,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcei(source[0], AL_BUFFER, buffer[0]);//De donde va a tomar el sonido
 	 alSourcei(source[0], AL_LOOPING, AL_TRUE);//Loop
 	 alSourcef(source[0], AL_MAX_DISTANCE, 2000);//DISTANCIA A LA QUE SE ESCUCHA
-	 // Pisadas exterior
+	 //Pisadas Exterior
 	 alSourcef(source[1], AL_PITCH, 1.0f);
 	 alSourcef(source[1], AL_GAIN, 0.7f);
 	 alSourcefv(source[1], AL_POSITION, source1Pos);
@@ -1536,7 +1536,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcef(source[1], AL_MAX_DISTANCE, 1000);
 	 //Pisadas interior
 	 alSourcef(source[2], AL_PITCH, 1.0f);
-	 alSourcef(source[2], AL_GAIN, 0.7f);
+	 alSourcef(source[2], AL_GAIN, 1.3f);
 	 alSourcefv(source[2], AL_POSITION, source2Pos);
 	 alSourcefv(source[2], AL_VELOCITY, source2Vel);
 	 alSourcei(source[2], AL_BUFFER, buffer[2]);
@@ -1549,15 +1549,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcefv(source[3], AL_VELOCITY, source3Vel);
 	 alSourcei(source[3], AL_BUFFER, buffer[3]);
 	 alSourcei(source[3], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[3], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[3], AL_MAX_DISTANCE, 3000);
 
 	 alSourcef(source[4], AL_PITCH, 1.0f);
-	 alSourcef(source[4], AL_GAIN, 1.0f);
+	 alSourcef(source[4], AL_GAIN, 2.0f);
 	 alSourcefv(source[4], AL_POSITION, source4Pos);
 	 alSourcefv(source[4], AL_VELOCITY, source4Vel);
 	 alSourcei(source[4], AL_BUFFER, buffer[3]);
 	 alSourcei(source[4], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[4], AL_MAX_DISTANCE, 50);
+	 alSourcef(source[4], AL_MAX_DISTANCE, 2000);
 
 	 //Generadores
 	 alSourcef(source[5], AL_PITCH, 1.0f);
@@ -1611,12 +1611,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	 //MovimientoAlien
 	 alSourcef(source[11], AL_PITCH, 1.0f);
-	 alSourcef(source[11], AL_GAIN, 1.0f);
+	 alSourcef(source[11], AL_GAIN, 2.0f);
 	 alSourcefv(source[11], AL_POSITION, source11Pos);
 	 alSourcefv(source[11], AL_VELOCITY, source11Vel);
 	 alSourcei(source[11], AL_BUFFER, buffer[6]);
 	 alSourcei(source[11], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[11], AL_MAX_DISTANCE, 30);
+	 alSourcef(source[11], AL_MAX_DISTANCE, 1500);
 
 	 //AmbientalExterior
 	 alSourcef(source[12], AL_PITCH, 1.0f);
@@ -1629,28 +1629,28 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	 //AmbientalInterior
 	 alSourcef(source[13], AL_PITCH, 1.0f);
-	 alSourcef(source[13], AL_GAIN, 1.5f);
+	 alSourcef(source[13], AL_GAIN, 5.0f);
 	 alSourcefv(source[13], AL_POSITION, source13Pos);
 	 alSourcefv(source[13], AL_VELOCITY, source13Vel);
 	 alSourcei(source[13], AL_BUFFER, buffer[8]);
 	 alSourcei(source[13], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[13], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[13], AL_MAX_DISTANCE, 2000);
 	 //ErrorCódigo
 	 alSourcef(source[14], AL_PITCH, 1.0f);
-	 alSourcef(source[14], AL_GAIN, 1.5f);
+	 alSourcef(source[14], AL_GAIN, 2.0f);
 	 alSourcefv(source[14], AL_POSITION, source14Pos);
 	 alSourcefv(source[14], AL_VELOCITY, source14Vel);
 	 alSourcei(source[14], AL_BUFFER, buffer[9]);
 	 alSourcei(source[14], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[14], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[14], AL_MAX_DISTANCE, 2000);
 	 //GameOver
 	 alSourcef(source[15], AL_PITCH, 1.0f);
-	 alSourcef(source[15], AL_GAIN, 1.5f);
+	 alSourcef(source[15], AL_GAIN, 2.0f);
 	 alSourcefv(source[15], AL_POSITION, source2Pos);
 	 alSourcefv(source[15], AL_VELOCITY, source2Vel);
 	 alSourcei(source[15], AL_BUFFER, buffer[10]);
 	 alSourcei(source[15], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[15], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[15], AL_MAX_DISTANCE, 2000);
 	 
 	 // Se inicializa el modelo de texeles.
 	modelText = new FontTypeRendering::FontTypeRendering(screenWidth,
@@ -2252,6 +2252,14 @@ void applicationLoop() {
 				alSourcePlay(source[i]);
 			}
 		}
+
+		//Sonido GAME OVER
+		source15Pos[0] = modelMatrixAstroProta[3].x;
+		source15Pos[1] = modelMatrixAstroProta[3].y + 3;
+		source15Pos[2] = modelMatrixAstroProta[3].z;
+		alSourcefv(source[15], AL_POSITION, source15Pos);
+		//sourcesPlay[15] = true;
+
 		if (escenario1) {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
@@ -2396,8 +2404,9 @@ void applicationLoop() {
 					situacion = 2;
 				}
 				break;
-			case 2:
+			case 2:// Game Over
 				modelText2->render("Te quedaste sin oxigeno!", -0.5, 0, 30, 1.0, 0.0, 0.0, 1.0);
+				sourcesPlay[5] = true;//Game Over
 				tiempoOxigeno++;
 				if (tiempoOxigeno > 250) {
 					situacion = 3;
@@ -2406,6 +2415,7 @@ void applicationLoop() {
 			case 3:
 				playerRespawn2 = true;
 				if (playerRespawn2 == true) {
+					sourcesPlay[5] = false;//Reinicio
 					modelMatrixAstroProta = defaultMatrix;
 					modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
 					modelMatrixPivoteCam = glm::translate(modelMatrixAstroProta, camPivOrigin);
@@ -5184,6 +5194,7 @@ void collidersManagmentEs2() {
 void soundEscene2() {
 	if (sourcesPlay[3]) {
 		// Apagado de sonidos primer nivel
+		sourcesPlay[0] = false;
 		sourcesPlay[1] = false;
 		sourcesPlay[3] = false;
 		sourcesPlay[5] = false;
@@ -5196,13 +5207,67 @@ void soundEscene2() {
 	}
 
 	//Interruptores reiniciar
+	//Caminata
+	source2Pos[0] = modelMatrixAstroProta[3].x;
+	source2Pos[1] = modelMatrixAstroProta[3].y + 7;
+	source2Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[2], AL_POSITION, source2Pos);
+	if (animationIndex != 1) {
+		std::cout << "Cambia sourcesPlay[2] " << std::endl;
+		sourcesPlay[2] = true;
+	}
+	else {
+		sourcesPlay[2] = false;
+	}
 
+	//Puerta
+	source4Pos[0] = 7.5f;
+	source4Pos[1] = terrain.getHeightTerrain(7.5f, -36.5f) + 1.0f;
+	source4Pos[2] = -36.5f;
+	alSourcefv(source[4], AL_POSITION, source4Pos);
 
-	//
+	//Luces
+	//Luz Código correcto G1
+	source8Pos[0] = modelMatrixAstroProta[3].x;
+	source8Pos[1] = modelMatrixAstroProta[3].y;
+	source8Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[8], AL_POSITION, source8Pos);
+	//sourcesPlay[8] = true;
 
+	//Luz Código correcto G2
+	source9Pos[0] = modelMatrixAstroProta[3].x;
+	source9Pos[1] = modelMatrixAstroProta[3].y;
+	source9Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[9], AL_POSITION, source9Pos);
+	//sourcesPlay[8] = true;
 
+	//Luz Código correcto G3
+	source10Pos[0] = modelMatrixAstroProta[3].x;
+	source10Pos[1] = modelMatrixAstroProta[3].y;
+	source10Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[10], AL_POSITION, source10Pos);
+	//sourcesPlay[8] = true;
 
+	//Movimiento Alien
+	source11Pos[0] = modelMatrixEnemigo[3].x;
+	source11Pos[1] = modelMatrixEnemigo[3].y;
+	source11Pos[2] = modelMatrixEnemigo[3].z;
+	alSourcefv(source[11], AL_POSITION, source11Pos);
+	sourcesPlay[11] = true;
+	
+	//Ambiental Interior
+	source13Pos[0] = modelMatrixAstroProta[3].x;
+	source13Pos[1] = modelMatrixAstroProta[3].y;
+	source13Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[13], AL_POSITION, source13Pos);
+	sourcesPlay[13] = true;
 
+	//Código error
+	source14Pos[0] = modelMatrixAstroProta[3].x;
+	source14Pos[1] = modelMatrixAstroProta[3].y;
+	source14Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[14], AL_POSITION, source14Pos);
+	//sourcesPlay[13] = true;
 }
 
 void cameraMove() {
@@ -5487,54 +5552,67 @@ void updateEscenario2() {
 	if (!enablePuerta) {
 		if (!lucesPalancas[0] && indPalanca == 1) {
 			if ((animaPalancas[2] == 1)) {
+				sourcesPlay[14] = false;
+				sourcesPlay[8] = true;
 				lucesPalancas[0] = true;
 				std::cout << "lucesPalancas[0] " << lucesPalancas[0] << std::endl;
 			}
 			else {
 				for (int i = 0; i < lucesPalancas.size(); i++){
+					sourcesPlay[8] = false;
 					lucesPalancas[i] = false;
 				}
 				for (int i = 0; i < animaPalancas.size(); i++) {
 					animaPalancas[i] = 0;
 				}
 				indPalanca=0;
+				sourcesPlay[14] = true;
 				std::cout << "Combinación Incorrecta "<< std::endl;
 			}
 		}
 		if (!lucesPalancas[1] && indPalanca == 2) {
 			if ((animaPalancas[0] == 1)) {
+				sourcesPlay[14] = false;
+				sourcesPlay[9] = true;
 				lucesPalancas[1] = true;
 				std::cout << "lucesPalancas[1] " << lucesPalancas[1] << std::endl;
 			}
 			else {
 				for (int i = 0; i < lucesPalancas.size(); i++) {
+					sourcesPlay[9] = false;
 					lucesPalancas[i] = false;
 				}
 				for (int i = 0; i < animaPalancas.size(); i++) {
 					animaPalancas[i] = 0;
 				}
 				indPalanca = 0;
+				sourcesPlay[14] = true;
 				std::cout << "Combinación Incorrecta " << std::endl;
 			}
 		}
 		if (!lucesPalancas[2] && indPalanca == 3) {
 			if ((animaPalancas[3] == 1)) {
+				sourcesPlay[14] = false;
+				sourcesPlay[10] = true;
 				lucesPalancas[2] = true;
 				std::cout << "lucesPalancas[2] " << lucesPalancas[2] << std::endl;
 			}
 			else {
 				for (int i = 0; i < lucesPalancas.size(); i++) {
+					sourcesPlay[10] = false;
 					lucesPalancas[i] = false;
 				}
 				for (int i = 0; i < animaPalancas.size(); i++) {
 					animaPalancas[i] = 0;
 				}
 				indPalanca = 0;
+				sourcesPlay[14] = true;
 				std::cout << "Combinación Incorrecta " << std::endl;
 			}
 		}
 		if ((lucesPalancas[0] && lucesPalancas[1] && lucesPalancas[2])) {
 			enablePuerta = true;
+			sourcesPlay[4] = true;
 			std::cout << "Combinación Correcta " << std::endl;
 		}
 
