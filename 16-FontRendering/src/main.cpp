@@ -137,11 +137,8 @@ Model modelGenerador;
 Model modelCompuerta;
 Model modelEdCompuerta;
 Model modelPlataforma;
-Model modelPlaCompuerta;
 Model modelRokas;
 Model modelRokas2;
-Model modelMontana;
-Model modelMontana2;
 Model modelLuzGenerador;
 Model modelLuzBotones;
 
@@ -171,7 +168,9 @@ Terrain terrain2(-1, -1, 200, 1, "../Textures/AlturasMapa2.png");
 GLuint textureYellowID, textureBlueID, textureRedID, textureOrangeID,
 textureGreenID, texturePurpleID;
 GLuint textureTerrainBackgroundID, textureTerrainRID, textureTerrainGID,
-textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2;
+textureTerrainBID, textureTerrainBlendMapID, textureTerrainBlendMapID2,
+textureTerrainBackgroundID2, textureTerrainRID2, textureTerrainGID2,
+textureTerrainBID2;
 GLuint textureParticleFountainID, textureParticleFireID, texId;
 GLuint skyboxTextureID;
 GLuint textureMenuID, textureMenu2ID, textureActivaID, textureTranID, textureEndID;
@@ -191,12 +190,12 @@ GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
 
-std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
-		"../Textures/mp_bloodvalley/blood-valley_bk.tga",
-		"../Textures/mp_bloodvalley/blood-valley_up.tga",
-		"../Textures/mp_bloodvalley/blood-valley_dn.tga",
-		"../Textures/mp_bloodvalley/blood-valley_rt.tga",
-		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };
+std::string fileNames[6] = { "../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapDown.png",
+		"../Textures/CubeMap/CubeMapUp.png",
+		"../Textures/CubeMap/CubeMapUp.png" };
 
 bool exitApp = false;
 int lastMousePosX, offsetX = 0;
@@ -261,10 +260,10 @@ glm::vec3 astroPosition;
 glm::vec3 astroOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 camPivOrigin = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 astroInitialOrientation = glm::vec3(1.0f, 0.0f, 0.0f);
-glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
-glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
-glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
-glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
+//glm::mat4 modelMatrixCompuerta = glm::mat4(1.0f);
+//glm::mat4 modelMatrixEdCompuerta = glm::mat4(1.0f);
+//glm::mat4 modelMatrixPlataforma = glm::mat4(1.0f);
+//glm::mat4 modelMatrixPlaCompuerta = glm::mat4(1.0f);
 
 float timer;
 int banderaCaminar = 0;
@@ -384,8 +383,8 @@ GLuint depthMap, depthMapFBO;
  */
 
  // OpenAL Defines
-#define NUM_BUFFERS 12
-#define NUM_SOURCES 15
+#define NUM_BUFFERS 11
+#define NUM_SOURCES 16
 #define NUM_ENVIRONMENTS 1
 // Listener
 ALfloat listenerPos[] = { 0.0, 0.0, 4.0 };
@@ -436,6 +435,9 @@ ALfloat source13Vel[] = { 0.0, 0.0, 0.0 };
 // Source 14
 ALfloat source14Pos[] = { 2.0, 0.0, 0.0 };
 ALfloat source14Vel[] = { 0.0, 0.0, 0.0 };
+// Source 15
+ALfloat source15Pos[] = { 2.0, 0.0, 0.0 };
+ALfloat source15Vel[] = { 0.0, 0.0, 0.0 };
 // Buffers
 ALuint buffer[NUM_BUFFERS];
 ALuint source[NUM_SOURCES];
@@ -446,8 +448,8 @@ ALenum format;
 ALvoid* data;
 int ch;
 ALboolean loop;
-std::vector<bool> sourcesPlay = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
-std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Ejecutandose
+std::vector<bool> sourcesPlay = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
+std::vector<bool> sourcesPlaying = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };//Si quiero que se prenda al inicio
 
 
 // Se definen todos las funciones.
@@ -737,10 +739,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	terrain.setShader(&shaderTerrain);
 	terrain.setPosition(glm::vec3(100, 0, 100));
 
-	terrain2.init();
-	terrain2.setShader(&shaderTerrain);
-	terrain2.setPosition(glm::vec3(100, 0, 100));
-
 	pivoteCam.init();
 	pivoteCam.setShader(&shaderMulLighting);
 
@@ -754,16 +752,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxMenu.setOrientation(glm::vec3(-25.0, 0.0, 0.0));
 
 	////Rokas
-	//modelRokas.loadModel("../models/rokas/Piedras2.obj");
-	//modelRokas.setShader(&shaderMulLighting);
-	//modelRokas2.loadModel("../models/rokas/Piedras.obj");
-	//modelRokas2.setShader(&shaderMulLighting);
-
-	////Rokas
-	//modelMontana.loadModel("../models/Montanas/Montana.obj");
-	//modelMontana.setShader(&shaderMulLighting);
-	//modelMontana2.loadModel("../models/Montanas/Montana2.obj");
-	//modelMontana2.setShader(&shaderMulLighting);
+	modelRokas.loadModel("../models/rokas/Piedras2.obj");
+	modelRokas.setShader(&shaderMulLighting);
+	modelRokas2.loadModel("../models/rokas/Piedras.obj");
+	modelRokas2.setShader(&shaderMulLighting);
 
 	//Generador
 	modelGenerador.loadModel("../models/generadorG/Generador.obj");
@@ -788,10 +780,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Edificio compuerta
 	modelEdCompuerta.loadModel("../models/edCompuerta/EdificioCompuerta.fbx");
 	modelEdCompuerta.setShader(&shaderMulLighting);
-
-	//PlatCompuerta
-	modelPlaCompuerta.loadModel("../models/compuerta/CompuertaBase.fbx");
-	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	//Plataforma
 	modelPlataforma.loadModel("../models/plataforma/Plataforma.fbx");
@@ -908,32 +896,20 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		skyboxTexture.freeImage(bitmap);
 	}
 
-	// Definiendo la textura a utilizar
+	// Definiendo la textura a utilizar | Negro BlendMap2
 	Texture textureTerrainBackground("../Textures/BlendMap/TierraColor.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureTerrainBackground.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
 	data = textureTerrainBackground.convertToData(bitmap, imageWidth,
 		imageHeight);
-	// Creando la textura con id 1
 	glGenTextures(1, &textureTerrainBackgroundID);
-	// Enlazar esa textura a una tipo de textura de 2D.
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBackgroundID);
-	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
 	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -941,31 +917,40 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainBackground.freeImage(bitmap);
 
-	// Definiendo la textura a utilizar
-	Texture textureTerrainR("../Textures/BlendMap/Cables.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureTerrainR.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureTerrainR.convertToData(bitmap, imageWidth, imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureTerrainRID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureTerrainRID);
-	// set the texture wrapping parameters
+	// Definiendo la textura a utilizar | Negro BlendMap3
+	Texture textureTerrainBackground2("../Textures/BlendMap/PisoFondoNegro.png");
+	bitmap = textureTerrainBackground2.loadImage();
+	data = textureTerrainBackground2.convertToData(bitmap, imageWidth,
+		imageHeight);
+	glGenTextures(1, &textureTerrainBackgroundID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBackgroundID2);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
 	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainBackground2.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Rojo Blendmap 2
+	Texture textureTerrainR("../Textures/BlendMap/Cables.png");
+	bitmap = textureTerrainR.loadImage();
+	data = textureTerrainR.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainRID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainRID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -973,8 +958,108 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureTerrainR.freeImage(bitmap);
 
+	// Definiendo la textura a utilizar | Rojo BlendMap 3
+	Texture textureTerrainR2("../Textures/BlendMap/PisoRojo.png");
+	bitmap = textureTerrainR2.loadImage();
+	data = textureTerrainR2.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainRID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainRID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainR2.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Verde BlendMap2
+	Texture textureTerrainG("../Textures/BlendMap/RocasColor.png");
+	bitmap = textureTerrainG.loadImage();
+	data = textureTerrainG.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainGID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainGID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainG.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Verde BlendMap3
+	Texture textureTerrainG2("../Textures/BlendMap/PisoVerde.png");
+	bitmap = textureTerrainG2.loadImage();
+	data = textureTerrainG2.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainGID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainGID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainG2.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Azul BlendMap2
+	Texture textureTerrainB("../Textures/BlendMap/Plano.png");
+	bitmap = textureTerrainB.loadImage();
+	data = textureTerrainB.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainBID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainB.freeImage(bitmap);
+
+	// Definiendo la textura a utilizar | Azul BlendMap3
+	Texture textureTerrainB2("../Textures/BlendMap/PisoAzul.png");
+	bitmap = textureTerrainB2.loadImage();
+	data = textureTerrainB2.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureTerrainBID2);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBID2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
+			GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	// Libera la memoria de la textura
+	textureTerrainB2.freeImage(bitmap);
+
 	// Definiendo la textura a utilizar para el INICIO
-	Texture textureMenu1("../Textures/Menu.png");
+	Texture textureMenu1("../Textures/Transiciones/Menu.png");
 	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
 	bitmap = textureMenu1.loadImage();
 	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
@@ -1004,70 +1089,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureMenu1.freeImage(bitmap);
-
-	// Definiendo la textura a utilizar
-	Texture textureTerrainG("../Textures/BlendMap/RocasColor.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureTerrainG.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureTerrainG.convertToData(bitmap, imageWidth, imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureTerrainGID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureTerrainGID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureTerrainG.freeImage(bitmap);
-
-	// Definiendo la textura a utilizar
-	Texture textureTerrainB("../Textures/BlendMap/Plano.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	bitmap = textureTerrainB.loadImage();
-	// Convertimos el mapa de bits en un arreglo unidimensional de tipo unsigned char
-	data = textureTerrainB.convertToData(bitmap, imageWidth, imageHeight);
-	// Creando la textura con id 1
-	glGenTextures(1, &textureTerrainBID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureTerrainBID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (data) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureTerrainB.freeImage(bitmap);
 
 	// Definiendo la textura a utilizar
 	Texture textureTerrainBlendMap("../Textures/blendMap2.png");
@@ -1473,11 +1494,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 buffer[4] = alutCreateBufferFromFile("../sounds/Generador.wav");
 	 buffer[5] = alutCreateBufferFromFile("../sounds/Interruptor.wav");
 	 buffer[6] = alutCreateBufferFromFile("../sounds/MovimientoAlien.wav");
-	 buffer[7] = alutCreateBufferFromFile("../sounds/AtaqueAlien.wav");
-	 buffer[8] = alutCreateBufferFromFile("../sounds/AmbientalExterior.wav");
-	 buffer[9] = alutCreateBufferFromFile("../sounds/AmbientalInterior.wav");
-	 buffer[10] = alutCreateBufferFromFile("../sounds/ErrorCodigo.wav");
-	 buffer[11] = alutCreateBufferFromFile("../sounds/GameOver.wav");
+	 buffer[7] = alutCreateBufferFromFile("../sounds/AmbientalExterior.wav");
+	 buffer[8] = alutCreateBufferFromFile("../sounds/AmbientalInterior.wav");
+	 buffer[9] = alutCreateBufferFromFile("../sounds/ErrorCodigo.wav");
+	 buffer[10] = alutCreateBufferFromFile("../sounds/GameOver.wav");
 
 	 int errorAlut = alutGetError();
 	 if (errorAlut != ALUT_ERROR_NO_ERROR) {
@@ -1485,19 +1505,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 	exit(2);
 	 }
 
-	 //if (alGetError() != AL_NO_ERROR) {
-	 //	printf("- Error creating sources !!\n");
-	 //	exit(2);
-	 //} else {
-	 //	printf("init - no errors after alGenSources\n");
-	 //}
-	 //alSourcef(source[0], AL_PITCH, 1.0f);
-	 //alSourcef(source[0], AL_GAIN, 3.0f);
-	 //alSourcefv(source[0], AL_POSITION, source0Pos);
-	 //alSourcefv(source[0], AL_VELOCITY, source0Vel);
-	 //alSourcei(source[0], AL_BUFFER, buffer[0]);
-	 //alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	 //alSourcef(source[0], AL_MAX_DISTANCE, 2000);
+	 alGetError(); /* clear error */
+	 alGenSources(NUM_SOURCES, source);
 
 	 if (alGetError() != AL_NO_ERROR) {
 	 	printf("- Error creating sources !!\n");
@@ -1515,15 +1524,15 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcef(source[0], AL_MAX_DISTANCE, 2000);//DISTANCIA A LA QUE SE ESCUCHA
 	 // Pisadas exterior
 	 alSourcef(source[1], AL_PITCH, 1.0f);
-	 alSourcef(source[1], AL_GAIN, 0.3f);
+	 alSourcef(source[1], AL_GAIN, 0.7f);
 	 alSourcefv(source[1], AL_POSITION, source1Pos);
 	 alSourcefv(source[1], AL_VELOCITY, source1Vel);
 	 alSourcei(source[1], AL_BUFFER, buffer[1]);
 	 alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[1], AL_MAX_DISTANCE, 500);
+	 alSourcef(source[1], AL_MAX_DISTANCE, 1000);
 	 //Pisadas interior
 	 alSourcef(source[2], AL_PITCH, 1.0f);
-	 alSourcef(source[2], AL_GAIN, 1.0f);
+	 alSourcef(source[2], AL_GAIN, 0.7f);
 	 alSourcefv(source[2], AL_POSITION, source2Pos);
 	 alSourcefv(source[2], AL_VELOCITY, source2Vel);
 	 alSourcei(source[2], AL_BUFFER, buffer[2]);
@@ -1531,12 +1540,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcef(source[2], AL_MAX_DISTANCE, 1000);
 	 //Puerta y compuerta
 	 alSourcef(source[3], AL_PITCH, 1.0f);
-	 alSourcef(source[3], AL_GAIN, 1.0f);
+	 alSourcef(source[3], AL_GAIN, 2.0f);
 	 alSourcefv(source[3], AL_POSITION, source3Pos);
 	 alSourcefv(source[3], AL_VELOCITY, source3Vel);
 	 alSourcei(source[3], AL_BUFFER, buffer[3]);
-	 alSourcei(source[3], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[3], AL_MAX_DISTANCE, 2000);
+	 alSourcei(source[3], AL_LOOPING, AL_TRUE);
+	 alSourcef(source[3], AL_MAX_DISTANCE, 1000);
 
 	 alSourcef(source[4], AL_PITCH, 1.0f);
 	 alSourcef(source[4], AL_GAIN, 1.0f);
@@ -1544,89 +1553,100 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	 alSourcefv(source[4], AL_VELOCITY, source4Vel);
 	 alSourcei(source[4], AL_BUFFER, buffer[3]);
 	 alSourcei(source[4], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[4], AL_MAX_DISTANCE, 2000);
+	 alSourcef(source[4], AL_MAX_DISTANCE, 50);
 
 	 //Generadores
 	 alSourcef(source[5], AL_PITCH, 1.0f);
-	 alSourcef(source[5], AL_GAIN, 2.0f);
+	 alSourcef(source[5], AL_GAIN, 3.0f);
 	 alSourcefv(source[5], AL_POSITION, source5Pos);
 	 alSourcefv(source[5], AL_VELOCITY, source5Vel);
 	 alSourcei(source[5], AL_BUFFER, buffer[4]);
 	 alSourcei(source[5], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[5], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[5], AL_MAX_DISTANCE, 50);
 
 	 alSourcef(source[6], AL_PITCH, 1.0f);
-	 alSourcef(source[6], AL_GAIN, 2.0f);
+	 alSourcef(source[6], AL_GAIN, 3.0f);
 	 alSourcefv(source[6], AL_POSITION, source6Pos);
 	 alSourcefv(source[6], AL_VELOCITY, source6Vel);
 	 alSourcei(source[6], AL_BUFFER, buffer[4]);
 	 alSourcei(source[6], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[6], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[6], AL_MAX_DISTANCE, 50);
 
 	 alSourcef(source[7], AL_PITCH, 1.0f);
-	 alSourcef(source[7], AL_GAIN, 2.0f);
+	 alSourcef(source[7], AL_GAIN, 3.0f);
 	 alSourcefv(source[7], AL_POSITION, source7Pos);
 	 alSourcefv(source[7], AL_VELOCITY, source7Vel);
 	 alSourcei(source[7], AL_BUFFER, buffer[4]);
 	 alSourcei(source[7], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[7], AL_MAX_DISTANCE, 1000);
+	 alSourcef(source[7], AL_MAX_DISTANCE, 50);
 
 	 //Interruptores
 	 alSourcef(source[8], AL_PITCH, 1.0f);
-	 alSourcef(source[8], AL_GAIN, 1.5f);
-	 alSourcefv(source[8], AL_POSITION, source2Pos);
-	 alSourcefv(source[8], AL_VELOCITY, source2Vel);
+	 alSourcef(source[8], AL_GAIN, 1.8f);
+	 alSourcefv(source[8], AL_POSITION, source8Pos);
+	 alSourcefv(source[8], AL_VELOCITY, source8Vel);
 	 alSourcei(source[8], AL_BUFFER, buffer[5]);
 	 alSourcei(source[8], AL_LOOPING, AL_FALSE);
 	 alSourcef(source[8], AL_MAX_DISTANCE, 1000);
-	 //MovimientoAlien
+
 	 alSourcef(source[9], AL_PITCH, 1.0f);
-	 alSourcef(source[9], AL_GAIN, 1.5f);
-	 alSourcefv(source[9], AL_POSITION, source2Pos);
-	 alSourcefv(source[9], AL_VELOCITY, source2Vel);
-	 alSourcei(source[9], AL_BUFFER, buffer[6]);
-	 alSourcei(source[9], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[9], AL_MAX_DISTANCE, 700);
-	//Ataque Alien
+	 alSourcef(source[9], AL_GAIN, 1.8f);
+	 alSourcefv(source[9], AL_POSITION, source9Pos);
+	 alSourcefv(source[9], AL_VELOCITY, source9Vel);
+	 alSourcei(source[9], AL_BUFFER, buffer[5]);
+	 alSourcei(source[9], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[9], AL_MAX_DISTANCE, 1000);
+
 	 alSourcef(source[10], AL_PITCH, 1.0f);
-	 alSourcef(source[10], AL_GAIN, 1.5f);
-	 alSourcefv(source[10], AL_POSITION, source2Pos);
-	 alSourcefv(source[10], AL_VELOCITY, source2Vel);
-	 alSourcei(source[10], AL_BUFFER, buffer[7]);
+	 alSourcef(source[10], AL_GAIN, 1.8f);
+	 alSourcefv(source[10], AL_POSITION, source10Pos);
+	 alSourcefv(source[10], AL_VELOCITY, source10Vel);
+	 alSourcei(source[10], AL_BUFFER, buffer[5]);
 	 alSourcei(source[10], AL_LOOPING, AL_FALSE);
-	 alSourcef(source[10], AL_MAX_DISTANCE, 700);
-	 //AmbientalExterior
+	 alSourcef(source[10], AL_MAX_DISTANCE, 1000);
+
+	 //MovimientoAlien
 	 alSourcef(source[11], AL_PITCH, 1.0f);
-	 alSourcef(source[11], AL_GAIN, 1.5f);
-	 alSourcefv(source[11], AL_POSITION, source2Pos);
-	 alSourcefv(source[11], AL_VELOCITY, source2Vel);
-	 alSourcei(source[11], AL_BUFFER, buffer[8]);
+	 alSourcef(source[11], AL_GAIN, 1.0f);
+	 alSourcefv(source[11], AL_POSITION, source11Pos);
+	 alSourcefv(source[11], AL_VELOCITY, source11Vel);
+	 alSourcei(source[11], AL_BUFFER, buffer[6]);
 	 alSourcei(source[11], AL_LOOPING, AL_TRUE);
-	 alSourcef(source[11], AL_MAX_DISTANCE, 1000);
-	 //AmbientalInterior
+	 alSourcef(source[11], AL_MAX_DISTANCE, 30);
+
+	 //AmbientalExterior
 	 alSourcef(source[12], AL_PITCH, 1.0f);
-	 alSourcef(source[12], AL_GAIN, 1.5f);
-	 alSourcefv(source[12], AL_POSITION, source2Pos);
-	 alSourcefv(source[12], AL_VELOCITY, source2Vel);
-	 alSourcei(source[12], AL_BUFFER, buffer[9]);
+	 alSourcef(source[12], AL_GAIN, 2.3f);
+	 alSourcefv(source[12], AL_POSITION, source12Pos);
+	 alSourcefv(source[12], AL_VELOCITY, source12Vel);
+	 alSourcei(source[12], AL_BUFFER, buffer[7]);
 	 alSourcei(source[12], AL_LOOPING, AL_TRUE);
 	 alSourcef(source[12], AL_MAX_DISTANCE, 1000);
-	 //ErrorCódigo
+
+	 //AmbientalInterior
 	 alSourcef(source[13], AL_PITCH, 1.0f);
 	 alSourcef(source[13], AL_GAIN, 1.5f);
-	 alSourcefv(source[13], AL_POSITION, source2Pos);
-	 alSourcefv(source[13], AL_VELOCITY, source2Vel);
-	 alSourcei(source[13], AL_BUFFER, buffer[10]);
-	 alSourcei(source[13], AL_LOOPING, AL_FALSE);
+	 alSourcefv(source[13], AL_POSITION, source13Pos);
+	 alSourcefv(source[13], AL_VELOCITY, source13Vel);
+	 alSourcei(source[13], AL_BUFFER, buffer[8]);
+	 alSourcei(source[13], AL_LOOPING, AL_TRUE);
 	 alSourcef(source[13], AL_MAX_DISTANCE, 1000);
-	 //GameOver
+	 //ErrorCódigo
 	 alSourcef(source[14], AL_PITCH, 1.0f);
 	 alSourcef(source[14], AL_GAIN, 1.5f);
-	 alSourcefv(source[14], AL_POSITION, source2Pos);
-	 alSourcefv(source[14], AL_VELOCITY, source2Vel);
-	 alSourcei(source[14], AL_BUFFER, buffer[11]);
+	 alSourcefv(source[14], AL_POSITION, source14Pos);
+	 alSourcefv(source[14], AL_VELOCITY, source14Vel);
+	 alSourcei(source[14], AL_BUFFER, buffer[9]);
 	 alSourcei(source[14], AL_LOOPING, AL_FALSE);
 	 alSourcef(source[14], AL_MAX_DISTANCE, 1000);
+	 //GameOver
+	 alSourcef(source[15], AL_PITCH, 1.0f);
+	 alSourcef(source[15], AL_GAIN, 1.5f);
+	 alSourcefv(source[15], AL_POSITION, source2Pos);
+	 alSourcefv(source[15], AL_VELOCITY, source2Vel);
+	 alSourcei(source[15], AL_BUFFER, buffer[10]);
+	 alSourcei(source[15], AL_LOOPING, AL_FALSE);
+	 alSourcef(source[15], AL_MAX_DISTANCE, 1000);
 	 
 	 // Se inicializa el modelo de texeles.
 	modelText = new FontTypeRendering::FontTypeRendering(screenWidth,
@@ -1662,7 +1682,6 @@ void destroy() {
 
 	// Terrains objects Delete
 	terrain.destroy();
-	terrain.destroy();
 
 	// Custom objects Delete
 	modelFountain.destroy();
@@ -1677,7 +1696,6 @@ void destroy() {
 	modelEdCompuerta.destroy();
 	modelGenerador.destroy();
 	modelPlataforma.destroy();
-	modelPlaCompuerta.destroy();
 	modelRokas.destroy();
 	modelRokas2.destroy();
 	modelLuzBotones.destroy();
@@ -1972,7 +1990,7 @@ bool processInput(bool continueApplication) {
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, 0.1));
 			animationIndex = 0;
-			timer += 0.01f;
+			timer += 0.0075f;
 			std::cout << timer << std::endl;
 			if (timer > 0.1f)
 				banderaCaminar = 1;
@@ -2230,12 +2248,6 @@ void applicationLoop() {
 				alSourcePlay(source[i]);
 			}
 		}
-
-		//Carga de escenarios
-		//if (!musicaIntro) {
-		//	sourcesPlay[0] = false;
-		//	alSourceStop(source[0]);
-		//}
 		if (escenario1) {
 			updateEscenario1();
 			lucesEscenari1(shadowBox, &view);
@@ -2256,7 +2268,7 @@ void applicationLoop() {
 			}
 			//std::cout << "Entra linea renderizados" << std::endl;
 			empiezaJuego = true;
-			musicaIntro = false;
+			//musicaIntro = false;
 			sourcesPlay[0] = false;
 			preRender1();
 			renderScene();
@@ -2447,15 +2459,9 @@ void prepareScene() {
 
 	modelPlataforma.setShader(&shaderMulLighting);
 
-	modelPlaCompuerta.setShader(&shaderMulLighting);
-
 	modelRokas.setShader(&shaderMulLighting);
 
 	modelRokas2.setShader(&shaderMulLighting);
-
-	modelMontana.setShader(&shaderMulLighting);
-
-	modelMontana2.setShader(&shaderMulLighting);
 
 	boxReferencia.setShader(&shaderMulLighting);
 
@@ -2494,15 +2500,9 @@ void prepareDepthScene() {
 
 	modelPlataforma.setShader(&shaderDepth);
 
-	modelPlaCompuerta.setShader(&shaderDepth);
-
 	modelRokas.setShader(&shaderDepth);
 
 	modelRokas2.setShader(&shaderDepth);
-
-	modelMontana.setShader(&shaderDepth);
-
-	modelMontana2.setShader(&shaderDepth);
 
 	boxReferencia.setShader(&shaderDepth);
 
@@ -2571,27 +2571,6 @@ void renderScene(bool renderParticles) {
 	 * Custom Anim objects obj
 	 *******************************************/
 
-	 /*
-	 glm::vec3 ejey = glm::normalize(terrain.getNormalTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]));
-	 glm::vec3 ejex = glm::normalize(modelMatrixCompuerta[0]);
-	 glm::vec3 ejez = glm::normalize(glm::cross(ejex, ejey));
-	 ejex = glm::normalize(glm::cross(ejey, ejez));
-	 modelMatrixCompuerta[0] = glm::vec4(ejex, 0.0);
-	 modelMatrixCompuerta[1] = glm::vec4(ejey, 0.0);
-	 modelMatrixCompuerta[2] = glm::vec4(ejez, 0.0);
-	 modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0], modelMatrixCompuerta[3][2]);*/
-
-	 //glDisable(GL_BLEND);
-	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-	//	modelMatrixCompuerta[3][2]) + 2.0f;
-	//glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
-	//modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-	//	glm::vec3(0.0021, 0.0021, 0.0021));
-	//modelCompuerta.setAnimationIndex(2);
-	//modelCompuerta.render(modelMatrixCompuertaBody);
-
-
-
 	//modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 	//	glm::vec3(0, 0, 1));
 
@@ -2649,29 +2628,23 @@ void renderScene(bool renderParticles) {
 		modelLuzGenerador.render();
 	}
 
-	//for (int i = 0; i < rokas2Pos.size(); i++) {
-	//	rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
-	//		rokas2Pos[i].z) - 0.5f;
-	//	modelRokas2.setPosition(rokas2Pos[i]);
-	//	modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
-	//	//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
-	//	modelRokas2.render();
-	//}
-	//for (int i = 0; i < rokasPos.size(); i++) {
-	//	rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
-	//		rokasPos[i].z) - 0.5f;
-	//	modelRokas.setPosition(rokasPos[i]);
-	//	modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
-	//	//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
-	//	modelRokas.render();
-	//}
+	for (int i = 0; i < rokas2Pos.size(); i++) {
+		rokas2Pos[i].y = terrain.getHeightTerrain(rokas2Pos[i].x,
+		rokas2Pos[i].z) - 0.5f;
+		modelRokas2.setPosition(rokas2Pos[i]);
+		modelRokas2.setScale(glm::vec3(1.5, 1.5, 1.5));
+		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+		modelRokas2.render();
+	}
+	for (int i = 0; i < rokasPos.size(); i++) {
+		rokasPos[i].y = terrain.getHeightTerrain(rokasPos[i].x,
+		rokasPos[i].z) - 0.5f;
+		modelRokas.setPosition(rokasPos[i]);
+		modelRokas.setScale(glm::vec3(1.5, 1.5, 1.5));
+		//modelRokas.setOrientation(glm::vec3(0.0, 0.0, 0));
+		modelRokas.render();
+	}
 	//Compuerta
-	//modelMatrixCompuerta = glm::translate(modelMatrixCompuerta, glm::vec3(10.445f, 0.0f, 13.789f));
-	//modelMatrixCompuerta[3][1] = terrain.getHeightTerrain(modelMatrixCompuerta[3][0],
-		//modelMatrixCompuerta[3][2]) - 2.0f;
-	//glm::mat4 modelMatrixCompuertaBody = glm::mat4(modelMatrixCompuerta);
-	//modelMatrixCompuertaBody = glm::scale(modelMatrixCompuertaBody,
-	//	glm::vec3(0.021, 0.021, 0.021));
 	modelCompuerta.setPosition(glm::vec3(3.3f, 2.8f, 19.1f));
 	modelCompuerta.setScale(glm::vec3(0.03, 0.03, 0.03));
 	modelCompuerta.setAnimationIndex(animationIndexEscotilla);
@@ -2694,19 +2667,6 @@ void renderScene(bool renderParticles) {
 	modelEdCompuerta.setScale(glm::vec3(0.9, 0.9, 0.9));
 	modelEdCompuerta.render();
 
-	////Montañas Fondo
-	//modelMontana2.setPosition(glm::vec3(-80.03, 1.0, -4.0));
-	//modelMontana2.setOrientation(glm::vec3(0.0, -90, 0.0));
-	//modelMontana2.render();
-
-	//modelMontana2.setPosition(glm::vec3(-15.0, 1.0, -19));
-	//modelMontana2.setOrientation(glm::vec3(0.0, 180.0, 0.0));
-	//modelMontana2.render();
-
-	//modelMontana2.setPosition(glm::vec3(94.0, 1.0, 6.0));
-	//modelMontana2.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-	//modelMontana2.render();
-
 	//astroProta
 	glDisable(GL_CULL_FACE);
 	modelMatrixAstroProta[3][1] = terrain.getHeightTerrain(modelMatrixAstroProta[3][0],
@@ -2715,19 +2675,7 @@ void renderScene(bool renderParticles) {
 	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
-	astroProta.render(modelMatrixAstroBody);
-	source1Pos[0] = modelMatrixAstroProta[3].x;
-	source1Pos[1] = modelMatrixAstroProta[3].y+7;
-	source1Pos[2] = modelMatrixAstroProta[3].z;
-	alSourcefv(source[1], AL_POSITION, source1Pos);
-	if (animationIndex != 1) {
-		std::cout << "Cambia sourcesPlay[1] "  << std::endl;
-		sourcesPlay[1] = true;
-	}
-	else {
-		sourcesPlay[1] = false;
-	}
-	
+	astroProta.render(modelMatrixAstroBody);	
 	glEnable(GL_CULL_FACE);
 
 	///**********
@@ -3528,9 +3476,6 @@ void collidersManagmentEs1() {
 	glm::mat4 modelmatrixColliderCompuerta = glm::mat4(1.0);
 	modelmatrixColliderCompuerta = glm::translate(modelmatrixColliderCompuerta,glm::vec3(1.9f, terrain.getHeightTerrain(2.2f,
 		13.0f) + 1.0f , 12.7f));
-	//modelmatrixColliderCompuerta = glm::rotate(modelmatrixColliderCompuerta,
-		//glm::radians(-90.0f), glm::vec3(1, 0, 0));
-	// Set the orientation of collider before doing the scale
 	compuertaCollider.u = glm::quat_cast(modelmatrixColliderCompuerta);
 	modelmatrixColliderCompuerta = glm::scale(modelmatrixColliderCompuerta,
 		glm::vec3(4.0, 4.0, 4.0));
@@ -3542,7 +3487,7 @@ void collidersManagmentEs1() {
 		* glm::vec3(4.0, 4.0, 4.0);
 	compuertaCollider.c = glm::vec3(modelmatrixColliderCompuerta[3]);
 	addOrUpdateColliders(collidersOBB, "compuerta", compuertaCollider,
-		modelMatrixCompuerta);
+		modelmatrixColliderCompuerta);
 
 
 	// Collider de edificio compuerta edificios
@@ -3552,8 +3497,6 @@ void collidersManagmentEs1() {
 		modelmatrixColliderEdCompuerta = glm::translate(modelmatrixColliderEdCompuerta,
 			glm::vec3(edificios[i].x, terrain.getHeightTerrain(edificios[i].x,
 				edificios[i].z) - 1.0f, edificios[i].z));
-		//modelmatrixColliderEdCompuerta = glm::rotate(modelmatrixColliderEdCompuerta,
-		//	glm::radians(120.0f), glm::vec3(0, 1, 0));
 		addOrUpdateColliders(collidersOBB, "edificios-" + std::to_string(i),
 			edCompuertaCollider, modelmatrixColliderEdCompuerta);
 		// Set the orientation of collider before doing the scale
@@ -3855,25 +3798,25 @@ void soundEscene1() {
 	source0Pos[2] = modelMatrixAstroProta[3].z;
 	alSourcefv(source[0], AL_POSITION, source0Pos);
 
-	//Pasos
-	//source1Pos[0] = modelMatrixAstroProta[3].x;
-	//source1Pos[1] = modelMatrixAstroProta[3].y + 10.0f;
-	//source1Pos[2] = modelMatrixAstroProta[3].z;
-	//alSourcefv(source[1], AL_POSITION, source1Pos);
-	//sourcesPlay[1] = true;
+	//Caminata
+	source1Pos[0] = modelMatrixAstroProta[3].x;
+	source1Pos[1] = modelMatrixAstroProta[3].y + 7;
+	source1Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[1], AL_POSITION, source1Pos);
+	if (animationIndex != 1) {
+		std::cout << "Cambia sourcesPlay[1] " << std::endl;
+		sourcesPlay[1] = true;
+	}
+	else {
+		sourcesPlay[1] = false;
+	}
 
 	//Generadores
-	sourcesPlay[5] = true;
-	source5Pos[0] = modelMatrixAstroProta[3].x;
-	source5Pos[1] = modelMatrixAstroProta[3].y;
-	source5Pos[2] = modelMatrixAstroProta[3].z;
+	source5Pos[0] = -66.6;
+	source5Pos[1] = terrain.getHeightTerrain(-66.6, -2) + 1.0;
+	source5Pos[2] = -2;
 	alSourcefv(source[5], AL_POSITION, source5Pos);
-	//sourcesPlay[5] = true;
-	//source5Pos[0] = -66.6;
-	//source5Pos[1] = terrain.getHeightTerrain(-66.6, -2) +1.0;
-	//source5Pos[2] = -2;
-	//alSourcefv(source[5], AL_POSITION, source5Pos);
-	//sourcesPlay[5] = true;
+	sourcesPlay[5] = true;
 
 	source6Pos[0] = 78;
 	source6Pos[1] = terrain.getHeightTerrain(78, 12) + 1.0;
@@ -3886,6 +3829,40 @@ void soundEscene1() {
 	source7Pos[2] = -3;
 	alSourcefv(source[7], AL_POSITION, source7Pos);
 	sourcesPlay[7] = true;
+
+	//Ambiental Exterior
+	source12Pos[0] = modelMatrixAstroProta[3].x;
+	source12Pos[1] = modelMatrixAstroProta[3].y + 3;
+	source12Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[12], AL_POSITION, source12Pos);
+	sourcesPlay[12] = true;
+
+	//Generador Código correcto G1
+	source8Pos[0] = modelMatrixAstroProta[3].x;
+	source8Pos[1] = modelMatrixAstroProta[3].y;
+	source8Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[8], AL_POSITION, source8Pos);
+	//sourcesPlay[8] = true;
+
+	//Generador Código correcto G2
+	source9Pos[0] = modelMatrixAstroProta[3].x;
+	source9Pos[1] = modelMatrixAstroProta[3].y;
+	source9Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[9], AL_POSITION, source9Pos);
+	//sourcesPlay[8] = true;
+
+	//Generador Código correcto G3
+	source10Pos[0] = modelMatrixAstroProta[3].x;
+	source10Pos[1] = modelMatrixAstroProta[3].y;
+	source10Pos[2] = modelMatrixAstroProta[3].z;
+	alSourcefv(source[10], AL_POSITION, source10Pos);
+	//sourcesPlay[8] = true;
+
+	//Compuerta Abierta
+	source3Pos[0] = 1.9f;
+	source3Pos[1] = terrain.getHeightTerrain(2.2f, 13.0f) + 1.0f;
+	source3Pos[2] = 12.7f;
+	alSourcefv(source[3], AL_POSITION, source3Pos);
 
 }
 
@@ -3917,8 +3894,6 @@ void prepareScene2() {
 	modelGenerador.setShader(&shaderMulLighting);
 
 	modelPlataforma.setShader(&shaderMulLighting);
-
-	modelPlaCompuerta.setShader(&shaderMulLighting);
 
 	modelRokas.setShader(&shaderMulLighting);
 
@@ -4012,8 +3987,6 @@ void prepareDepthScene2() {
 
 	modelPlataforma.setShader(&shaderDepth);
 
-	modelPlaCompuerta.setShader(&shaderDepth);
-
 	modelRokas.setShader(&shaderDepth);
 
 	boxReferencia.setShader(&shaderDepth);
@@ -4078,7 +4051,6 @@ void prepareDepthScene2() {
 	modelMarcoPuerta.setShader(&shaderDepth);
 }
 
-//Descomentar los modelos en el init
 void renderScene2(bool renderParticles) {
 	// Se activa la textura del background
 	glActiveTexture(GL_TEXTURE0);
@@ -5206,44 +5178,27 @@ void collidersManagmentEs2() {
 }
 
 void soundEscene2() {
-	/****************************+
-		 * Open AL sound data
-		 */
-		 // Listener for the Thris person camera
-	listenerPos[0] = modelMatrixEnemigo[3].x;
-	listenerPos[1] = modelMatrixEnemigo[3].y;
-	listenerPos[2] = modelMatrixEnemigo[3].z;
-	alListenerfv(AL_POSITION, listenerPos);
-
-	glm::vec3 upModel = glm::normalize(modelMatrixEnemigo[1]);
-	glm::vec3 frontModel = glm::normalize(modelMatrixEnemigo[2]);
-
-	listenerOri[0] = frontModel.x;
-	listenerOri[1] = frontModel.y;
-	listenerOri[2] = frontModel.z;
-	listenerOri[3] = upModel.x;
-	listenerOri[4] = upModel.y;
-	listenerOri[5] = upModel.z;
-
-	// Listener for the First person camera
-	/*listenerPos[0] = camera->getPosition().x;
-	 listenerPos[1] = camera->getPosition().y;
-	 listenerPos[2] = camera->getPosition().z;
-	 alListenerfv(AL_POSITION, listenerPos);
-	 listenerOri[0] = camera->getFront().x;
-	 listenerOri[1] = camera->getFront().y;
-	 listenerOri[2] = camera->getFront().z;
-	 listenerOri[3] = camera->getUp().x;
-	 listenerOri[4] = camera->getUp().y;
-	 listenerOri[5] = camera->getUp().z;*/
-	alListenerfv(AL_ORIENTATION, listenerOri);
-
-	for (unsigned int i = 0; i < sourcesPlay.size(); i++) {
-		if (sourcesPlay[i]) {
-			sourcesPlay[i] = false;
-			alSourcePlay(source[i]);
-		}
+	if (sourcesPlay[3]) {
+		// Apagado de sonidos primer nivel
+		sourcesPlay[1] = false;
+		sourcesPlay[3] = false;
+		sourcesPlay[5] = false;
+		sourcesPlay[6] = false;
+		sourcesPlay[7] = false;
+		sourcesPlay[12] = false;
+		sourcesPlay[8] = true;
+		sourcesPlay[9] = true;
+		sourcesPlay[10] = true;
 	}
+
+	//Interruptores reiniciar
+
+
+	//
+
+
+
+
 }
 
 void cameraMove() {
@@ -5251,9 +5206,16 @@ void cameraMove() {
 	posterior = terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]);
 	camaraXcoord = terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]);
 	if (camaraXcoord < posterior) {
-		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
-			modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-				glm::vec3(-0.1, 0, 0.0));
+		if (escenario1) {
+			if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
+				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+					glm::vec3(-0.1, 0, 0.0));
+		}
+		if (escenario2) {
+			if (terrain2.getXCoordTerrain(modelMatrixPivoteCam[3][0]) < limiteDerecho && terrain2.getXCoordTerrain(modelMatrixAstroProta[3][0]) > limiteIzquierdo)
+				modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
+					glm::vec3(-0.1, 0, 0.0));
+		}
 	}
 	if (camaraXcoord > posterior) {
 		if (terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) > limiteIzquierdo && terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) < limiteDerecho)
@@ -5413,6 +5375,7 @@ void updateEscenario1() {
 	if (!enableEscotilla1) {
 		if (combBotones[0][0] && !combBotones[0][1] && !combBotones[0][2]) {
 			lucesBotones[0] = true;
+			sourcesPlay[8] = true;
 			std::cout << "combBotones[0] " << lucesBotones[0] << std::endl;
 		}
 		else {
@@ -5420,6 +5383,7 @@ void updateEscenario1() {
 		}
 		if (combBotones[2][0] && !combBotones[2][1] && combBotones[2][2]) {
 			lucesBotones[2] = true;
+			sourcesPlay[9] = true;
 			std::cout << "combBotones[2] " << lucesBotones[2] << std::endl;
 		}
 		else {
@@ -5427,6 +5391,8 @@ void updateEscenario1() {
 		}
 		if (combBotones[3][0] && combBotones[3][1] && !combBotones[3][2]) {
 			lucesBotones[3] = true;
+			alSourcePlay(source[8]);
+			sourcesPlay[10] = true;
 			std::cout << "combBotones[3] " << lucesBotones[3] << std::endl;
 		}
 		else {
@@ -5435,6 +5401,7 @@ void updateEscenario1() {
 		if (lucesBotones[0] && lucesBotones[2] && lucesBotones[3]) {
 			enableEscotilla1 = true;
 			animationIndexEscotilla = 2;
+			sourcesPlay[3] = true;
 			std::cout << "enableEscotilla1 " << enableEscotilla1 << std::endl;
 		}
 	}
