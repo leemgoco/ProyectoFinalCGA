@@ -291,7 +291,9 @@ bool cambianivel3 = false;
 bool empiezaJuego = false;
 bool pressEnter = false;
 bool musicaIntro = true;
+bool deControl = false;
 int animationIndexEscotilla = 0;
+bool primera = false;
 
 bool escenario1 = true;
 bool escenario2 = false;
@@ -1910,10 +1912,11 @@ bool processInput(bool continueApplication) {
 			if (enableAction && buttons[0] == GLFW_PRESS) {
 				enableAction = false;
 				actionE = true;
+				deControl = true;
 				animationIndex = 2;
 				std::cout << "actionE:" << actionE << std::endl;
 			}
-			else if (!enableAction) {
+			else if (buttons[0] == GLFW_RELEASE) {
 				enableAction = true;
 				actionE = false;
 				std::cout << "Desactivado:" << actionE << std::endl;
@@ -1925,9 +1928,11 @@ bool processInput(bool continueApplication) {
 					glm::vec3(0, 1, 0));
 				animationIndex = 0;
 				astroPosition = modelMatrixAstroProta[3];
-				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-				astroPosition.x += -58.0f;
-				astroPosition.z += -10.0f;
+				if (escenario2) {
+					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				}
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 			}
@@ -1937,9 +1942,11 @@ bool processInput(bool continueApplication) {
 					glm::vec3(0, 1, 0));
 				animationIndex = 0;
 				astroPosition = modelMatrixAstroProta[3];
-				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-				astroPosition.x += -58.0f;
-				astroPosition.z += -10.0f;
+				if (escenario2) {
+					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				}
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 			}
 			//Cruzeta Arriba
@@ -1989,9 +1996,11 @@ bool processInput(bool continueApplication) {
 					cameraMove2();
 				}
 				astroPosition = modelMatrixAstroProta[3];
-				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-				astroPosition.x += -58.0f;
-				astroPosition.z += -10.0f;
+				if (escenario2) {
+					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				}
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 
 				animationIndex = 0;
 
@@ -2023,7 +2032,9 @@ bool processInput(bool continueApplication) {
 					cameraMove2();
 				}
 				astroPosition = modelMatrixAstroProta[3];
-				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				if (escenario2) {
+					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				}
 				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 
@@ -2036,9 +2047,11 @@ bool processInput(bool continueApplication) {
 					cameraMove2();
 				}
 				astroPosition = modelMatrixAstroProta[3];
-				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-				astroPosition.x += -58.0f;
-				astroPosition.z += -10.0f;
+				if (escenario2) {
+					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				}
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 					//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
@@ -2105,7 +2118,7 @@ bool processInput(bool continueApplication) {
 			animationIndex = 2;
 			std::cout << "actionE:" << actionE << std::endl;
 		}
-		else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+		else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE && !deControl) {
 			enableAction = true;
 			actionE = false;
 		}
@@ -2115,9 +2128,11 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0, 1, 0));
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-			astroPosition.x += -58.0f;
-			astroPosition.z += -10.0f;
+			if (escenario2) {
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			}
+			astroPosition.x += -55.0f;
+			astroPosition.z += -23.0f;
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 		}
@@ -2126,9 +2141,11 @@ bool processInput(bool continueApplication) {
 				glm::vec3(0, 1, 0));
 			animationIndex = 0;
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-			astroPosition.x += -58.0f;
-			astroPosition.z += -10.0f;
+			if (escenario2) {
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			}
+			astroPosition.x += -55.0f;
+			astroPosition.z += -23.0f;
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 		}
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -2177,9 +2194,11 @@ bool processInput(bool continueApplication) {
 				cameraMove2();
 			}
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-			astroPosition.x += -58.0f;
-			astroPosition.z += -10.0f;
+			if (escenario2) {
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			}
+			astroPosition.x += -555.0f;
+			astroPosition.z += -23.0f;
 
 			animationIndex = 0;
 
@@ -2210,7 +2229,9 @@ bool processInput(bool continueApplication) {
 				cameraMove2();
 			}
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			if (escenario2) {
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			}
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 
@@ -2223,9 +2244,11 @@ bool processInput(bool continueApplication) {
 				cameraMove2();
 			}
 			astroPosition = modelMatrixAstroProta[3];
-			enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
-			astroPosition.x += -58.0f;
-			astroPosition.z += -10.0f;
+			if (escenario2) {
+				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+			}
+			astroPosition.x += -55.0f;
+			astroPosition.z += -23.0f;
 			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 				//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
@@ -2237,7 +2260,9 @@ bool processInput(bool continueApplication) {
 
 	//************************INTERACCIONES DE COLLIDERS ENEMIGO JUGADOR ******************************/
 
-	vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixEnemigo[3]);
+	if (escenario2) {
+		vectorDireccionEnemigo = enemigo1.calcularDireccionDeMovimiento(astroPosition, modelMatrixEnemigo[3]);
+	}
 
 	if (playerRespawn == true) {
 
@@ -2265,8 +2290,10 @@ bool processInput(bool continueApplication) {
 
 	if (enemigo1.respawn == true) {
 		//Descomentar
-		modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
-			glm::vec3(0.0f, 0.0f, 0.0f));
+		if (escenario2) {
+			modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
+				glm::vec3(0.0f, 0.0f, 0.0f));
+		}
 		tiempo += 1;
 
 
@@ -2277,7 +2304,10 @@ bool processInput(bool continueApplication) {
 
 	}
 	else if (enemigo1.respawn == false) {
-		modelMatrixEnemigo = glm::translate(modelMatrixEnemigo, vectorDireccionEnemigo * enemigo1.velocidad); //Descomentar
+		if (escenario2) {
+			modelMatrixEnemigo = glm::translate(modelMatrixEnemigo, vectorDireccionEnemigo * enemigo1.velocidad);
+		}
+		 //Descomentar
 		//modelMatrixEnemigo = glm::rotate(modelMatrixEnemigo, enemigo1.faceDirection(vectorDireccionEnemigo), glm::vec3(0,1,0));
 	}
 
@@ -2455,6 +2485,7 @@ void applicationLoop() {
 				//boxMenu.setOrientation(glm::vec3(0.0, 180.0, 0.0));
 				boxMenu.render();
 				glfwSwapBuffers(window);
+				timer = 0.0f;
 				continue;
 			}
 			empiezaJuego = true;
@@ -2467,6 +2498,10 @@ void applicationLoop() {
 		if (!escenario1 && !escenario2) {
 			updateEscenario2();
 			lucesEscenari2(shadowBox, &view);
+			for (unsigned int i = 1; i < sourcesPlay.size(); i++) {
+				sourcesPlay[0] = true;
+				sourcesPlay[i] = false;
+			}
 			if (cambianivel3) {
 				luzMenus();
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -2855,173 +2890,9 @@ void renderScene(bool renderParticles) {
 	astroProta.render(modelMatrixAstroBody);	
 	glEnable(GL_CULL_FACE);
 
-	///**********
-	// * Sorter with alpha objects
-	// */
-	//std::map<float, std::pair<std::string, glm::vec3>> blendingSorted;
-	//std::map<std::string, glm::vec3>::iterator itblend;
-	//for (itblend = blendingUnsorted.begin(); itblend != blendingUnsorted.end();
-	//		itblend++) {
-	//	float distanceFromView = glm::length(
-	//			camera->getPosition() - itblend->second);
-	//	blendingSorted[distanceFromView] = std::make_pair(itblend->first,
-	//			itblend->second);
-	//}
-
-	/**********
-	 * Render de las transparencias
-	 */
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_CULL_FACE);
-	//for (std::map<float, std::pair<std::string, glm::vec3> >::reverse_iterator it =
-	//		blendingSorted.rbegin(); it != blendingSorted.rend(); it++) {
-	//	if (it->second.first.compare("aircraft") == 0) {
-	//		// Render for the aircraft model
-	//		glm::mat4 modelMatrixAircraftBlend = glm::mat4(modelMatrixAircraft);
-	//		modelMatrixAircraftBlend[3][1] = terrain.getHeightTerrain(
-	//				modelMatrixAircraftBlend[3][0],
-	//				modelMatrixAircraftBlend[3][2]) + 2.0;
-	//		modelAircraft.render(modelMatrixAircraftBlend);
-	//	} else if (it->second.first.compare("lambo") == 0) {
-	//		// Lambo car
-	//		glm::mat4 modelMatrixLamboBlend = glm::mat4(modelMatrixLambo);
-	//		modelMatrixLamboBlend[3][1] = terrain.getHeightTerrain(
-	//				modelMatrixLamboBlend[3][0], modelMatrixLamboBlend[3][2]);
-	//		modelMatrixLamboBlend = glm::scale(modelMatrixLamboBlend,
-	//				glm::vec3(1.3, 1.3, 1.3));
-	//		modelLambo.render(modelMatrixLamboBlend);
-	//		glActiveTexture(GL_TEXTURE0);
-	//		glm::mat4 modelMatrixLamboLeftDor = glm::mat4(
-	//				modelMatrixLamboBlend);
-	//		modelMatrixLamboLeftDor = glm::translate(modelMatrixLamboLeftDor,
-	//				glm::vec3(1.08676, 0.707316, 0.982601));
-	//		modelMatrixLamboLeftDor = glm::rotate(modelMatrixLamboLeftDor,
-	//				glm::radians(dorRotCount), glm::vec3(1.0, 0, 0));
-	//		modelMatrixLamboLeftDor = glm::translate(modelMatrixLamboLeftDor,
-	//				glm::vec3(-1.08676, -0.707316, -0.982601));
-	//		modelLamboLeftDor.render(modelMatrixLamboLeftDor);
-	//		modelLamboRightDor.render(modelMatrixLamboBlend);
-	//		modelLamboFrontLeftWheel.render(modelMatrixLamboBlend);
-	//		modelLamboFrontRightWheel.render(modelMatrixLamboBlend);
-	//		modelLamboRearLeftWheel.render(modelMatrixLamboBlend);
-	//		modelLamboRearRightWheel.render(modelMatrixLamboBlend);
-	//		// Se regresa el cull faces IMPORTANTE para las puertas
-	//	} else if (it->second.first.compare("heli") == 0) {
-	//		// Helicopter
-	//		glm::mat4 modelMatrixHeliChasis = glm::mat4(modelMatrixHeli);
-	//		modelHeliChasis.render(modelMatrixHeliChasis);
-
-	//		glm::mat4 modelMatrixHeliHeli = glm::mat4(modelMatrixHeliChasis);
-	//		modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli,
-	//				glm::vec3(0.0, 0.0, -0.249548));
-	//		modelMatrixHeliHeli = glm::rotate(modelMatrixHeliHeli, rotHelHelY,
-	//				glm::vec3(0, 1, 0));
-	//		modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli,
-	//				glm::vec3(0.0, 0.0, 0.249548));
-	//		modelHeliHeli.render(modelMatrixHeliHeli);
-	//	} else if (renderParticles
-	//			&& it->second.first.compare("fountain") == 0) {
-	//		/**********
-	//		 * Init Render particles systems
-	//		 */
-	//		glm::mat4 modelMatrixParticlesFountain = glm::mat4(1.0);
-	//		modelMatrixParticlesFountain = glm::translate(
-	//				modelMatrixParticlesFountain, it->second.second);
-	//		modelMatrixParticlesFountain[3][1] = terrain.getHeightTerrain(
-	//				modelMatrixParticlesFountain[3][0],
-	//				modelMatrixParticlesFountain[3][2]) + 0.36 * 10.0;
-	//		modelMatrixParticlesFountain = glm::scale(
-	//				modelMatrixParticlesFountain, glm::vec3(3.0, 3.0, 3.0));
-	//		currTimeParticlesAnimation = TimeManager::Instance().GetTime();
-	//		if (currTimeParticlesAnimation - lastTimeParticlesAnimation > 10.0)
-	//			lastTimeParticlesAnimation = currTimeParticlesAnimation;
-	//		//glDisable(GL_DEPTH_TEST);
-	//		glDepthMask(GL_FALSE);
-	//		// Set the point size
-	//		glPointSize(10.0f);
-	//		glActiveTexture(GL_TEXTURE0);
-	//		glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);
-	//		shaderParticlesFountain.turnOn();
-	//		shaderParticlesFountain.setFloat("Time",
-	//				float(
-	//						currTimeParticlesAnimation
-	//								- lastTimeParticlesAnimation));
-	//		shaderParticlesFountain.setFloat("ParticleLifetime", 3.5f);
-	//		shaderParticlesFountain.setInt("ParticleTex", 0);
-	//		shaderParticlesFountain.setVectorFloat3("Gravity",
-	//				glm::value_ptr(glm::vec3(0.0f, -0.3f, 0.0f)));
-	//		shaderParticlesFountain.setMatrix4("model", 1, false,
-	//				glm::value_ptr(modelMatrixParticlesFountain));
-	//		glBindVertexArray(VAOParticles);
-	//		glDrawArrays(GL_POINTS, 0, nParticles);
-	//		glDepthMask(GL_TRUE);
-	//		//glEnable(GL_DEPTH_TEST);
-	//		shaderParticlesFountain.turnOff();
-	//		/**********
-	//		 * End Render particles systems
-	//		 */
-	//	} else if (renderParticles && it->second.first.compare("fire") == 0) {
-	//		/**********
-	//		 * Init Render particles systems
-	//		 */
-	//		lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
-	//		currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
-
-	//		shaderParticlesFire.setInt("Pass", 1);
-	//		shaderParticlesFire.setFloat("Time",
-	//				currTimeParticlesAnimationFire);
-	//		shaderParticlesFire.setFloat("DeltaT",
-	//				currTimeParticlesAnimationFire
-	//						- lastTimeParticlesAnimationFire);
-
-	//		glActiveTexture(GL_TEXTURE1);
-	//		glBindTexture(GL_TEXTURE_1D, texId);
-	//		glEnable(GL_RASTERIZER_DISCARD);
-	//		glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
-	//		glBeginTransformFeedback(GL_POINTS);
-	//		glBindVertexArray(particleArray[1 - drawBuf]);
-	//		glVertexAttribDivisor(0, 0);
-	//		glVertexAttribDivisor(1, 0);
-	//		glVertexAttribDivisor(2, 0);
-	//		glDrawArrays(GL_POINTS, 0, nParticlesFire);
-	//		glEndTransformFeedback();
-	//		glDisable(GL_RASTERIZER_DISCARD);
-
-	//		shaderParticlesFire.setInt("Pass", 2);
-	//		glm::mat4 modelFireParticles = glm::mat4(1.0);
-	//		modelFireParticles = glm::translate(modelFireParticles,
-	//				it->second.second);
-	//		modelFireParticles[3][1] = terrain.getHeightTerrain(
-	//				modelFireParticles[3][0], modelFireParticles[3][2]);
-	//		shaderParticlesFire.setMatrix4("model", 1, false,
-	//				glm::value_ptr(modelFireParticles));
-
-	//		shaderParticlesFire.turnOn();
-	//		glActiveTexture(GL_TEXTURE0);
-	//		glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
-	//		glDepthMask(GL_FALSE);
-	//		glBindVertexArray(particleArray[drawBuf]);
-	//		glVertexAttribDivisor(0, 1);
-	//		glVertexAttribDivisor(1, 1);
-	//		glVertexAttribDivisor(2, 1);
-	//		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
-	//		glBindVertexArray(0);
-	//		glDepthMask(GL_TRUE);
-	//		drawBuf = 1 - drawBuf;
-	//		shaderParticlesFire.turnOff();
-
-	//		/****************************+
-	//		 * Open AL sound data
-	//		 */
-
-
-	//		/**********
-	//		 * End Render particles systems
-	//		 */
-	//	}
-
-	//}
 	glEnable(GL_CULL_FACE);
 }
 
@@ -3043,13 +2914,11 @@ void inicialMatrixs() {
 
 	//Matriz
 	modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
-		glm::vec3(0.0f, 0.0f, 0.0f));
+		glm::vec3(0.0f, 0.0f, 20.0f));
 	/*modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-90.0f),
 		glm::vec3(1, 0, 0));*/
 
-		//Matriz
-	modelMatrixAstroProta2 = glm::translate(modelMatrixAstroProta2,
-		glm::vec3(0.0f, 0.0f, -20.0f));
+
 
 	//Posicion de los muros escenario 1
 	modelMatrixMuroFondo = glm::translate(modelMatrixMuroFondo,
@@ -3817,33 +3686,33 @@ void collidersManagmentEs1() {
 	/*******************************************
 	 * Render de colliders
 	 *******************************************/
-	for (std::map<std::string,
-		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
-		collidersOBB.begin(); it != collidersOBB.end(); it++) {
-		glm::mat4 matrixCollider = glm::mat4(1.0);
-		matrixCollider = glm::translate(matrixCollider,
-			std::get<0>(it->second).c);
-		matrixCollider = matrixCollider
-			* glm::mat4(std::get<0>(it->second).u);
-		matrixCollider = glm::scale(matrixCollider,
-			std::get<0>(it->second).e * 2.0f);
-		boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-		boxCollider.enableWireMode();
-		boxCollider.render(matrixCollider);
-	}
+	//for (std::map<std::string,
+	//	std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+	//	collidersOBB.begin(); it != collidersOBB.end(); it++) {
+	//	glm::mat4 matrixCollider = glm::mat4(1.0);
+	//	matrixCollider = glm::translate(matrixCollider,
+	//		std::get<0>(it->second).c);
+	//	matrixCollider = matrixCollider
+	//		* glm::mat4(std::get<0>(it->second).u);
+	//	matrixCollider = glm::scale(matrixCollider,
+	//		std::get<0>(it->second).e * 2.0f);
+	//	boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+	//	boxCollider.enableWireMode();
+	//	boxCollider.render(matrixCollider);
+	//}
 
-	for (std::map<std::string,
-		std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
-		collidersSBB.begin(); it != collidersSBB.end(); it++) {
-		glm::mat4 matrixCollider = glm::mat4(1.0);
-		matrixCollider = glm::translate(matrixCollider,
-			std::get<0>(it->second).c);
-		matrixCollider = glm::scale(matrixCollider,
-			glm::vec3(std::get<0>(it->second).ratio * 2.0f));
-		sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-		sphereCollider.enableWireMode();
-		sphereCollider.render(matrixCollider);
-	}
+	//for (std::map<std::string,
+	//	std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it =
+	//	collidersSBB.begin(); it != collidersSBB.end(); it++) {
+	//	glm::mat4 matrixCollider = glm::mat4(1.0);
+	//	matrixCollider = glm::translate(matrixCollider,
+	//		std::get<0>(it->second).c);
+	//	matrixCollider = glm::scale(matrixCollider,
+	//		glm::vec3(std::get<0>(it->second).ratio * 2.0f));
+	//	sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+	//	sphereCollider.enableWireMode();
+	//	sphereCollider.render(matrixCollider);
+	//}
 
 	/*******************************************
 	 * Test Colisions
@@ -3878,12 +3747,17 @@ void collidersManagmentEs1() {
 		addOrUpdateCollisionDetection(collisionDetection, it->first,
 			isCollision);
 	}
-
+	std::cout << "En collider " << std::endl;
+	std::cout << "actionE " << actionE <<std::endl;
+	std::cout << "isCollisionG " << isCollisionG << std::endl;
 	if (isCollisionG && actionE && !enableEscotilla1) {
-		//std::cout << "EntraISC " << std::endl;
+		std::cout << "EntraISC " << std::endl;
 		updateBotonCollider(collisionDetection);
 		actionE = false;
 	}
+	//else {
+	//	actionE = false;
+	//}
 
 
 	//std::cout << "Colision escotilla " << collisionDetection.find("escotilla")->second << std::endl;
@@ -4235,15 +4109,15 @@ void renderScene2(bool renderParticles) {
 	shaderTerrain.setInt("backgroundTexture", 0);
 	// Se activa la textura de tierra
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, textureTerrainRID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainRID2);
 	shaderTerrain.setInt("rTexture", 1);
 	// Se activa la textura de hierba
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, textureTerrainGID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainGID2);
 	shaderTerrain.setInt("gTexture", 2);
 	// Se activa la textura del camino
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, textureTerrainBID);
+	glBindTexture(GL_TEXTURE_2D, textureTerrainBID2);
 	shaderTerrain.setInt("bTexture", 3);
 	// Se activa la textura del blend map
 	glActiveTexture(GL_TEXTURE4);
@@ -4278,10 +4152,11 @@ void renderScene2(bool renderParticles) {
 
 	//astroProta
 	glDisable(GL_CULL_FACE);
+	modelMatrixAstroProta[3][1] = 0.4;
 	glm::mat4 modelMatrixAstroBody = glm::mat4(modelMatrixAstroProta);
-	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 10.0;
-	modelMatrixAstroBody[3].x = modelMatrixAstroBody[3].x - 58.0;
-	modelMatrixAstroBody[3].y = modelMatrixAstroBody[3].y + 0.4;
+	modelMatrixAstroBody[3].z = modelMatrixAstroBody[3].z - 23.0;
+	modelMatrixAstroBody[3].x = modelMatrixAstroBody[3].x - 55.0;
+	//modelMatrixAstroBody[3].y = modelMatrixAstroBody[3].y + 0.4;
 	modelMatrixAstroBody = glm::scale(modelMatrixAstroBody,
 		glm::vec3(0.021, 0.021, 0.021));
 	astroProta.setAnimationIndex(animationIndex);
@@ -4750,8 +4625,8 @@ void collidersManagmentEs2() {
 	glm::mat4 modelmatrixColliderAstroProta = glm::mat4(modelMatrixAstroProta);
 	// Set the orientation of collider before doing the scale
 	astroProtaCollider.u = glm::quat_cast(modelmatrixColliderAstroProta);
-	modelmatrixColliderAstroProta[3].z += - 10.0;
-	modelmatrixColliderAstroProta[3].x += - 58.0;
+	modelmatrixColliderAstroProta[3].z += - 23.0;
+	modelmatrixColliderAstroProta[3].x += - 55.0;
 	modelmatrixColliderAstroProta = glm::scale(modelmatrixColliderAstroProta,
 		glm::vec3(1.5, 4.0, 1.4));
 	modelmatrixColliderAstroProta = glm::translate(modelmatrixColliderAstroProta,
@@ -4769,8 +4644,8 @@ void collidersManagmentEs2() {
 	glm::mat4 modelmatrixColliderAction = glm::mat4(modelMatrixAstroProta);
 	// Set the orientation of collider before doing the scale
 	actionCollider.u = glm::quat_cast(modelmatrixColliderAction);
-	modelmatrixColliderAction[3].z += -10.0;
-	modelmatrixColliderAction[3].x += -58.0;
+	modelmatrixColliderAction[3].z += -23.0;
+	modelmatrixColliderAction[3].x += -55.0;
 	modelmatrixColliderAction = glm::scale(modelmatrixColliderAction,
 		glm::vec3(1.5, 4.0, 1.4));
 	modelmatrixColliderAction = glm::translate(modelmatrixColliderAction,
@@ -5213,21 +5088,21 @@ void collidersManagmentEs2() {
 	addOrUpdateColliders(collidersOBB2, "marcoPuerta", puertaCollider,
 		modelMatrixMarcoPuerta);
 
-	//Render colliders
-	for (std::map<std::string,
-		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
-		collidersOBB2.begin(); it != collidersOBB2.end(); it++) {
-		glm::mat4 matrixCollider = glm::mat4(1.0);
-		matrixCollider = glm::translate(matrixCollider,
-			std::get<0>(it->second).c);
-		matrixCollider = matrixCollider
-			* glm::mat4(std::get<0>(it->second).u);
-		matrixCollider = glm::scale(matrixCollider,
-			std::get<0>(it->second).e * 2.0f);
-		boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-		boxCollider.enableWireMode();
-		boxCollider.render(matrixCollider);
-	}
+	////Render colliders
+	//for (std::map<std::string,
+	//	std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it =
+	//	collidersOBB2.begin(); it != collidersOBB2.end(); it++) {
+	//	glm::mat4 matrixCollider = glm::mat4(1.0);
+	//	matrixCollider = glm::translate(matrixCollider,
+	//		std::get<0>(it->second).c);
+	//	matrixCollider = matrixCollider
+	//		* glm::mat4(std::get<0>(it->second).u);
+	//	matrixCollider = glm::scale(matrixCollider,
+	//		std::get<0>(it->second).e * 2.0f);
+	//	//boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+	//	//boxCollider.enableWireMode();
+	//	//boxCollider.render(matrixCollider);
+	//}
 
 	/*******************************************
 	 * Test Colisions
