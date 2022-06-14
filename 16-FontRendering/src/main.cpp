@@ -792,10 +792,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelPlataforma.loadModel("../models/plataforma/Plataforma.fbx");
 	modelPlataforma.setShader(&shaderMulLighting);
 
-	//Fountain
-	modelFountain.loadModel("../models/fountain/fountain.obj");
-	modelFountain.setShader(&shaderMulLighting);
-
 	//Enemy
 	enemyModelAnimate.loadModel("../models/Enemigo/Enemy.fbx");
 	enemyModelAnimate.setShader(&shaderMulLighting);
@@ -1361,47 +1357,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureEnd.freeImage(bitmap);
 
-	Texture textureParticlesFountain("../Textures/bluewater.png");
-	bitmap = textureParticlesFountain.loadImage();
-	data = textureParticlesFountain.convertToData(bitmap, imageWidth,
-		imageHeight);
-	glGenTextures(1, &textureParticleFountainID);
-	glBindTexture(GL_TEXTURE_2D, textureParticleFountainID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	textureParticlesFountain.freeImage(bitmap);
-
-	Texture textureParticleFire("../Textures/fire.png");
-	bitmap = textureParticleFire.loadImage();
-	data = textureParticleFire.convertToData(bitmap, imageWidth, imageHeight);
-	glGenTextures(1, &textureParticleFireID);
-	glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0,
-			GL_BGRA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-		std::cout << "Failed to load texture" << std::endl;
-	textureParticleFire.freeImage(bitmap);
-
 	std::uniform_real_distribution<float> distr01 =
 		std::uniform_real_distribution<float>(0.0f, 1.0f);
 	std::mt19937 generator;
@@ -1857,29 +1812,8 @@ bool processInput(bool continueApplication) {
 
 
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
-		//std::cout << "Esta presente el joystick" << std::endl;
 		int axesCount, buttonCount;
 		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-		//std::cout << "Número de ejes disponibles :=>" << axesCount << std::endl;
-		//std::cout << "Left Stick X axis: " << axes[0] << std::endl;
-		//std::cout << "Left Stick Y axis: " << axes[1] << std::endl;
-		//std::cout << "Left Trigger/L2: " << axes[2] << std::endl;
-		//std::cout << "Right Stick X axis: " << axes[3] << std::endl;
-		//std::cout << "Right Stick Y axis: " << axes[4] << std::endl;
-		//std::cout << "Right Trigger/R2: " << axes[5] << std::endl;
-
-		//Y axis (Arriba/abajo)
-		//if (fabs(axes[1]) > 0.2) {
-		//	modelMatrixEnemigo = glm::translate(modelMatrixEnemigo,
-		//		glm::vec3(0, 0, -axes[1] * 0.1));
-		//	animationIndex = 0;
-		//}
-		////Y axis (izquierda/derecha)
-		//if (fabs(axes[0]) > 0.2) {
-		//	modelMatrixEnemigo = glm::rotate(modelMatrixEnemigo,
-		//		glm::radians(-axes[0] * 0.5f), glm::vec3(0, 1, 0));
-		//	animationIndex = 0;
-		//}
 
 		const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1,
 			&buttonCount);
@@ -1902,12 +1836,7 @@ bool processInput(bool continueApplication) {
 		if (buttons[6] == GLFW_PRESS) {
 			exitApp = true;
 		}
-		//std::cout << "Número de botones disponibles :=>" << buttonCount
-		//	<< std::endl;
 		if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
-			//std::cout << "primer if:" << actionE << std::endl;
-			//if (modelSelected == 2 && buttons[13] == GLFW_PRESS)
-			//	modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
 
 			if (enableAction && buttons[0] == GLFW_PRESS) {
 				enableAction = false;
@@ -1930,10 +1859,9 @@ bool processInput(bool continueApplication) {
 				astroPosition = modelMatrixAstroProta[3];
 				if (escenario2) {
 					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+					astroPosition.x += -55.0f;
+					astroPosition.z += -23.0f;
 				}
-				astroPosition.x += -55.0f;
-				astroPosition.z += -23.0f;
-				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
 			}
 			//Cruzeta Derecha
@@ -1944,10 +1872,10 @@ bool processInput(bool continueApplication) {
 				astroPosition = modelMatrixAstroProta[3];
 				if (escenario2) {
 					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+					astroPosition.x += -55.0f;
+					astroPosition.z += -23.0f;
 				}
-				astroPosition.x += -55.0f;
-				astroPosition.z += -23.0f;
-				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
+				
 			}
 			//Cruzeta Arriba
 			if (modelSelected == 2 && buttons[10] == GLFW_PRESS) {
@@ -1984,10 +1912,6 @@ bool processInput(bool continueApplication) {
 					banderaCaminar = 10;
 				if (timer > 35.0f && banderaCaminar == 10)
 					banderaCaminar = 11;
-				//std::cout << banderaCaminar << std::endl;
-				//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-				//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-
 
 				if (escenario1) {
 					cameraMove();
@@ -1998,17 +1922,11 @@ bool processInput(bool continueApplication) {
 				astroPosition = modelMatrixAstroProta[3];
 				if (escenario2) {
 					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+					astroPosition.x += -55.0f;
+					astroPosition.z += -23.0f;
 				}
-				astroPosition.x += -55.0f;
-				astroPosition.z += -23.0f;
 
 				animationIndex = 0;
-
-				//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-				//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-
-
-
 			}
 			//Cruzeta abajo
 			else if (modelSelected
@@ -2023,8 +1941,6 @@ bool processInput(bool continueApplication) {
 				modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 					glm::vec3(0.0, 0.0, -0.1));
 				animationIndex = 0;
-				//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-				//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 				if (escenario1) {
 					cameraMove();
 				}
@@ -2035,11 +1951,7 @@ bool processInput(bool continueApplication) {
 				if (escenario2) {
 					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
 				}
-				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
-
-			/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
-			std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
 				if (escenario1) {
 					cameraMove();
 				}
@@ -2049,23 +1961,12 @@ bool processInput(bool continueApplication) {
 				astroPosition = modelMatrixAstroProta[3];
 				if (escenario2) {
 					enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+					astroPosition.x += -55.0f;
+					astroPosition.z += -23.0f;
 				}
-				astroPosition.x += -55.0f;
-				astroPosition.z += -23.0f;
-				//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
-
-					//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-					//std::cout << "modelMatrixEnemy: " << modelMatrixEnemy[3][0] << std::endl;
-					//std::cout << "position enemigo: " << terrain.getXCoordTerrain(modelMatrixEnemy[3][0]) << std::endl;
 			}
 
 		}
-		//for (int i = 1; i < buttonCount; i++) {
-		//	if (buttons[i] == GLFW_PRESS)
-		//		std::cout << "Se pesiono el boton " << i <<std::endl;
-		//}
-		/*if (buttons[0] == GLFW_PRESS)
-			std::cout << "Se presiona x" << std::endl;*/
 	}
 
 	if (cameraSelected == 1) {
@@ -2104,13 +2005,7 @@ bool processInput(bool continueApplication) {
 	//		&& glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_RELEASE))
 	//	enableCameraSelected = true;
 
-	//std::cout << "respaw empieza el juego:" << (playerRespawn == false && empiezaJuego == true) << std::endl;
-	//std::cout << "respaw empieza el cambia nivel:" << (playerRespawn == false && cambianivel2 == true) << std::endl;
-	//std::cout << "respaw empieza el cambia nivel 2:" << (playerRespawn == false && cambianivel3 == true) << std::endl;
 	if ((playerRespawn == false && empiezaJuego == true) || (playerRespawn == false && cambianivel2 == true) || (playerRespawn == false && cambianivel3 == true)) {
-		//std::cout << "primer if:" << actionE << std::endl;
-		//if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		//	modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(3.5f), glm::vec3(0, 1, 0));
 
 		if (enableAction && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			enableAction = false;
@@ -2130,11 +2025,9 @@ bool processInput(bool continueApplication) {
 			astroPosition = modelMatrixAstroProta[3];
 			if (escenario2) {
 				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 			}
-			astroPosition.x += -55.0f;
-			astroPosition.z += -23.0f;
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
-
 		}
 		else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 			modelMatrixAstroProta = glm::rotate(modelMatrixAstroProta, glm::radians(-3.5f),
@@ -2143,10 +2036,9 @@ bool processInput(bool continueApplication) {
 			astroPosition = modelMatrixAstroProta[3];
 			if (escenario2) {
 				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 			}
-			astroPosition.x += -55.0f;
-			astroPosition.z += -23.0f;
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 		}
 		if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 			if (escenario1) {
@@ -2182,10 +2074,6 @@ bool processInput(bool continueApplication) {
 				banderaCaminar = 10;
 			if (timer > 35.0f && banderaCaminar == 10)
 				banderaCaminar = 11;
-			//std::cout << banderaCaminar << std::endl;
-			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-
 
 			if (escenario1) {
 				cameraMove();
@@ -2196,17 +2084,11 @@ bool processInput(bool continueApplication) {
 			astroPosition = modelMatrixAstroProta[3];
 			if (escenario2) {
 				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 			}
-			astroPosition.x += -555.0f;
-			astroPosition.z += -23.0f;
 
 			animationIndex = 0;
-
-			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
-
-
-
 		}
 		else if (modelSelected
 			== 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
@@ -2220,8 +2102,6 @@ bool processInput(bool continueApplication) {
 			modelMatrixAstroProta = glm::translate(modelMatrixAstroProta,
 				glm::vec3(0.0, 0.0, -0.1));
 			animationIndex = 0;
-			//std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0]) << std::endl;
-			//std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;
 			if (escenario1) {
 				cameraMove();
 			}
@@ -2232,11 +2112,7 @@ bool processInput(bool continueApplication) {
 			if (escenario2) {
 				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
 			}
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
 
-
-		/*std::cout << "modelMatrixPivote.x: " << terrain.getXCoordTerrain(modelMatrixPivoteCam[3][0])<< std::endl;
-		std::cout << "modelMatrixAstro.x: " << terrain.getXCoordTerrain(modelMatrixAstroProta[3][0]) << std::endl;*/
 			if (escenario1) {
 				cameraMove();
 			}
@@ -2246,14 +2122,9 @@ bool processInput(bool continueApplication) {
 			astroPosition = modelMatrixAstroProta[3];
 			if (escenario2) {
 				enemigo1.setDistance(enemigo1.distanciaAProta(modelMatrixEnemigo[3], modelMatrixAstroProta[3]));
+				astroPosition.x += -55.0f;
+				astroPosition.z += -23.0f;
 			}
-			astroPosition.x += -55.0f;
-			astroPosition.z += -23.0f;
-			//anguloEntreDosVectores = enemigo1.anguloEntreVectores(modelMatrixAstroProta[3], modelMatrixEnemigo[3]);
-
-				//std::cout << "modelMatrixPivote: " << modelMatrixPivoteCam[3][0] << std::endl;
-				//std::cout << "modelMatrixEnemy: " << modelMatrixEnemy[3][0] << std::endl;
-				//std::cout << "position enemigo: " << terrain.getXCoordTerrain(modelMatrixEnemy[3][0]) << std::endl;
 		}
 
 	}
@@ -2266,20 +2137,25 @@ bool processInput(bool continueApplication) {
 
 	if (playerRespawn == true) {
 
+		if (escenario1) {
+			defaultMatrix = glm::translate(defaultMatrix,
+				glm::vec3(0.0f, 0.0f, 20.0f));
+		}
 		modelMatrixAstroProta = defaultMatrix;
 		modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
 		modelMatrixAstroProta2 = defaultMatrix2;
 		modelMatrixPivoteCam = glm::translate(modelMatrixAstroProta, camPivOrigin);
 		modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-			glm::vec3(0.0f, 5.0f, 23.0f));
+			glm::vec3(0.0f, 5.0f, 3.0f));
 		modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 			glm::vec3(0, 0, 1));
-		empiezaJuego = false;
+		//empiezaJuego = false;
 		tiempoRespawnProta++;
 		if (tiempoRespawnProta > 50) {
 			playerRespawn = false;
 			tiempoRespawnProta = 0;
 		}
+		defaultMatrix = glm::mat4(1.0f);
 
 	}
 
@@ -2520,44 +2396,7 @@ void applicationLoop() {
 			}
 		}
 
-		/*******************************************
-		 * Debug to box light box
-		 *******************************************/
-		 /*glm::vec3 front = glm::normalize(-lightPos);
-		  glm::vec3 right = glm::normalize(glm::cross(glm::vec3(0, 1, 0), front));
-		  glm::vec3 up = glm::normalize(glm::cross(front, right));
-		  glDisable(GL_CULL_FACE);
-		  glm::mat4 boxViewTransform = glm::mat4(1.0f);
-		  boxViewTransform = glm::translate(boxViewTransform, centerBox);
-		  boxViewTransform[0] = glm::vec4(right, 0.0);
-		  boxViewTransform[1] = glm::vec4(up, 0.0);
-		  boxViewTransform[2] = glm::vec4(front, 0.0);
-		  boxViewTransform = glm::scale(boxViewTransform, glm::vec3(shadowBox->getWidth(), shadowBox->getHeight(), shadowBox->getLength()));
-		  boxLightViewBox.enableWireMode();
-		  boxLightViewBox.render(boxViewTransform);
-		  glEnable(GL_CULL_FACE);*/
-
 		animationIndex = 1;
-
-		/*******************************************
-		 * State machines
-		 *******************************************/
-
-		 // State machine for the lambo car
-		 /*switch (stateDoor) {
-		 case 0:
-			 dorRotCount += 0.5;
-			 if (dorRotCount > 75)
-				 stateDoor = 1;
-			 break;
-		 case 1:
-			 dorRotCount -= 0.5;
-			 if (dorRotCount < 0) {
-				 dorRotCount = 0.0;
-				 stateDoor = 0;
-			 }
-			 break;
-		 }*/
 
 		if (fontbandera == true) {
 			modelText->render("Oxigeno", 0.7, 0.95, 15, 0.5, 1.0, 1.0, 1.0);
@@ -2614,14 +2453,18 @@ void applicationLoop() {
 				playerRespawn2 = true;
 				if (playerRespawn2 == true) {
 					sourcesPlay[5] = false;//Reinicio
+					if (escenario1) {
+						defaultMatrix = glm::translate(defaultMatrix,
+							glm::vec3(0.0f, 0.0f, 20.0f));
+					}
 					modelMatrixAstroProta = defaultMatrix;
 					modelMatrixAstroProta = glm::translate(modelMatrixAstroProta, astroOrigin);
 					modelMatrixPivoteCam = glm::translate(modelMatrixAstroProta, camPivOrigin);
 					modelMatrixPivoteCam = glm::translate(modelMatrixPivoteCam,
-						glm::vec3(0.0f, 5.0f, 23.0f));
+						glm::vec3(0.0f, 5.0f, 3.0f));
 					modelMatrixPivoteCam = glm::rotate(modelMatrixPivoteCam, glm::radians(-180.0f),
 						glm::vec3(0, 0, 1));
-					empiezaJuego = false; //linea que genera problemas
+					//empiezaJuego = false; //linea que genera problemas
 					tiempoRespawnProta++;
 					if (tiempoRespawnProta > 50) {
 						playerRespawn2 = false;
@@ -2631,6 +2474,7 @@ void applicationLoop() {
 						tiempoOxigeno = 0;
 						situacion = 1;
 					}
+					defaultMatrix = glm::mat4(1.0f);
 				}
 				break;
 			}
